@@ -141,7 +141,7 @@ function trustedPolicyFixture(t, policy = canonicalPolicyRecord().policy) {
     "utf8"
   );
   runGit(repositoryRoot, ["init", "--initial-branch=main"]);
-  runGit(repositoryRoot, ["remote", "add", "origin", "https://github.com/0xprogrammable/submit-launch.git"]);
+  runGit(repositoryRoot, ["remote", "add", "origin", "https://github.com/0xprogrammable/launch-policy.git"]);
   runGit(repositoryRoot, ["add", "policy/launch-policy.v1.json"]);
   runGit(repositoryRoot, ["commit", "-m", "fixture policy"]);
   const baseCommit = runGit(repositoryRoot, ["rev-parse", "HEAD^{commit}"]);
@@ -385,7 +385,7 @@ test("fabricated records cannot mint bindings or evaluate policy", () => {
   const parsed = canonicalPolicyRecord();
   const fabricated = {
     ...parsed,
-    repository: "0xprogrammable/submit-launch",
+    repository: "0xprogrammable/launch-policy",
     numericRepositoryId: "1320171831",
     baseCommit: "0".repeat(40),
     baseTree: "0".repeat(40),
@@ -422,7 +422,7 @@ test("trusted Git reader binds fixed protected-base identity and rejects substit
   assert.equal(record.baseTree, baseTree);
   assert.equal(record.gitBlobOid, blob);
   assert.equal(record.path, "policy/launch-policy.v1.json");
-  assert.equal(record.repository, "0xprogrammable/submit-launch");
+  assert.equal(record.repository, "0xprogrammable/launch-policy");
   assert.equal(record.numericRepositoryId, "1320171831");
 
   const binding = buildLaunchPolicyBinding(record, "workflow-canary");

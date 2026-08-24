@@ -70,7 +70,7 @@ test("the frozen six-file package and public schema identity are exported", () =
     "evidence-index.json"
   ]);
   assert.equal(PUBLIC_APPLICATION_SCHEMA_ID, "https://programmable.money/schemas/public-pr-application-v2.json");
-  assert.deepEqual(PUBLIC_INTAKE_STATES, ["prelaunch", "open", "paused-new", "paused-all"]);
+  assert.deepEqual(PUBLIC_INTAKE_STATES, ["prelaunch", "open", "paused-new", "paused-all", "closed"]);
 });
 
 test("the checked-in trusted intake status is a closed canonical regular file", () => {
@@ -84,6 +84,7 @@ test("the checked-in trusted intake status is a closed canonical regular file", 
   const value = JSON.parse(source);
   assert.deepEqual(Object.keys(value).sort(compareUtf8), ["continuingPullRequests", "schemaVersion", "state"]);
   assert.equal(value.schemaVersion, 2);
+  assert.equal(value.state, "closed");
   assert.ok(PUBLIC_INTAKE_STATES.includes(value.state));
   assert.deepEqual(value.continuingPullRequests, []);
   assert.equal(source, `${canonicalJson(value)}\n`);
@@ -392,7 +393,7 @@ test("unchanged V2 bytes bind the exact trusted policy snapshot without canary o
 
   assert.deepEqual(report.policyBinding, {
     schemaVersion: "programmable.trusted-policy-snapshot-binding.v1",
-    repository: "0xprogrammable/submit-launch",
+    repository: "0xprogrammable/launch-policy",
     numericRepositoryId: "1320171831",
     baseCommit: fixture.baseCommit,
     baseTree: git(fixture.base, ["rev-parse", `${fixture.baseCommit}^{tree}`]),
@@ -577,7 +578,9 @@ test("trusted base intake state enforces the complete new-versus-update matrix b
     ["prelaunch", true, "INTAKE_PRELAUNCH"],
     ["paused-new", false, "INTAKE_PAUSED_NEW"],
     ["paused-all", false, "INTAKE_PAUSED_ALL"],
-    ["paused-all", true, "INTAKE_PAUSED_ALL"]
+    ["paused-all", true, "INTAKE_PAUSED_ALL"],
+    ["closed", false, "INTAKE_CLOSED"],
+    ["closed", true, "INTAKE_CLOSED"]
   ];
   for (const [state, isUpdate, expectedCode] of cases) {
     await t.test(`${state} ${isUpdate ? "update" : "new"}`, async (t2) => {
@@ -697,7 +700,7 @@ test("missing or malformed trusted intake status always system-blocks", async (t
     ["invalid JSON", Buffer.from("{\n", "utf8"), "INTAKE_STATUS_INVALID"],
     ["noncanonical JSON", Buffer.from('{"continuingPullRequests":[], "schemaVersion":2,"state":"open"}\n', "utf8"), "INTAKE_STATUS_INVALID"],
     ["unsupported schema", Buffer.from('{"continuingPullRequests":[],"schemaVersion":1,"state":"open"}\n', "utf8"), "INTAKE_STATUS_INVALID"],
-    ["unsupported state", Buffer.from('{"continuingPullRequests":[],"schemaVersion":2,"state":"closed"}\n', "utf8"), "INTAKE_STATUS_INVALID"],
+    ["unsupported state", Buffer.from('{"continuingPullRequests":[],"schemaVersion":2,"state":"retired"}\n', "utf8"), "INTAKE_STATUS_INVALID"],
     ["extra property", Buffer.from('{"continuingPullRequests":[],"note":"candidate","schemaVersion":2,"state":"open"}\n', "utf8"), "INTAKE_STATUS_INVALID"],
     ["oversize", Buffer.alloc((32 * 1024) + 1, 0x20), "INTAKE_STATUS_INVALID"]
   ];
@@ -1489,7 +1492,8 @@ test("trusted CLI emits operational intake states as system blockers without rea
   for (const [state, isUpdate, expectedCode] of [
     ["prelaunch", false, "INTAKE_PRELAUNCH"],
     ["paused-new", false, "INTAKE_PAUSED_NEW"],
-    ["paused-all", true, "INTAKE_PAUSED_ALL"]
+    ["paused-all", true, "INTAKE_PAUSED_ALL"],
+    ["closed", true, "INTAKE_CLOSED"]
   ]) {
     await t.test(`${state} ${isUpdate ? "update" : "new"}`, (t2) => {
       const fixture = createRevisionPair(t2);
@@ -3279,7 +3283,7 @@ function createRevisionPair(t) {
   git(base, ["init", "-b", "main"]);
   git(base, ["config", "user.name", "Trusted Test"]);
   git(base, ["config", "user.email", "trusted@example.invalid"]);
-  git(base, ["remote", "add", "origin", "https://github.com/0xprogrammable/submit-launch.git"]);
+  git(base, ["remote", "add", "origin", "https://github.com/0xprogrammable/launch-policy.git"]);
   writeFile(base, "README.md", "trusted base\n");
   writeFile(base, "policy/launch-policy.v1.json", TRUSTED_POLICY_BYTES);
   setIntakeStatus(base, "open");

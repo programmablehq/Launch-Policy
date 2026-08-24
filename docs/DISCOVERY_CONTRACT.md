@@ -1,6 +1,6 @@
 # Discovery contract
 
-Agents and applications start with `registry/index.json` or `registry/search-index.json` at one exact Submit a Launch
+Agents and applications start with `registry/index.json` or `registry/search-index.json` at one exact Launch Policy
 commit. They do not crawl project repositories or load every application into context. Discovery answers what records
 exist; it is not the source of launch requirements. The sole normative source of Programmable-specific requirements is
 [`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json).
@@ -16,8 +16,8 @@ exist; it is not the source of launch requirements. The sole normative source of
 7. Preserve the record's exact status, limitations, and bound promotion receipt.
 
 `design`, `candidate`, `accepted`, `deployed`, `available`, `suspended`, and `retired` are distinct. Pending application
-pull requests are not canonical records. An offline snapshot may be used only when clearly labeled with its Submit a
-Launch commit and age; it must never be presented as live.
+pull requests are not canonical records. An offline snapshot may be used only when clearly labeled with its Launch
+Policy commit and age; it must never be presented as live.
 
 Search terms may match name, summary, mechanism, outcomes, capabilities, surfaces, synonyms, and tags. Results answer
 “what looks related?” They do not answer “is this copied?”, “is this safe?”, “is it liquid?”, or “will this launch?” A
@@ -118,4 +118,4 @@ A consumer must fetch the contract and every bound schema and implementation art
 verify each SHA-256. It must also obey the deployment fields before selecting a transport. The published V1 state is
 `reference-only-disabled`, with `enabled: false` and null endpoint, audience, and trust snapshot. Therefore no client
 may infer a live queue, authentication configuration, availability, production capacity, review result, or launch
-authority from the presence of the contract or reference code. Use the public GitHub application path.
+authority from the presence of the contract or reference code. Use the Custom Launch API for current launches.

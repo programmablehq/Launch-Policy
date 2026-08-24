@@ -1,14 +1,20 @@
 # Legacy intake migration
 
-The version 1 review schemas retain their original `0xprogrammable/apply` schema identifiers for backward compatibility. These identifiers are stable protocol names, not the current repository location. New repository links and intake records use `0xprogrammable/submit-launch`. A future schema identifier change requires a new schema version and explicit migration coverage.
+> [!IMPORTANT]
+> GitHub intake is retired. This document preserves migration history; new launches use the
+> [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+
+The version 1 review schemas retain their original `0xprogrammable/apply` and `submit-launch` identifiers for backward
+compatibility. These are stable legacy protocol names, not the current repository location. Current policy links use
+`0xprogrammable/launch-policy`. A protocol identifier change requires a new schema version and explicit migration coverage.
 
 ## Application V3.2 and V3.1 compatibility
 
 Application V3.2 is the complete current launch contract, not an in-place rewrite of V3.1, legacy V2, or Workflow
 Canary data. The central schema owner is
 [`intake/schemas/public-pr-application-v3.2.schema.json`](../intake/schemas/public-pr-application-v3.2.schema.json).
-Each pull request adds exactly one revision under
-`submissions/<application-id>/v3/revisions/<positive-decimal-revision>/`; previous revision bytes remain unchanged.
+Historical pull requests added one revision under `submissions/<application-id>/v3/revisions/<positive-decimal-revision>/`;
+those bytes now remain unchanged.
 
 The current machine discovery record is
 [`applicant-compatibility.v2.json`](../.programmable/applicant-compatibility.v2.json), validated by
@@ -16,11 +22,9 @@ The current machine discovery record is
 content-binds V3.2 and its supporting Submission 2.1, Trade Capability Manifest V2, and Router-readiness contracts while
 retaining V3.1 as legacy compatibility. Applicant Compatibility V1 remains legacy discovery only.
 
-The V3.1 compatibility contract remains byte-unchanged and continues to accept new and existing drafts so current
-Builders do not break. Those revisions are never revalidated or reinterpreted as V3.2 and cannot establish
-`launch-readiness` or the official Programmable Router route. A project selecting a Programmable Ethereum market adds
-a new V3.2 revision with `lineage.kind: "schema-migration"` bound to the exact V3.1 predecessor. Do not copy, delete,
-relabel, or infer approval from the old package or pull request.
+The V3.1 compatibility contract remains byte-unchanged for historical reproduction. Those revisions are never
+revalidated or reinterpreted as V3.2 and cannot establish `launch-readiness` or the official Programmable Router route.
+Do not copy, delete, relabel, or infer approval from the old package or pull request.
 
 V3.2 remains project-agnostic. No-market, tradable, hook, token, app, game, service, hybrid, and previously unknown
 project shapes use the same contract. Required review records remain the common review floor, while novel capability
@@ -42,7 +46,7 @@ Ethereum market additionally binds `.programmable/launch-router-readiness.v1.jso
 policy binding. Before pinning the source commit, a separate Builder or preparation step obtains and embeds the current
 official manifest projection. The offline readiness checker verifies its exact bytes against the pinned official
 Developer artifact without fetching the endpoint or independently proving endpoint freshness. Before it may mint a
-protected readiness decision, the platform must separately recheck trust and required freshness. Submit a Launch
+protected readiness decision, the platform must separately recheck trust and required freshness. Launch Policy
 exposes no fetch or mutation server. This does not turn a copied Router address into a permanent trust root. A direct
 Classic Factory, Graph Factory, or Single Factory path cannot be converted into canonical provenance after launch.
 
@@ -61,10 +65,10 @@ review completion, deployment permission, Registry promotion, public routing, or
 
 ## Legacy V2 and Canary continuity
 
-Submit a Launch 1.4.0 historically activated the Hookbuilder 0.5.1 bridge. The current open, frozen legacy V2 transport
-is the receipt-bound Hookbuilder v0.10.3 tree while the checked-in intake state is `open`. It continues to use Submission
-1.6.0 and intake status schema 2 while binding the canonical `0xprogrammable/submit-launch` repository and numeric
-repository ID. The newer receipt binding does not rewrite the historical 1.3.0 or 1.4.0 release or older applications.
+Submit a Launch 1.4.0 historically activated the Hookbuilder 0.5.1 bridge. The final frozen V2 transport used the
+receipt-bound Hookbuilder v0.10.3 tree, Submission 1.6.0, and intake status schema 2. The checked-in intake state is now
+`closed`; its old `0xprogrammable/submit-launch` name and numeric repository ID remain historical provenance. The newer
+receipt binding does not rewrite the historical 1.3.0 or 1.4.0 release or older applications.
 It cannot satisfy Workflow Canary or Website eligibility.
 
 Application pull request `0xprogrammable/programmable#62` remains on its original review thread. It is recorded in
@@ -74,14 +78,13 @@ as accepted. A Builder status client may read that original thread with the Buil
 Hookbuilder application pull requests `#10`, `#11`, `#12`, `#14`, `#15`, `#18`, `#19`, and `#20` also remain on their
 original Hookbuilder review threads. They are recorded as legacy intake and are never copied or renumbered here.
 
-The legacy activation remains valid only while all of the following remain true:
+The historical activation was valid only while all of the following remained true:
 
 1. this repository is public at the exact tested commit;
-2. the protected branch requires `Node 24`, `public-intake`, and `CodeQL` before merge;
+2. the protected branch required `Node 24`, `public-intake`, and `CodeQL` before merge;
 3. the receipt-bound Hookbuilder v0.10.3 tree targets `0xprogrammable/submit-launch` with Submission 1.6.0;
 4. the vendored intake validator and receipt match that exact Builder release; and
-5. `docs/builder/intake-status.json` and `registry/config.json` both report `open`.
+5. `docs/builder/intake-status.json` and `registry/config.json` both reported `open`.
 
-If that legacy binding fails, its intake must return to a closed state. Existing legacy review threads remain
-untouched. The separate lightweight one-file Workflow Canary binds `policy/launch-policy.v1.json` and does not inherit
-V2 acceptance.
+That legacy binding is now retired. Existing legacy review threads remain untouched. The historical one-file Workflow
+Canary remains separate from V2 acceptance and does not accept new records.

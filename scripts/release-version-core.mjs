@@ -5,7 +5,7 @@ import { TextDecoder } from "node:util";
 
 import { parseBoundedLosslessJson } from "../vendor/programmable-v4-hook-builder/scripts/github-public-source-lossless-json.mjs";
 
-export const RELEASE_VERSION = "1.10.0";
+export const RELEASE_VERSION = "1.11.0";
 
 const RELEASED_HISTORY_SHA256 = Object.freeze({
   "1.0.0": "e95c13613e8c921b0fb6c084b0766429859d2492f0e36312cbc47d51228af989",
@@ -21,7 +21,8 @@ const RELEASED_HISTORY_SHA256 = Object.freeze({
   "1.7.0": "f94c4d49770d9116fbe14fc41491bc457510ce34844f220f568e8f5cd5176bac",
   "1.8.0": "3e928370685a0ba1bea2822b4c39d63530d144e2ab0e00200e8085ab94087487",
   "1.9.0": "aaad452ff39c6ef8f70d5a65b6c2dc76930eaf578510808583d99510b09fac46",
-  "1.10.0": "dfbb0a23e172f78b5038a3b98483f1d307d49d69e83ea65bccbe9173f208d602"
+  "1.10.0": "dfbb0a23e172f78b5038a3b98483f1d307d49d69e83ea65bccbe9173f208d602",
+  "1.11.0": "4c126ee1a79a255b26e66814d0cc5c79e0832decd330a991cbea3ff11665f632"
 });
 
 const MAX_JSON_BYTES = 2 * 1024 * 1024;

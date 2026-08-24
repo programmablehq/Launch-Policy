@@ -1,5 +1,9 @@
 # Universal Admission V1
 
+> [!NOTE]
+> This is disabled reference code, not the current launch front door. Current launches use the
+> [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+
 Universal Admission is the small front door for an open-world project. It is deliberately separate from the
 Programmable launch policy and from the later security/review package.
 
@@ -57,7 +61,7 @@ Every result keeps `approvalGranted`, `launchAuthorized`, and `externalWritesPer
 
 ## Transport and scale boundary
 
-The GitHub PR/Actions adapter remains a compatibility and maintainer-review path. It is not a million-submissions-per-
+The retired GitHub PR/Actions adapter remains only for compatibility and historical reproduction. It was not a million-submissions-per-
 day ingress: repeated full-tree scans, uncached GitHub reads, workflow fan-out, and a monolithic registry create a
 capacity and fairness bottleneck.
 
@@ -90,7 +94,7 @@ administrative contexts are accepted only inside this private reference boundary
 published. A future network adapter must authenticate and authorize those operations separately.
 
 The exact same-tree reference surface is published at
-`.programmable/universal-admission-contract.v1.json`. Consumers must read it at one exact Submit a Launch commit and
+`.programmable/universal-admission-contract.v1.json`. Consumers must read it at one exact Launch Policy commit and
 verify every bound digest. `deployment.state: "reference-only-disabled"`, `enabled: false`, and null endpoint, audience,
 and trust-snapshot fields mean the queue cannot be selected as a live transport. The older active contract,
 Applicant Compatibility V1, and Application V3.1 remain separate and unchanged.

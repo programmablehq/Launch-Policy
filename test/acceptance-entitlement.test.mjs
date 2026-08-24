@@ -158,7 +158,7 @@ function createFixture(t) {
   const policyRepository = path.join(fixtureRoot, "policy-repository");
   fs.mkdirSync(policyRepository);
   git(policyRepository, ["init", "--initial-branch=main"]);
-  git(policyRepository, ["remote", "add", "origin", "https://github.com/0xprogrammable/submit-launch.git"]);
+  git(policyRepository, ["remote", "add", "origin", "https://github.com/0xprogrammable/launch-policy.git"]);
   writeFile(policyRepository, "policy/launch-policy.v1.json", fs.readFileSync(path.join(root, "policy/launch-policy.v1.json")));
   writeFile(policyRepository, "README.md", "trusted policy base\n");
   const policyBaseCommit = commitAll(policyRepository, "trusted policy base");
@@ -210,7 +210,7 @@ function makeCommand(fixture, overrides = {}) {
     pullRequest: {
       authorGitHubUserId: FIXTURE_BUILDER_USER_ID,
       baseCommitOid: "1".repeat(40),
-      baseRepository: "0xprogrammable/submit-launch",
+      baseRepository: "0xprogrammable/launch-policy",
       baseRepositoryId: "1320171831",
       baseTreeOid: "2".repeat(40),
       headCommitOid: "3".repeat(40),

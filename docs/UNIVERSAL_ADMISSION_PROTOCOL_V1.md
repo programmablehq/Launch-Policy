@@ -20,7 +20,7 @@ that one million submissions per day are supported in production.
 
 ## Closed public surface
 
-The discovery contract binds these roles at one exact Submit a Launch commit:
+The discovery contract binds these roles at one exact Launch Policy commit:
 
 - the Universal Admission envelope;
 - detached-Ed25519 enqueue command and public trust snapshot;

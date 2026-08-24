@@ -3,8 +3,8 @@
 ## Report privately
 
 Report security-sensitive findings through [GitHub private vulnerability
-reporting](https://github.com/0xprogrammable/submit-launch/security/advisories/new). Do not open a public issue for an intake
-bypass, path-confusion defect, source-binding failure, registry-integrity problem, prompt-injection path, credential
+reporting](https://github.com/0xprogrammable/launch-policy/security/advisories/new). Do not open a public issue for a legacy
+validator bypass, path-confusion defect, source-binding failure, registry-integrity problem, prompt-injection path, credential
 exposure, or unpublished exploit.
 
 Include the affected commit, files, minimal reproduction, impact, and preconditions. Never include real private keys,
@@ -12,7 +12,7 @@ seed phrases, access tokens, production secrets, personal data, or user funds.
 
 ## In scope
 
-- the trusted application intake and its repository, revision, tree, and source binding;
+- the preserved application validators and their repository, revision, tree, and source binding;
 - the public checker, policy, schemas, and decision integrity;
 - generated registry records, indexes, history, and discovery boundaries;
 - repository workflows and their permission boundaries;
@@ -23,10 +23,10 @@ seed phrases, access tokens, production secrets, personal data, or user funds.
 ## Out of scope
 
 Applicant projects, Hookbuilder itself, Uniswap, wallets, RPC or infrastructure providers, the live Programmable
-platform, deployed contracts, and third-party systems retain their own security processes. No public Universal Admission
+platform, Custom Launch API, deployed contracts, and third-party systems retain their own security processes. No public Universal Admission
 service is claimed; a future deployment, remote worker plane, key-provisioning system, hosting provider, or distributed
 store would require its own reviewed scope. A weakness in one of those systems is not automatically a vulnerability in
-Submit a Launch.
+Programmable Launch Policy.
 
 ## Responsible testing
 

@@ -119,7 +119,7 @@ test("the closed ownership manifest proves one current authored admission author
   assert.deepEqual(findForbiddenPolicyValueKeys(manifest), []);
 
   const policy = readJson(canonicalPolicyPath);
-  assert.equal(policy.repository.name, "0xprogrammable/submit-launch");
+  assert.equal(policy.repository.name, "0xprogrammable/launch-policy");
   assert.equal(policy.repository.numericRepositoryId, "1320171831");
   assert.equal(policy.repository.branch, "main");
   assert.equal(policy.repository.path, canonicalPolicyPath);
@@ -450,7 +450,7 @@ test("the receipt-bound vendored Hookbuilder is frozen legacy data, never curren
   const tree = git(["write-tree"]);
   const entry = git(["ls-tree", tree, "vendor/programmable-v4-hook-builder"]);
   assert.match(entry, new RegExp(`^040000 tree ${receipt.skillTree}\\tvendor/programmable-v4-hook-builder$`, "u"));
-  assert.match(read("AGENTS.md"), /frozen, receipt-bound validation dependency for the open legacy V2/u);
+  assert.match(read("AGENTS.md"), /frozen, receipt-bound validation dependency for historical legacy V2/u);
   assert.match(read("AGENTS.md"), /cannot author current central-policy requirements/u);
 });
 
@@ -458,15 +458,15 @@ test("frozen legacy V2 compatibility cannot become a current policy or Website e
   const policyRecord = trustedPolicyRecord();
   const intakeStatus = readJson("docs/builder/intake-status.json");
   const registryConfig = readJson("registry/config.json");
-  assert.equal(intakeStatus.state, "open");
+  assert.equal(intakeStatus.state, "closed");
   assert.deepEqual(registryConfig.activeIntake, {
     baseBranch: "main",
     directory: "submissions",
-    repository: "0xprogrammable/submit-launch",
-    state: "open"
+    repository: "0xprogrammable/launch-policy",
+    state: "closed"
   });
   for (const relativePath of ["README.md", "CONTRIBUTING.md", "docs/builder/PUBLIC_GITHUB_PR_BETA.md"]) {
-    assert.match(read(relativePath), /open legacy|legacy V2 intake|open, frozen legacy V2/iu, relativePath);
+    assert.match(read(relativePath), /closed|retired|historical/iu, relativePath);
   }
   assert.equal(policyRecord.policy.rules.some(({ id }) => id.startsWith("LEGACY_V2.")), false);
   assert.equal(policyRecord.policy.rules.some(({ id }) => id.startsWith("FROZEN_LEGACY_V2.")), false);
@@ -481,7 +481,7 @@ test("frozen legacy V2 compatibility cannot become a current policy or Website e
   );
 });
 
-test("public docs describe one policy chain through reviewer canary and audience-bound Website eligibility", () => {
+test("public docs separate the current API flow from historical GitHub eligibility", () => {
   const readme = read("README.md");
   const architecture = read("docs/ARCHITECTURE.md");
   const lifecycle = read("docs/REVIEW_LIFECYCLE.md");
@@ -497,19 +497,18 @@ test("public docs describe one policy chain through reviewer canary and audience
   ]) {
     assert.match(source, /policy\/launch-policy\.v1\.json/u, `${name} must name the sole authored policy`);
   }
-  assert.match(architecture, /policy → reviewer → Workflow Canary →\s*signed audience-bound Website\s+eligibility/u);
+  assert.match(architecture, /current launch flow is: API key → closed contract bundle and required evidence → Custom Launch API preparation/u);
   assert.match(lifecycle, /expected Website audience from protected deployment configuration/u);
-  assert.match(beta, /frozen legacy V2 transport/u);
-  assert.match(beta, /cannot satisfy Workflow\s+Canary or Website eligibility/u);
+  assert.match(beta, /GitHub launch intake is closed/u);
+  assert.match(beta, /No contract in that list opens GitHub intake/u);
   assert.match(agents, /only authored source of current Programmable-specific admission requirements/u);
-  assert.match(readme, /exactly \*\*10 bps \(0\.10%\)\*\* of `gross-canonical-pool-volume`/u);
-  assert.match(readme, /`build` returns no semantic launch requirements/u);
-  assert.match(readme, /Three intake transports are open/u);
-  assert.match(readme, /Application V3\.2\.\*\* Submit one new immutable revision/u);
-  assert.match(readme, /Application V3\.1 compatibility/u);
-  assert.match(readme, /six-file legacy V2 package/u);
-  assert.match(readme, /checked-in intake state remains/u);
-  assert.match(readme, /existing V2 applications use that bounded compatibility validator/u);
+  assert.match(readme, /policy-defined 10 bps Programmable share of gross canonical-pool volume/u);
+  assert.match(readme, /launch-readiness.*checker-only/su);
+  assert.match(readme, /GitHub launch intake is closed/u);
+  assert.match(readme, /Custom Launch API/u);
+  assert.match(readme, /historical GitHub records/iu);
+  assert.match(readme, /legacy validators remain available for reproducing historical records/u);
+  assert.match(readme, /Pull requests that modify the historical application namespaces fail closed/u);
 });
 
 function currentReviewInput(policyRecord, profileId, rules) {

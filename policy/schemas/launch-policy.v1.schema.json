@@ -241,7 +241,7 @@
       "additionalProperties": false,
       "properties": {
         "branch": { "const": "main" },
-        "name": { "const": "0xprogrammable/submit-launch" },
+        "name": { "const": "0xprogrammable/launch-policy" },
         "numericRepositoryId": { "const": "1320171831" },
         "path": { "const": "policy/launch-policy.v1.json" }
       },

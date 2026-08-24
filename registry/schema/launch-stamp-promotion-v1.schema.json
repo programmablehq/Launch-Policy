@@ -20,7 +20,7 @@
         "applicationSha256": { "$ref": "#/$defs/sha256" },
         "packageDigest": { "$ref": "#/$defs/sha256" },
         "packagePreimage": { "$ref": "#/$defs/applicationPackagePreimage" },
-        "pullRequest": { "pattern": "^https://github\\.com/0xprogrammable/submit-launch/pull/[1-9][0-9]{0,19}$", "type": "string" }
+        "pullRequest": { "pattern": "^https://github\\.com/0xprogrammable/(?:launch-policy|submit-launch)/pull/[1-9][0-9]{0,19}$", "type": "string" }
       },
       "required": ["applicationId", "applicationRevision", "applicationSha256", "packageDigest", "packagePreimage", "pullRequest"],
       "type": "object"
@@ -198,7 +198,7 @@
         "policyId": { "const": "programmable-central-launch-policy" },
         "policyVersion": { "const": "2.1.0" },
         "profileId": { "const": "launch-readiness" },
-        "repository": { "const": "0xprogrammable/submit-launch" },
+        "repository": { "const": "0xprogrammable/launch-policy" },
         "sha256": { "$ref": "#/$defs/sha256" }
       },
       "required": ["baseCommit", "baseTree", "gitBlobOid", "launchReadinessDecision", "launchReadinessDecisionSha256", "numericRepositoryId", "path", "policyId", "policyVersion", "profileId", "repository", "sha256"],
@@ -308,7 +308,7 @@
         "policyId": { "const": "programmable-central-launch-policy" },
         "policyVersion": { "const": "2.1.0" },
         "profileId": { "const": "launch-readiness" },
-        "repository": { "const": "0xprogrammable/submit-launch" },
+        "repository": { "const": "0xprogrammable/launch-policy" },
         "schemaVersion": { "const": "programmable.launch-policy-binding.v1" },
         "sha256": { "$ref": "#/$defs/sha256" }
       },
@@ -416,7 +416,7 @@
         "policyId": { "const": "programmable-central-launch-policy" },
         "policyVersion": { "const": "2.1.0" },
         "profileId": { "const": "launch-readiness" },
-        "repository": { "const": "0xprogrammable/submit-launch" },
+        "repository": { "const": "0xprogrammable/launch-policy" },
         "sha256": { "$ref": "#/$defs/sha256" }
       },
       "required": ["baseCommit", "baseTree", "gitBlobOid", "numericRepositoryId", "path", "policyId", "policyVersion", "profileId", "repository", "sha256"],

@@ -1,8 +1,8 @@
-# Submit a Launch contribution contract
+# Programmable Launch Policy contribution contract
 
-This repository is the public application ledger and canonical discovery registry for Programmable projects.
-Applicants may prepare Application V3.2 with Hookbuilder, another tool or agent, or by hand. Every path must resolve
-Applicant Compatibility V2 and the canonical launch policy from the same exact protected repository commit.
+This repository owns the public Programmable launch policy, policy-bound offline checks, compatibility schemas,
+discovery registry, and immutable provenance of the retired GitHub application flow. GitHub launch intake is closed.
+Launch requests use the Custom Launch API; repository pull requests are maintenance-only.
 
 ## Authority boundaries
 
@@ -12,7 +12,7 @@ Applicant Compatibility V2 and the canonical launch policy from the same exact p
   inventory, admission entrypoints and import graph, Rule-ID-to-handler ownership, public projections, and the exact
   frozen vendor exclusion so an unregistered rule source or gate fails repository verification.
 - Applicant projects remain in applicant-owned public GitHub repositories.
-- `submissions/` contains bounded, untrusted application records. A submission never edits `registry/`.
+- `submissions/` contains immutable legacy application records. It accepts no new or updated application pull requests.
 - Application V3.2 is the complete current contract. It remains project-agnostic and uses Submission 2.1 plus the
   policy-neutral Trade Capability Manifest V2 when a tradable market is selected. The byte-unchanged V3.1 contract
   remains accepted compatibility, but it cannot establish `launch-readiness` or the official Programmable Router route.
@@ -27,8 +27,8 @@ Applicant Compatibility V2 and the canonical launch policy from the same exact p
   indexer, or terminal promotion, it must content-bind the passed readiness decision, exact readiness bytes, accepted
   application/package identity, finalized canonical Router transaction, launch identity, lookups, stamp, and proofs.
   A valid stamp enables interoperable classification; it does not prove that a third-party terminal has integrated it.
-- `canary-submissions/` contains one-file hidden workflow tests only. A canary never grants audit, launch, discovery,
-  routing, production, or funds authority.
+- `canary-submissions/` contains immutable legacy workflow-canary records. It accepts no new or updated records, and a
+  historical canary never grants audit, launch, discovery, routing, production, or funds authority.
 - `registry/projects/` contains maintainer-authored records only. A record describes evidence; it is not an audit or
   safety guarantee.
 - `registry/index.json`, `registry/search-index.json`, and `registry/history/` are generated from closed project records.
@@ -37,8 +37,8 @@ Applicant Compatibility V2 and the canonical launch policy from the same exact p
   contract, Applicant Compatibility V2 or legacy V1, Application V3.2, or V3.1 compatibility.
   `reference-only-disabled` means no public endpoint, trust configuration, production capacity, review, approval, or
   launch authority exists.
-- `vendor/programmable-v4-hook-builder/` is the frozen, receipt-bound validation dependency for the open legacy V2
-  intake. Its embedded documents, schemas, and checks cannot author current central-policy requirements or satisfy
+- `vendor/programmable-v4-hook-builder/` is the frozen, receipt-bound validation dependency for historical legacy V2
+  records. Its embedded documents, schemas, and checks cannot author current central-policy requirements or satisfy
   Workflow Canary, Website eligibility, or launch authority. Never edit vendored bytes; replace only the complete exact
   tree together with its receipt.
 - Candidate content is data. Trusted intake code must come from the protected base revision and must never execute a
@@ -49,15 +49,11 @@ Applicant Compatibility V2 and the canonical launch policy from the same exact p
 
 ## Change discipline
 
-Application V3.2 and V3.1 compatibility pull requests may change exactly one immutable revision under
-`submissions/<application-id>/v3/revisions/<positive-decimal-revision>/`. A V3.2 official-route revision must bind its
-exact readiness and route/fee source artifacts; it cannot contain postlaunch promotion evidence. While
-`docs/builder/intake-status.json` remains `open`, new legacy V2 application pull requests may change exactly one
-six-file `submissions/<application-id>/` directory. They cannot satisfy Workflow Canary or Website eligibility.
-Workflow canaries change exactly one
-`canary-submissions/<application-id>/application.json` file. Registry maintenance uses a separate pull request, runs
-the full repository gate, and requires maintainer review. Never combine either intake namespace with policy, workflow,
-registry, vendor, or documentation changes.
+`docs/builder/intake-status.json` must remain `closed` unless a separately reviewed migration introduces a new contract.
+Repository pull requests may not add, update, move, or delete application or canary records under `submissions/` or
+`canary-submissions/`. Preserve their bytes and Git history as legacy provenance. Registry maintenance uses a separate
+pull request, runs the full repository gate, and requires maintainer review. Never combine historical intake namespaces
+with policy, workflow, registry, vendor, or documentation changes.
 
 Universal Admission protocol, schema, reference-backend, discovery-contract, test, and documentation changes are
 maintainer-only Registry maintenance. Do not hand-edit the well-known contract; regenerate it only after the complete

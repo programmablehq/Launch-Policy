@@ -822,10 +822,10 @@
         "gitBlobOid": { "$ref": "#/$defs/objectId" },
         "numericRepositoryId": { "const": "1320171831" },
         "path": { "$ref": "#/$defs/repositoryPath" },
-        "repository": { "const": "0xprogrammable/submit-launch" },
+        "repository": { "const": "0xprogrammable/launch-policy" },
         "sha256": { "$ref": "#/$defs/sha256" },
         "tree": { "$ref": "#/$defs/objectId" },
-        "trustBasis": { "const": "protected-submit-launch-base-content-addressed" }
+        "trustBasis": { "const": "protected-launch-policy-base-content-addressed" }
       },
       "oneOf": [
         {

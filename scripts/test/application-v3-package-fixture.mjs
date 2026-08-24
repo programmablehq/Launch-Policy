@@ -167,7 +167,7 @@ export function createApplicationV3TestPackage({
         commit: "2".repeat(40),
         numericRepositoryId: "1320171831",
         path: PROGRAMMABLE_LAUNCH_ROUTER_READINESS_SCHEMA_PATH,
-        repository: "0xprogrammable/submit-launch",
+        repository: "0xprogrammable/launch-policy",
         tree: "3".repeat(40)
       })
     };

@@ -1,15 +1,7 @@
-# Hidden workflow canaries
+# Historical Workflow Canary records
 
-This namespace tests the GitHub application handoff without creating a public launch, Registry entry, audit claim, or
-permission to route real funds.
+This namespace preserves immutable records from the retired GitHub Workflow Canary transport. It is not an active
+handoff or launch path. Do not add, update, move, or delete files under `canary-submissions/`.
 
-An applicant pull request changes exactly one canonical JSON file:
-
-```text
-canary-submissions/<application-id>/application.json
-```
-
-The transport schema is
-[`canary/schemas/workflow-canary-application-v1.schema.json`](../canary/schemas/workflow-canary-application-v1.schema.json).
-The only authored Programmable requirements remain in
-[`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json).
+A preserved Canary result remains checker-only, unaudited, non-production, unrouted, and unauthorized for real-user
+funds. New launches use the [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).

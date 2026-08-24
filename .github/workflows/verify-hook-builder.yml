@@ -1,214 +1,31 @@
-name: Verify public application intake
+name: GitHub launch intake is closed
 
 on:
   pull_request_target:
     branches:
       - main
     types: [opened, synchronize, reopened, converted_to_draft, ready_for_review]
+    paths:
+      - "submissions/**"
+      - "canary-submissions/**"
 
 permissions:
   contents: read
 
 concurrency:
-  group: registry-intake-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: closed-launch-intake-${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  public-intake:
-    if: github.event_name == 'pull_request_target'
+  intake-closed:
+    name: Use the Custom Launch API
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      GIT_CONFIG_GLOBAL: /dev/null
-      GIT_CONFIG_NOSYSTEM: "1"
-      GIT_LFS_SKIP_SMUDGE: "1"
-      GIT_TERMINAL_PROMPT: "0"
+    timeout-minutes: 1
 
     steps:
-      - name: Checkout trusted validator
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.base.sha }}
-          path: trusted
-          persist-credentials: false
-          fetch-depth: 1
-          lfs: false
-          submodules: false
-
-      - name: Set up Node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24
-
-      - name: Fetch exact candidate merge as blobless data
-        id: candidate_fetch
-        shell: bash
-        env:
-          CANDIDATE_READ_TOKEN: ${{ github.token }}
-          SERVER_URL: ${{ github.server_url }}
-        run: |
-          set -euo pipefail
-          if [[ "$SERVER_URL" != "https://github.com" ]]; then
-            echo "::error::The central repository identity is outside the supported GitHub origin."
-            exit 1
-          fi
-          fetch_report="$(timeout --signal=KILL 90s node \
-            "$GITHUB_WORKSPACE/trusted/scripts/verify-public-hook-application.mjs" \
-            --fetch-candidate \
-            --repository "${{ github.repository }}" \
-            --pull-request-number "${{ github.event.pull_request.number }}" \
-            --base-root "$GITHUB_WORKSPACE/trusted" \
-            --candidate-root "$GITHUB_WORKSPACE/candidate.git" \
-            --expected-base-commit "${{ github.event.pull_request.base.sha }}" \
-            --expected-candidate-commit "${{ github.event.pull_request.head.sha }}")"
-          merge_commit="$(node -e '
-            const report = JSON.parse(process.argv[1]);
-            if (report.result !== "exact-blobless-candidate-fetched" || !/^[a-f0-9]{40}$/.test(report.mergeCommit)) process.exit(1);
-            process.stdout.write(report.mergeCommit);
-          ' "$fetch_report")"
-          echo "merge_commit=$merge_commit" >> "$GITHUB_OUTPUT"
-
-      - name: Classify candidate data with trusted base code
-        id: classify
+      - name: Reject retired GitHub application transport
         shell: bash
         run: |
           set -euo pipefail
-          mode="$(timeout --signal=KILL 30s node \
-            "$GITHUB_WORKSPACE/trusted/scripts/verify-public-hook-application.mjs" \
-            --classify \
-            --base-root "$GITHUB_WORKSPACE/trusted" \
-            --candidate-root "$GITHUB_WORKSPACE/candidate.git" \
-            --expected-base-commit "${{ github.event.pull_request.base.sha }}" \
-            --expected-candidate-commit "${{ github.event.pull_request.head.sha }}" \
-            --expected-merge-commit "${{ steps.candidate_fetch.outputs.merge_commit }}")"
-          case "$mode" in
-            application|application-v3|workflow-canary|registry-maintenance|no-op) ;;
-            *)
-              echo "::error::The trusted classifier returned an unsupported mode."
-              exit 1
-              ;;
-          esac
-          echo "mode=$mode" >> "$GITHUB_OUTPUT"
-
-      - name: Preflight and hydrate only bounded intake blobs
-        if: steps.classify.outputs.mode == 'application' || steps.classify.outputs.mode == 'application-v3' || steps.classify.outputs.mode == 'workflow-canary'
-        shell: bash
-        env:
-          CANDIDATE_READ_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          timeout --signal=KILL 90s node \
-            "$GITHUB_WORKSPACE/trusted/scripts/verify-public-hook-application.mjs" \
-            --hydrate-candidate \
-            --repository "${{ github.repository }}" \
-            --pull-request-number "${{ github.event.pull_request.number }}" \
-            --base-root "$GITHUB_WORKSPACE/trusted" \
-            --candidate-root "$GITHUB_WORKSPACE/candidate.git" \
-            --expected-base-commit "${{ github.event.pull_request.base.sha }}" \
-            --expected-candidate-commit "${{ github.event.pull_request.head.sha }}" \
-            --expected-merge-commit "${{ steps.candidate_fetch.outputs.merge_commit }}"
-
-      - name: Remove candidate fetch credential
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          candidate="$GITHUB_WORKSPACE/candidate.git"
-          if [[ ! -f "$candidate/config" ]]; then exit 0; fi
-          git -C "$candidate" config --local --unset-all http.https://github.com/.extraheader 2>/dev/null || true
-          if git -C "$candidate" config --local --get-regexp '^(http\..*\.extraheader|credential\.)' >/dev/null; then
-            echo "::error::Candidate object-store credentials were not fully removed."
-            exit 1
-          fi
-
-      - name: Verify policy-bound closed public application package
-        if: steps.classify.outputs.mode == 'application'
-        shell: bash
-        env:
-          GH_TOKEN: ""
-          GITHUB_TOKEN: ""
-          GIT_NO_LAZY_FETCH: "1"
-        run: |
-          set -euo pipefail
-          timeout --signal=KILL 120s node \
-            "$GITHUB_WORKSPACE/trusted/scripts/verify-public-hook-application.mjs" \
-            --pull-request-number "${{ github.event.pull_request.number }}" \
-            --base-root "$GITHUB_WORKSPACE/trusted" \
-            --candidate-root "$GITHUB_WORKSPACE/candidate.git" \
-            --expected-base-commit "${{ github.event.pull_request.base.sha }}" \
-            --expected-builder-login "${{ github.event.pull_request.user.login }}" \
-            --expected-builder-user-id "${{ github.event.pull_request.user.id }}" \
-            --expected-candidate-commit "${{ github.event.pull_request.head.sha }}" \
-            --expected-merge-commit "${{ steps.candidate_fetch.outputs.merge_commit }}"
-
-      - name: Verify policy-bound Application V3 package
-        if: steps.classify.outputs.mode == 'application-v3'
-        shell: bash
-        env:
-          GH_TOKEN: ""
-          GITHUB_TOKEN: ""
-          GIT_NO_LAZY_FETCH: "1"
-        run: |
-          set -euo pipefail
-          timeout --signal=KILL 120s node \
-            "$GITHUB_WORKSPACE/trusted/scripts/verify-public-hook-application.mjs" \
-            --pull-request-number "${{ github.event.pull_request.number }}" \
-            --base-root "$GITHUB_WORKSPACE/trusted" \
-            --candidate-root "$GITHUB_WORKSPACE/candidate.git" \
-            --expected-base-commit "${{ github.event.pull_request.base.sha }}" \
-            --expected-builder-login "${{ github.event.pull_request.user.login }}" \
-            --expected-builder-user-id "${{ github.event.pull_request.user.id }}" \
-            --expected-candidate-commit "${{ github.event.pull_request.head.sha }}" \
-            --expected-merge-commit "${{ steps.candidate_fetch.outputs.merge_commit }}"
-
-      - name: Rebind exact open Draft metadata after Application V3 verification
-        if: steps.classify.outputs.mode == 'application-v3'
-        shell: bash
-        env:
-          CANDIDATE_READ_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          timeout --signal=KILL 30s node \
-            "$GITHUB_WORKSPACE/trusted/scripts/verify-public-hook-application.mjs" \
-            --verify-bounded-application-paths \
-            --repository "${{ github.repository }}" \
-            --pull-request-number "${{ github.event.pull_request.number }}" \
-            --expected-base-commit "${{ github.event.pull_request.base.sha }}" \
-            --expected-candidate-commit "${{ github.event.pull_request.head.sha }}"
-
-      - name: Verify policy-bound hidden workflow canary
-        if: steps.classify.outputs.mode == 'workflow-canary'
-        shell: bash
-        env:
-          GH_TOKEN: ""
-          GITHUB_TOKEN: ""
-          GIT_NO_LAZY_FETCH: "1"
-        run: |
-          set -euo pipefail
-          timeout --signal=KILL 120s node \
-            "$GITHUB_WORKSPACE/trusted/scripts/verify-workflow-canary.mjs" \
-            --pull-request-number "${{ github.event.pull_request.number }}" \
-            --base-root "$GITHUB_WORKSPACE/trusted" \
-            --candidate-root "$GITHUB_WORKSPACE/candidate.git" \
-            --expected-base-repository "${{ github.repository }}" \
-            --expected-base-repository-id "${{ github.event.repository.id }}" \
-            --expected-base-commit "${{ github.event.pull_request.base.sha }}" \
-            --expected-builder-login "${{ github.event.pull_request.user.login }}" \
-            --expected-builder-user-id "${{ github.event.pull_request.user.id }}" \
-            --expected-head-repository "${{ github.event.pull_request.head.repo.full_name }}" \
-            --expected-head-repository-id "${{ github.event.pull_request.head.repo.id }}" \
-            --expected-candidate-commit "${{ github.event.pull_request.head.sha }}" \
-            --expected-merge-commit "${{ steps.candidate_fetch.outputs.merge_commit }}"
-
-      - name: Defer executable registry maintenance to ordinary read-only CI
-        if: steps.classify.outputs.mode == 'registry-maintenance'
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "No maintenance blob is hydrated, parsed, or executed under pull_request_target."
-          echo "Candidate maintenance runs only in ordinary read-only pull-request CI."
-
-      - name: Preserve unrelated and legacy pull-request compatibility
-        if: steps.classify.outputs.mode == 'no-op'
-        shell: bash
-        run: echo "No current Registry intake content changed."
+          echo "::error title=GitHub launch intake is closed::Create an API key at https://programmable.market/developers/api-keys and submit through https://programmable.market/developers/custom-launch-api-v1.md"
+          exit 1

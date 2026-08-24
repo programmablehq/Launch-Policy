@@ -23,7 +23,7 @@ const V2_ROUTER_READINESS_CORE_PATH = "scripts/programmable-launch-router-readin
 const V2_ROUTER_READINESS_CLI_PATH = "scripts/programmable-launch-router-readiness.mjs";
 const V2_ROUTER_READINESS_EVM_ENCODING_PATH = "vendor/programmable-applicant-validator/scripts/evm-encoding-core.mjs";
 const V2_ROUTER_READINESS_LOSSLESS_JSON_PATH = "vendor/programmable-v4-hook-builder/scripts/github-public-source-lossless-json.mjs";
-const REPOSITORY_NAME = "0xprogrammable/submit-launch";
+const REPOSITORY_NAME = "0xprogrammable/launch-policy";
 const REPOSITORY_NUMERIC_ID = "1320171831";
 const DEFAULT_BRANCH = "main";
 const COMPATIBILITY_SCHEMA = "urn:programmable:applicant-compatibility:1.0.0";
@@ -89,6 +89,88 @@ export function canonicalApplicantJson(value) {
     return `{${Object.keys(value).sort(compareUtf8).map((key) => `${JSON.stringify(key)}:${canonicalApplicantJson(value[key])}`).join(",")}}`;
   }
   fail("APPLICANT_COMPATIBILITY_CANONICAL_JSON_INVALID", "Canonical Applicant JSON contains an unsupported value.");
+}
+
+export function buildApplicantCompatibilityContractV2(options) {
+  assertExactKeys(options, ["repositoryRoot"], "APPLICANT_COMPATIBILITY_ARGUMENTS_INVALID", "options");
+  const repositoryRoot = requireRepositoryRoot(options.repositoryRoot);
+  const artifact = (contractId, relativePath) => ({
+    contractId,
+    path: relativePath,
+    sha256: digestBytes(readRegularFile(
+      resolveRepositoryPath(repositoryRoot, relativePath),
+      MAXIMUM_PACKAGE_FILE_BYTES,
+      "APPLICANT_COMPATIBILITY_V2_GENERATION_INPUT_INVALID"
+    ))
+  });
+  const validatorPaths = [
+    V2_ROUTER_READINESS_CORE_PATH,
+    V2_ROUTER_READINESS_CLI_PATH,
+    V2_ROUTER_READINESS_EVM_ENCODING_PATH,
+    V2_ROUTER_READINESS_LOSSLESS_JSON_PATH
+  ].sort(compareUtf8);
+  const validatorBytes = new Map(validatorPaths.map((relativePath) => [
+    relativePath,
+    readRegularFile(
+      resolveRepositoryPath(repositoryRoot, relativePath),
+      MAXIMUM_PACKAGE_FILE_BYTES,
+      "APPLICANT_COMPATIBILITY_V2_GENERATION_INPUT_INVALID"
+    )
+  ]));
+  const validatorFiles = validatorPaths.map((relativePath) => ({
+    path: relativePath,
+    sha256: digestBytes(validatorBytes.get(relativePath))
+  }));
+  const closure = crypto.createHash("sha256");
+  for (const { path: relativePath } of validatorFiles) {
+    const bytes = validatorBytes.get(relativePath);
+    closure.update(Buffer.from(relativePath, "utf8"));
+    closure.update(Buffer.from([0]));
+    closure.update(Buffer.from(String(bytes.byteLength), "ascii"));
+    closure.update(Buffer.from([0]));
+    closure.update(bytes);
+    closure.update(Buffer.from([0]));
+  }
+
+  const compatibility = {
+    $schema: V2_COMPATIBILITY_SCHEMA,
+    application: {
+      current: artifact("public-pr-application-v3.2", V2_APPLICATION_SCHEMA_PATH),
+      legacy: [artifact("public-pr-application-v3.1", APPLICATION_SCHEMA_PATH)]
+    },
+    authority: {
+      candidateCodeExecuted: false,
+      credentialsUsed: false,
+      externalWritesPerformed: false,
+      launchAuthorized: false,
+      networkAccessed: false,
+      promotionAuthorized: false,
+      reviewAuthorized: false,
+      rpcAccessed: false
+    },
+    capabilities: v2CapabilityShape(),
+    kind: COMPATIBILITY_KIND,
+    minimumBuilderProtocolVersion: MINIMUM_BUILDER_PROTOCOL_VERSION,
+    schemaVersion: V2_SCHEMA_VERSION,
+    supportingContracts: {
+      routerReadiness: {
+        schema: artifact("programmable-launch-router-readiness-v1", V2_ROUTER_READINESS_SCHEMA_PATH),
+        validatorClosure: {
+          algorithm: RECEIPT_ALGORITHM,
+          closureSha256: `sha256:${closure.digest("hex")}`,
+          files: validatorFiles
+        }
+      },
+      submission: artifact("open-world-submission-v2.1", V2_SUBMISSION_SCHEMA_PATH),
+      tradeCapabilityManifest: artifact("trade-capability-manifest-v2", V2_TRADE_CAPABILITY_SCHEMA_PATH)
+    },
+    trustedRepository: {
+      defaultBranch: DEFAULT_BRANCH,
+      numericId: REPOSITORY_NUMERIC_ID
+    }
+  };
+  validateCompatibilityShapeV2(compatibility);
+  return deepFreeze(compatibility);
 }
 
 export function parseApplicantCompatibilityBytesV1(bytes) {

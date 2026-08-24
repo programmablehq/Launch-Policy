@@ -561,7 +561,7 @@ async function createEligibilityFixture(t, { applicationRevision = 1, source = S
     pullRequestNumber: "7",
     expectedBuilderLogin: "Alice",
     expectedBuilderUserId: "9007199254740993",
-    expectedBaseRepository: "0xprogrammable/submit-launch",
+    expectedBaseRepository: "0xprogrammable/launch-policy",
     expectedBaseRepositoryId: "1320171831",
     expectedHeadRepository: "alice/submit-launch-fork",
     expectedHeadRepositoryId: "88001"
@@ -591,7 +591,7 @@ function createPolicyRepository(t) {
   const candidate = path.join(fixtureRoot, "candidate");
   fs.mkdirSync(base);
   git(base, ["init", "--initial-branch=main"]);
-  git(base, ["remote", "add", "origin", "https://github.com/0xprogrammable/submit-launch.git"]);
+  git(base, ["remote", "add", "origin", "https://github.com/0xprogrammable/launch-policy.git"]);
   writeFile(base, "policy/launch-policy.v1.json", fs.readFileSync(path.join(root, "policy/launch-policy.v1.json")));
   writeFile(base, "README.md", "trusted base\n");
   const baseCommit = commitAll(base, "trusted base");
@@ -743,7 +743,7 @@ function makeLegacyCommand() {
       sha256: `sha256:${"2".repeat(64)}`
     },
     pullRequest: {
-      authorGitHubUserId: "1", baseCommitOid: "1".repeat(40), baseRepository: "0xprogrammable/submit-launch",
+      authorGitHubUserId: "1", baseCommitOid: "1".repeat(40), baseRepository: "0xprogrammable/launch-policy",
       baseRepositoryId: "1320171831", baseTreeOid: "2".repeat(40), headCommitOid: "3".repeat(40),
       headRepositoryId: "2", headTreeOid: "4".repeat(40), number: 1
     },

@@ -24,8 +24,8 @@ export const SIX_FILE_ADAPTER_PROFILE = "submit-launch-six-file-source-plan-v1";
 export const MAXIMUM_ACCEPTANCE_COMMAND_LIFETIME_MS = 15 * 60 * 1000;
 export const MAXIMUM_LAUNCH_PLAN_BYTES = 1024 * 1024;
 
-const SUBMIT_LAUNCH_REPOSITORY = "0xprogrammable/submit-launch";
-const SUBMIT_LAUNCH_REPOSITORY_ID = "1320171831";
+const LAUNCH_POLICY_REPOSITORY = "0xprogrammable/launch-policy";
+const LAUNCH_POLICY_REPOSITORY_ID = "1320171831";
 const SIGNING_DOMAIN = Buffer.from("programmable.submit-launch.protected-acceptance-command.v1\0", "utf8");
 const PACKAGE_BINDING_DOMAIN = "programmable.submit-launch.six-file-package-binding.v1";
 const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true });
@@ -248,8 +248,8 @@ function validateAcceptanceCommand(command) {
   assertExactKeys(command.pullRequest, ["authorGitHubUserId", "baseCommitOid", "baseRepository", "baseRepositoryId", "baseTreeOid", "headCommitOid", "headRepositoryId", "headTreeOid", "number"], "ACCEPTANCE_COMMAND_INVALID");
   assertPattern(command.pullRequest.authorGitHubUserId, OPAQUE_ID_PATTERN, "PULL_REQUEST_BINDING_INVALID");
   assertPattern(command.pullRequest.baseCommitOid, GIT_OID_PATTERN, "PULL_REQUEST_BINDING_INVALID");
-  assertEqual(command.pullRequest.baseRepository, SUBMIT_LAUNCH_REPOSITORY, "PULL_REQUEST_BINDING_INVALID");
-  assertEqual(command.pullRequest.baseRepositoryId, SUBMIT_LAUNCH_REPOSITORY_ID, "PULL_REQUEST_BINDING_INVALID");
+  assertEqual(command.pullRequest.baseRepository, LAUNCH_POLICY_REPOSITORY, "PULL_REQUEST_BINDING_INVALID");
+  assertEqual(command.pullRequest.baseRepositoryId, LAUNCH_POLICY_REPOSITORY_ID, "PULL_REQUEST_BINDING_INVALID");
   assertPattern(command.pullRequest.baseTreeOid, GIT_OID_PATTERN, "PULL_REQUEST_BINDING_INVALID");
   assertPattern(command.pullRequest.headCommitOid, GIT_OID_PATTERN, "PULL_REQUEST_BINDING_INVALID");
   assertPattern(command.pullRequest.headRepositoryId, OPAQUE_ID_PATTERN, "PULL_REQUEST_BINDING_INVALID");

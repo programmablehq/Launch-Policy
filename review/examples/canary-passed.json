@@ -3,7 +3,7 @@
   "profileId": "workflow-canary",
   "expectedPolicyBinding": {
     "schemaVersion": "programmable.launch-policy-binding.v1",
-    "repository": "0xprogrammable/submit-launch",
+    "repository": "0xprogrammable/launch-policy",
     "numericRepositoryId": "1320171831",
     "baseCommit": "599cbb7f9e6c6daf8a1aeca85340429db5a4f134",
     "baseTree": "3a3ffe028ff3e528bbdfb49d10f287a5d6f23b5a",

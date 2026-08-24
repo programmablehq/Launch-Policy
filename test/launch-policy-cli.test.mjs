@@ -97,7 +97,9 @@ test("generated-artifact verifier fails closed on stale bytes", (t) => {
   const generatedPaths = new Set(generated.keys());
   const sourcePaths = new Set([
     ...Object.values(ACTIVE_CONTRACT_ROLE_PATHS_V1).flat(),
-    ...Object.values(ACTIVE_CONTRACT_ROLE_PATHS_V2).flat()
+    ...Object.values(ACTIVE_CONTRACT_ROLE_PATHS_V2).flat(),
+    "vendor/programmable-applicant-validator/scripts/evm-encoding-core.mjs",
+    "vendor/programmable-v4-hook-builder/scripts/github-public-source-lossless-json.mjs"
   ]);
   for (const relativePath of [...sourcePaths].filter((value) => !generatedPaths.has(value))) {
     const target = path.join(fixtureRoot, relativePath);
@@ -130,7 +132,7 @@ test("active contract V1 compatibility envelope binds the complete V2 role contr
     assert.equal(manifest.$schema, `urn:programmable:active-contract-manifest:${schemaVersion}`);
     assert.equal(manifest.schemaVersion, schemaVersion);
     assert.equal(manifest.kind, "programmable-active-contract");
-    assert.equal(manifest.contractId, "submit-launch");
+    assert.equal(manifest.contractId, "launch-policy");
     assert.equal(manifest.defaultBranch, "main");
     assert.deepEqual(Object.keys(manifest.artifacts), ["package", "policy", "validator", "workflow"]);
     assert.deepEqual(manifest.artifacts, Object.fromEntries(
@@ -202,7 +204,7 @@ test("binding CLI binds the fixed Git policy and rejects disabled production", (
   const result = run(["binding", "--profile", "launch-readiness"]);
   assert.equal(result.status, 0, result.stderr);
   const binding = parseCanonicalOutput(result);
-  assert.equal(binding.repository, "0xprogrammable/submit-launch");
+  assert.equal(binding.repository, "0xprogrammable/launch-policy");
   assert.equal(binding.numericRepositoryId, "1320171831");
   assert.equal(binding.baseCommit, childProcess.execFileSync("git", ["rev-parse", "HEAD^{commit}"], { cwd: root, encoding: "utf8" }).trim());
   assert.equal(binding.path, "policy/launch-policy.v1.json");

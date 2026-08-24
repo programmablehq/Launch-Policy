@@ -1015,13 +1015,13 @@ function validateLaunchRequestPackage({
     !isObject(schemaBinding)
     || schemaBinding.schemaId !== routerReadinessSchema.$id
     || schemaBinding.path !== "intake/schemas/programmable-launch-router-readiness-v1.schema.json"
-    || schemaBinding.repositoryRef?.repository !== "0xprogrammable/submit-launch"
+    || schemaBinding.repositoryRef?.repository !== "0xprogrammable/launch-policy"
     || schemaBinding.repositoryRef?.numericRepositoryId !== "1320171831"
     || schemaBinding.byteLength !== routerReadinessSchemaBytes.length
     || schemaBinding.sha256 !== sha256Bytes(routerReadinessSchemaBytes)
     || schemaBinding.gitBlobOid !== gitBlobOid(routerReadinessSchemaBytes)
   ) {
-    rejectApplicationV3("APPLICATION_V3_ROUTE_PLAN_SCHEMA_BINDING_MISMATCH", "routerReadinessSchema must content-address the exact protected Submit Launch schema bytes.");
+    rejectApplicationV3("APPLICATION_V3_ROUTE_PLAN_SCHEMA_BINDING_MISMATCH", "routerReadinessSchema must content-address the exact protected Launch Policy schema bytes.");
   }
 
   const sourceIdentity = applicabilityRecord.subject;

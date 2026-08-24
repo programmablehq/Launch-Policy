@@ -9,9 +9,10 @@ import { ruleHandlersForPolicyVersion } from "./launch-policy-handlers.mjs";
 
 const MAXIMUM_POLICY_BYTES = 512 * 1024;
 const POLICY_PATH = "policy/launch-policy.v1.json";
-const REPOSITORY = "0xprogrammable/submit-launch";
+const REPOSITORY = "0xprogrammable/launch-policy";
+const LEGACY_REPOSITORY = "0xprogrammable/submit-launch";
 const NUMERIC_REPOSITORY_ID = "1320171831";
-const REPOSITORY_REMOTE = "https://github.com/0xprogrammable/submit-launch.git";
+const REPOSITORY_REMOTE = "https://github.com/0xprogrammable/launch-policy.git";
 const POLICY_SCHEMA_VERSION = "programmable.launch-policy.v1";
 const BINDING_SCHEMA_VERSION = "programmable.launch-policy-binding.v1";
 const OBJECT_ID = /^[0-9a-f]{40}$/u;
@@ -70,12 +71,12 @@ export function validateLaunchPolicy(policy) {
   requirePlainObject(policy.repository, "policy.repository");
   exactKeys(policy.repository, ["branch", "name", "numericRepositoryId", "path"], "policy.repository");
   if (
-    policy.repository.name !== REPOSITORY
+    ![REPOSITORY, LEGACY_REPOSITORY].includes(policy.repository.name)
     || policy.repository.numericRepositoryId !== NUMERIC_REPOSITORY_ID
     || policy.repository.branch !== "main"
     || policy.repository.path !== POLICY_PATH
   ) {
-    fail("LAUNCH_POLICY_REPOSITORY_INVALID", "Policy repository identity must match the protected Submit Launch source.");
+    fail("LAUNCH_POLICY_REPOSITORY_INVALID", "Policy repository identity must match the protected Launch Policy source or its legacy repository name.");
   }
 
   requirePlainObject(policy.effective, "policy.effective");
@@ -129,7 +130,7 @@ export function readTrustedLaunchPolicyFromGit(options) {
 
   const observedRemote = runGitText(repositoryRoot, ["remote", "get-url", "origin"], 4096);
   if (normalizeRemote(observedRemote) !== REPOSITORY_REMOTE) {
-    fail("LAUNCH_POLICY_GIT_IDENTITY_INVALID", "Trusted policy repository origin is not 0xprogrammable/submit-launch.");
+    fail("LAUNCH_POLICY_GIT_IDENTITY_INVALID", "Trusted policy repository origin is not 0xprogrammable/launch-policy.");
   }
   const baseCommit = runGitText(repositoryRoot, ["rev-parse", "--verify", `${expectedBaseCommit}^{commit}`], 128);
   if (baseCommit !== expectedBaseCommit) {
@@ -506,7 +507,10 @@ function validTimestamp(value) {
 
 function normalizeRemote(remote) {
   const trimmed = remote.trim().replace(/\/$/u, "");
+  if (trimmed === "git@github.com:0xprogrammable/launch-policy.git") return REPOSITORY_REMOTE;
+  if (trimmed === "https://github.com/0xprogrammable/launch-policy") return REPOSITORY_REMOTE;
   if (trimmed === "git@github.com:0xprogrammable/submit-launch.git") return REPOSITORY_REMOTE;
+  if (trimmed === "https://github.com/0xprogrammable/submit-launch.git") return REPOSITORY_REMOTE;
   if (trimmed === "https://github.com/0xprogrammable/submit-launch") return REPOSITORY_REMOTE;
   return trimmed;
 }

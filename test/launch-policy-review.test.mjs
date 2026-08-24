@@ -59,7 +59,7 @@ function trustedReviewFixture(t) {
     "utf8"
   );
   runGit(repositoryRoot, ["init", "--initial-branch=main"]);
-  runGit(repositoryRoot, ["remote", "add", "origin", "https://github.com/0xprogrammable/submit-launch.git"]);
+  runGit(repositoryRoot, ["remote", "add", "origin", "https://github.com/0xprogrammable/launch-policy.git"]);
   runGit(repositoryRoot, ["add", "policy/launch-policy.v1.json"]);
   runGit(repositoryRoot, ["commit", "-m", "fixture policy"]);
   const expectedBaseCommit = runGit(repositoryRoot, ["rev-parse", "HEAD^{commit}"]);
@@ -772,7 +772,7 @@ function materializeImmutablePolicySnapshot(t, expectedBaseCommit) {
   const repositoryRoot = fs.mkdtempSync(path.join(os.tmpdir(), "launch-policy-snapshot-"));
   t.after(() => fs.rmSync(repositoryRoot, { recursive: true, force: true }));
   runGit(repositoryRoot, ["init", "--initial-branch=main"]);
-  runGit(repositoryRoot, ["remote", "add", "origin", "https://github.com/0xprogrammable/submit-launch.git"]);
+  runGit(repositoryRoot, ["remote", "add", "origin", "https://github.com/0xprogrammable/launch-policy.git"]);
   for (const object of fixture.objects) {
     assert.deepEqual(Object.keys(object).sort(), ["base64", "oid", "type"].sort());
     assert.match(object.oid, /^[0-9a-f]{40}$/u);

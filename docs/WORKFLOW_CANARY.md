@@ -1,11 +1,15 @@
 # Workflow Canary
 
-The workflow canary is a one-file, hidden test of the GitHub application path. It does not approve a launch, publish a
+> [!IMPORTANT]
+> Workflow Canary intake is retired. This document preserves the historical contract; do not submit a Canary pull
+> request. Current launches use the [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+
+The workflow canary was a one-file, hidden test of the GitHub application path. It did not approve a launch, publish a
 project, create a Registry record, claim an audit, enable production routing, or permit real-user funds.
 
-## Applicant file
+## Historical applicant file
 
-Submit exactly:
+Historical records used exactly:
 
 ```text
 canary-submissions/<application-id>/application.json
@@ -19,7 +23,7 @@ The application binds:
 
 - the authenticated GitHub builder and application revision;
 - one exact public source repository numeric ID, commit, and tree;
-- the exact `workflow-canary` binding from protected `submit-launch:main`;
+- the exact `workflow-canary` binding from the protected repository revision active at the time;
 - explicit hidden, unaudited, unrouted, non-production, and no-real-user-funds declarations.
 
 The schema defines transport only. Every Programmable-specific requirement is authored once in

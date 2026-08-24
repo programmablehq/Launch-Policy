@@ -1149,10 +1149,10 @@ function notApplicableFixture(routeMode) {
       gitBlobOid: objectId("3"),
       numericRepositoryId: "1320171831",
       path: `review/applicability/${routeMode}.json`,
-      repository: "0xprogrammable/submit-launch",
+      repository: "0xprogrammable/launch-policy",
       sha256: sha256Value("4"),
       tree: objectId("5"),
-      trustBasis: "protected-submit-launch-base-content-addressed"
+      trustBasis: "protected-launch-policy-base-content-addressed"
     }
   };
   return fixture;

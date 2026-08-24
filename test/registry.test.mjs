@@ -82,8 +82,8 @@ test("pending legacy pull requests remain explicitly separate from accepted reco
       repository: "0xprogrammable/hookbuilder"
     }
   ]);
-  assert.equal(config.activeIntake.state, "open");
-  assert.equal(config.activeIntake.repository, "0xprogrammable/submit-launch");
+  assert.equal(config.activeIntake.state, "closed");
+  assert.equal(config.activeIntake.repository, "0xprogrammable/launch-policy");
 });
 
 test("Deep is outside the active registry without rewriting released history", () => {
@@ -131,7 +131,7 @@ test("maintainer acceptance must bind the exact application and source record", 
   const project = JSON.parse(fs.readFileSync(projectPath, "utf8"));
   project.review = {
     acceptancePath: "registry/acceptances/classic/1.json",
-    applicationPullRequest: "https://github.com/0xprogrammable/submit-launch/pull/7",
+    applicationPullRequest: "https://github.com/0xprogrammable/launch-policy/pull/7",
     independentAudit: false,
     limitations: ["Maintainer acceptance is not an audit or deployment approval."],
     state: "accepted"
@@ -146,7 +146,7 @@ test("maintainer acceptance must bind the exact application and source record", 
       applicationId: "classic",
       applicationRevision: 1,
       packageDigest: `sha256:${"a".repeat(64)}`,
-      pullRequest: "https://github.com/0xprogrammable/submit-launch/pull/7"
+      pullRequest: "https://github.com/0xprogrammable/launch-policy/pull/7"
     },
     conditions: ["Maintainer acceptance is not an audit or deployment authorization."],
     decision: "accepted-for-registry-promotion",
@@ -404,7 +404,7 @@ function makeAcceptedFixture(t, { chainId = 1, chainState = "available", removeM
   project.provenance.recordClass = "maintainer-acceptance";
   project.review = {
     acceptancePath: "registry/acceptances/classic/1.json",
-    applicationPullRequest: "https://github.com/0xprogrammable/submit-launch/pull/7",
+    applicationPullRequest: "https://github.com/0xprogrammable/launch-policy/pull/7",
     independentAudit: false,
     limitations: ["Maintainer acceptance and launch provenance are not safety or audit claims."],
     state: new Set(["suspended", "retired"]).has(status) ? status : "accepted"
@@ -426,7 +426,7 @@ function makeAcceptedFixture(t, { chainId = 1, chainState = "available", removeM
       applicationId: "classic",
       applicationRevision: 1,
       packageDigest: `sha256:${"a".repeat(64)}`,
-      pullRequest: "https://github.com/0xprogrammable/submit-launch/pull/7"
+      pullRequest: "https://github.com/0xprogrammable/launch-policy/pull/7"
     },
     conditions: ["Finalized launch provenance remains a separate later promotion fact."],
     decision: "accepted-for-registry-promotion",
@@ -581,7 +581,7 @@ function makePromotionRecord(project, acceptance, acceptanceSha256) {
       policyId: "programmable-central-launch-policy",
       policyVersion: "2.1.0",
       profileId: "launch-readiness",
-      repository: "0xprogrammable/submit-launch",
+      repository: "0xprogrammable/launch-policy",
       sha256: `sha256:${"d".repeat(64)}`
     },
     projectId: project.id,

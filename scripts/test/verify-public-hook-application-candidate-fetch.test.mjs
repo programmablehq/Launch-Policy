@@ -887,7 +887,8 @@ test("trusted closed intake blocks application data before candidate Git fetch",
   for (const [intakeState, expectedCode] of [
     ["prelaunch", "INTAKE_PRELAUNCH"],
     ["paused-new", "INTAKE_PAUSED_NEW"],
-    ["paused-all", "INTAKE_PAUSED_ALL"]
+    ["paused-all", "INTAKE_PAUSED_ALL"],
+    ["closed", "INTAKE_CLOSED"]
   ]) {
     await t.test(intakeState, async (t2) => {
       const fixture = createRevisionPair(t2, { intakeState });
@@ -1919,7 +1920,7 @@ function createRevisionPair(t, {
   fs.mkdirSync(base);
   git(base, ["init", "-b", "main"]);
   configureIdentity(base, "Trusted Test", "trusted@example.invalid");
-  git(base, ["remote", "add", "origin", "https://github.com/0xprogrammable/submit-launch.git"]);
+  git(base, ["remote", "add", "origin", "https://github.com/0xprogrammable/launch-policy.git"]);
   writeFile(base, "README.md", "trusted base\n");
   writeFile(base, "policy/launch-policy.v1.json", TRUSTED_POLICY_BYTES);
   writeFile(

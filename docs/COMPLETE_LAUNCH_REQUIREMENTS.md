@@ -2,19 +2,29 @@
 
 This page is the shortest complete map for an agent or Builder preparing a Programmable launch. It is not a second
 policy. The sole normative source of Programmable-specific requirements is
-[`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json) at one exact protected `submit-launch:main` commit and
+[`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json) at one exact protected `launch-policy:main` commit and
 tree. If this guide and that file differ, stop and follow the canonical policy.
 
 The current machine identity in this tree is policy ID `programmable-central-launch-policy`, version `2.1.0`. Do not
 infer future requirements from that label alone; always bind the exact policy bytes and Git identity.
 
+> [!IMPORTANT]
+> GitHub launch intake is closed. This page does not instruct a builder to open an application, scaffold, Canary, or
+> launch pull request. Current launches use the [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+
 ## Start here
 
-Hookbuilder is optional. You may use it, another tool or agent, or prepare the application manually. In every case,
-resolve Applicant Compatibility V2 and the canonical policy from the same exact protected Submit a Launch commit.
+Hookbuilder is optional. You may use it, another tool or agent, or prepare the API bundle manually. In every case,
+resolve the canonical policy from the same exact protected Launch Policy commit.
 Node.js 24.12 or newer is required for the repository tools.
 
-From an exact Submit a Launch checkout, inspect and bind the current policy:
+Create an [API key](https://programmable.market/developers/api-keys), read the
+[OpenAPI document](https://programmable.market/openapi.json), and submit the request defined there to
+`POST https://api.programmable.market/v1/custom-launches`. The API contract owns the current request and response
+shape. This policy repository owns the requirements and offline verification contracts; it does not accept the
+request itself.
+
+From an exact Launch Policy checkout, inspect and bind the current policy:
 
 ```bash
 npm run policy -- validate-policy
@@ -33,26 +43,25 @@ a binding or `LAUNCH_APPROVED`; its requirements command is inspection-only and 
 Do not classify a project from its name, project kind, use of Uniswap v4, or similarity to an existing launch. Use the
 exact bound application and route state.
 
-Applicants never set the canonical policy predicate `subject.routerProvenanceRequired`. A protected V3.2
-package-and-source verifier must mint the opaque decision. `launchRequest.requestedRoute` is an applicant declaration,
-not an exemption: verified no-market and external-route state is `not-applicable`; incomplete, conflicting, or
-unresolved source or trade state is `analysis-pending`, including when the applicant requested `none` or `other`; and a
-completely verified official route is `required`. The protected policy compiler maps `not-applicable` to
+API callers never set the canonical policy predicate `subject.routerProvenanceRequired`. The platform derives the
+opaque decision from the validated request bundle and its bound source evidence. A requested route is a caller
+declaration, not an exemption: verified no-market and external-route state is `not-applicable`; incomplete,
+conflicting, or unresolved source or trade state is `analysis-pending`; and a completely verified official route is
+`required`. The protected policy compiler maps `not-applicable` to
 `routerProvenanceRequired: false` and both `analysis-pending` and `required` to `true`, with pending evidence unable to
 pass. Missing evidence must never become a caller-selected `false` or exemption.
 
-In V3.2, `launchRequest.requestedRoute` is exactly `none`, `other`, or `programmable-ethereum-mainnet`. Only the last
-value requires `stage: "prototype"` and binds the matching pair `category: "custom"` with `launchKind: 1` or
-`category: "classic"` with `launchKind: 2`, the readiness source artifact, and its protected schema. Its readiness
-document is `analysis-pending` until the exact prelaunch plan can become `prelaunch-bound`.
+For the current API field names and route values, follow the OpenAPI document. Internally, the protected compatibility
+projection retains the exact route distinction needed to bind `category: "custom"` with `launchKind: 1` or
+`category: "classic"` with `launchKind: 2`. A Programmable Ethereum readiness record stays `analysis-pending` until
+the exact prelaunch plan can become `prelaunch-bound`.
 
-| Exact state | Application result | Router readiness | Registry, API, or terminal promotion |
+| Exact state | API and policy result | Router readiness | Registry, API, or terminal promotion |
 | --- | --- | --- | --- |
-| Verified no market | Eligible for the same open-world intake | `not-applicable`; no Router plan is required | No launch-stamp promotion is required |
-| Route or market is unresolved | Eligible as an honest draft | `analysis-pending`; never silently exempt | Cannot be promoted as a verified Programmable launch while unresolved |
-| Verified external market route | Eligible for review | `not-applicable`; the Programmable Router rules are not selected | Must not receive a Programmable Classic or Custom label |
-| Programmable Ethereum market | Must use Application V3.2 and Submission 2.1 | Exact fee terms and a canonical Router plan are mandatory before launch | A finalized canonical stamp and proof are mandatory before promotion |
-| V3.1 compatibility draft | New and existing drafts remain accepted under unchanged V3.1 semantics | Cannot establish `launch-readiness` or the official Programmable route | Migrate by adding a new V3.2 revision before an official Ethereum market launch |
+| Verified no market | May be represented honestly by the API contract | `not-applicable`; no Router plan is required | No launch-stamp promotion is required |
+| Route or market is unresolved | Remains an honest unresolved request, never an implicit pass | `analysis-pending`; never silently exempt | Cannot be promoted as a verified Programmable launch while unresolved |
+| Verified external market route | May proceed only under the API contract for that route | `not-applicable`; the Programmable Router rules are not selected | Must not receive a Programmable Classic or Custom label |
+| Programmable Ethereum market | The request bundle must satisfy the current API contract and exact policy | Exact fee terms and a canonical Router plan are mandatory before launch | A finalized canonical stamp and proof are mandatory before promotion |
 
 Novel projects are not rejected for being unfamiliar. An unresolved fact remains `analysis-pending`; it is not treated
 as unsafe and is not converted into a false `not-applicable` claim.
@@ -83,78 +92,40 @@ This table is a human map of
 rule as 10% or as an optional creator fee. Do not apply it to a no-market or unresolved draft merely because the project
 uses v4.
 
-## Prepare the current application
+## Prepare the current API request
 
-The complete current contract is Application V3.2. It serves all four routes and is required for the official
-Programmable Ethereum path:
+Use the API guide and OpenAPI document as the only current transport instructions. The normal sequence is:
 
-- schema: [`intake/schemas/public-pr-application-v3.2.schema.json`](../intake/schemas/public-pr-application-v3.2.schema.json);
-- contract ID: `public-pr-application-v3`, version `3.2.0`;
-- Submission schema: [`intake/schemas/open-world-submission-v2.1.schema.json`](../intake/schemas/open-world-submission-v2.1.schema.json);
-- Submission identity: `urn:programmable:v4-hook-submission:2.1.0` with `standardVersion: "2.1.0"`;
-- policy-neutral trade manifest schema:
-  [`intake/schemas/trade-capability-manifest-v2.schema.json`](../intake/schemas/trade-capability-manifest-v2.schema.json),
-  `$schema: "urn:programmable:trade-capability-manifest:2.0.0"`, contract ID
-  `trade-capability-manifest-v2`, version `2.0.0`.
+1. create an API key through the authenticated developer surface;
+2. prepare the contract/source bundle and truthful route evidence required by the current API schema;
+3. send it to `POST https://api.programmable.market/v1/custom-launches`; and
+4. independently review and sign any returned transaction request with the authorized wallet.
 
-Submission 2.1 is the common source contract. Bind one Trade Capability Manifest V2 for each selected tradable market;
-a no-market project or a proposal with no selected tradable market must not fabricate one.
+An API key is authentication, not wallet authority. A successful request, policy match, or prepared transaction does
+not prove broadcast, finality, indexing, promotion, liquidity, or safety. Never put the API key, wallet secret, or
+private RPC credential in this repository or a public source bundle.
 
-To start a bounded standalone draft, choose one honest route:
+### Historical Application contracts
 
-```bash
-npm run --silent applicant:scaffold -- --route no-market --application-id my-project
-npm run --silent applicant:scaffold -- --route external --application-id my-project
-npm run --silent applicant:scaffold -- --route unresolved --application-id my-project
-npm run --silent applicant:scaffold -- --route official --category custom --application-id my-project
-```
+Application V3.2, Submission 2.1, Trade Capability Manifest V2, V3.1 compatibility, and the applicant scaffold remain
+checked in only for offline reproduction and compatibility with preserved records. They do not open a GitHub launch
+transport and are not the current submission instructions. Their machine discovery contract is
+[`applicant-compatibility.v2.json`](../.programmable/applicant-compatibility.v2.json); its digests allow old records to
+be reproduced without rewriting their bytes.
 
-Use `--category classic` instead for an official Classic launch. Without `--output`, the command prints canonical
-scaffold JSON. Add `--output <new-directory>` for a no-overwrite draft package; place real artifacts under its
-`application-package/` and `source-repositories/` directories, then use
-`npm run --silent applicant:scaffold -- --check <directory>`. The scaffold stays `draft-pending` with
-`submitReady: false` and cannot make itself submit-ready, mint a readiness decision, or invent deployment, trade, or
-settlement evidence.
-
-Machine-discover those current and compatibility contracts through
-[`applicant-compatibility.v2.json`](../.programmable/applicant-compatibility.v2.json), validated by
-[`intake/schemas/applicant-compatibility-v2.schema.json`](../intake/schemas/applicant-compatibility-v2.schema.json) with
-`$id: "urn:programmable:applicant-compatibility:2.0.0"`. It also digest-binds the readiness validator closure. Applicant
-Compatibility V1 remains legacy and does not discover V3.2.
-
-The applicant-owned source file remains `submission.v2.json`. Application V3.2 binds its exact bytes rather than
-renaming it or rewriting the source repository. Protected CI invokes the candidate validator with the exact
-GitHub-derived identities and hydrated roots:
-
-```bash
-node scripts/verify-public-hook-application.mjs \
-  --pull-request-number <number> \
-  --base-root <trusted-base-root> \
-  --candidate-root <hydrated-candidate-root> \
-  --expected-base-commit <base-sha> \
-  --expected-candidate-commit <head-sha> \
-  --expected-merge-commit <merge-sha> \
-  --expected-builder-login <login> \
-  --expected-builder-user-id <decimal-id>
-```
-
-Do not guess these protected values from applicant data. To check all packages already maintained in one checkout, run:
+Maintainers may verify the immutable historical namespace with:
 
 ```bash
 node scripts/verify-public-hook-application.mjs --verify-maintained --repository-root .
 ```
 
-The validator does not execute applicant code, and a pass means only that the draft or maintained package is valid for
-review.
-
-The V3.1 compatibility contract remains byte-unchanged and continues to accept new and existing drafts so current
-Builders do not break. Those revisions are never revalidated as V3.2, never inherit readiness, and cannot establish
-the official Programmable Router route. Add a new V3.2 revision before requesting readiness for a Programmable
-Ethereum market. Bind the exact V3.1 predecessor with `lineage.kind: "schema-migration"`; do not rewrite its bytes.
+That command does not accept a new application, contact the launch API, execute applicant code, authorize a wallet, or
+launch a contract.
 
 ## Bind the prelaunch Router plan
 
-For a selected Programmable Ethereum market, add exactly this applicant-owned source document:
+For a selected Programmable Ethereum market, the API request and its bound source evidence must supply or allow the
+platform to derive the exact readiness document required by the current API contract:
 
 ```text
 .programmable/launch-router-readiness.v1.json
@@ -173,7 +144,7 @@ npm run launch-readiness -- .programmable/launch-router-readiness.v1.json
 ```
 
 That public command validates the readiness document only. It cannot mint the opaque applicability decision or a
-policy-review result; the protected compiler combines the exact verified V3.2 package, source closure, and readiness
+policy-review result; the protected compiler combines the exact verified API bundle, source closure, and readiness
 record.
 
 A readiness pass proves only that the exact checked launch plan binds the canonical Router and mandatory fee
@@ -183,14 +154,14 @@ specific observed blocks, logs, and assets. That evidence does not promise futur
 separate. The repository-side V1 settlement assertion is deliberately `analysis-pending`: only a future independently
 anchored observer verifier may mint a passed settlement proof.
 
-The checker is offline: it performs no RPC or network access, executes no applicant code, writes no files, signs
+The checker is offline: it performs no RPC or network access, executes no caller code, writes no files, signs
 nothing, and sends no transaction. It verifies the exact supplied manifest snapshot bytes against the pinned official
 Developer artifact; it does not fetch the endpoint or independently prove endpoint freshness. A `prelaunch-bound` plan
 must bind the expected chain, launch kind, route/source commitments, permit commitments, fee tuple, component
 identities, and exact manifest snapshot used for the decision.
 
 A separate Builder or preparation step obtains the current official Developer discovery response and manifest, embeds
-the exact projection in the readiness document, and does so before the applicant pins the source commit. Before it may
+the exact projection in the readiness document, and does so before the caller pins the source commit. Before it may
 mint a readiness decision, the protected platform must independently resolve or check that trust and freshness; the
 offline command is not a fetch or generation service. Never treat one address copied into this guide, an agent prompt,
 source code, token metadata, a topic, or an API response as an eternal Router address. Start from the
@@ -206,33 +177,48 @@ immutable after the signed permit commits to it.
 
 ## Keep responsibilities separate
 
-Applicant responsibilities:
+API caller responsibilities:
 
-- keep the complete project in the exact applicant-owned public source revision;
+- keep the complete project in the exact caller-owned public source revision;
 - declare no-market, unresolved, external, or Programmable-route state truthfully;
-- supply the V3.2/Submission 2.1 package and, when required, the exact readiness document;
-- obtain and embed the current official manifest projection before committing the applicant-owned readiness document;
+- supply the current API request bundle and, when required, the exact readiness evidence;
+- obtain and embed the current official manifest projection before committing the caller-owned readiness document;
 - declare the launch-wallet late-binding constraints, then bind its public address and all route, result, stamp, permit,
   fee, token, hook, PoolManager, and pool commitments before signing in the separately authorized launch flow;
 - never self-assert approval, a finalized stamp, Registry promotion, or third-party terminal support.
 
 Platform or maintainer responsibilities:
 
-- read policy only from the exact protected Submit a Launch base revision;
+- read policy only from the exact protected Launch Policy base revision;
 - resolve and validate the current official Developer manifest rather than accepting a caller-selected Router;
 - independently check the bound snapshot and required freshness before minting the protected readiness decision;
-- run the protected application and readiness validators without applicant code execution;
+- run the protected request and readiness validators without caller code execution;
 - keep signing, deployment, transaction broadcast, finality verification, acceptance, and promotion as separate
   attributable actions;
 - reject a direct-factory path or any identity, runtime, ABI, fee, launch-kind, commitment, block, stamp, or proof
   mismatch.
 
-Submit a Launch does not ask an applicant to share a private key or seed phrase. A public launch wallet address is
+Programmable Launch Policy does not ask a developer to share a private key or seed phrase. A public launch wallet address is
 configuration; signing remains an external wallet or authorized service action.
 
-## Prove the finalized launch before promotion
+## After API preparation
 
-After an authorized launch transaction is finalized, create the separate maintainer-owned receipt:
+The API caller's launch flow ends with reviewing the prepared transaction, authorizing it in the wallet, and following
+the API's transaction/finality status. The caller does not create a Registry file, obtain a GitHub application or pull
+request, or manufacture acceptance and promotion receipts.
+
+After finality, the platform and its indexers separately verify the canonical Router transaction, stamp, launch kind,
+token and pool lookups, component identity, and required fee evidence before showing a verified Programmable label or
+making a launch discoverable. This is automatic platform-side evidence processing, not another applicant step. A
+missing or contradictory observation stays unverified and cannot be promoted.
+
+## Legacy maintainer promotion provenance
+
+The checked-in Registry promotion schema and existing records preserve the former maintainer-side provenance contract.
+They remain useful for reproducing historical classifications, but they are not the caller-facing transport for a new
+API launch. New API callers must not open a pull request or create the following path.
+
+The legacy maintainer-owned receipt path was:
 
 ```text
 registry/promotions/<project-id>/<launch-id>.json
@@ -241,18 +227,20 @@ registry/promotions/<project-id>/<launch-id>.json
 The basename must equal the receipt's lowercase nonzero bytes32 `launch.launchId`: `0x` plus 64 lowercase hexadecimal
 characters, followed by `.json`.
 
-It must satisfy
+Any preserved receipt must satisfy
 [`registry/schema/launch-stamp-promotion-v1.schema.json`](../registry/schema/launch-stamp-promotion-v1.schema.json)
 with `$id: "https://programmable.money/schemas/launch-stamp-promotion-v1.json"` and `schemaVersion: "1.0.0"`.
 
-The receipt must bind the exact acceptance, application, source, project, policy, readiness plan, manifest, economics,
+The legacy receipt binds the exact acceptance, application, source, project, policy, readiness plan, manifest, economics,
 launch identity, lookups, component proofs, canonical block, and verifier evidence. It is content-carrying rather than
 digest-only:
 
 - `policy.launchReadinessDecision` embeds the full canonical passed `launch-readiness` review decision with
   `status: "passed"` and outcome `LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED`; its intrinsic digest is recomputed and must
   equal `policy.launchReadinessDecisionSha256`;
-- `application.packagePreimage.applicationBytes` embeds the exact bounded canonical Application V3 root bytes. Registry
+- `application.packagePreimage.applicationBytes` embeds the exact bounded canonical Application V3 root bytes used by
+  the current Registry schema as an internal compatibility projection. This does not reopen Application V3 as a
+  caller-facing GitHub transport. Registry
   parses those bytes, re-derives `application.applicationSha256` and `application.packageDigest`, matches the resulting
   package to the accepted `packageDigest`, and then cross-binds both values to the embedded decision subject's
   `applicationSha256` and `packageSha256`, alongside the same application ID, revision, source, configuration, and
@@ -264,7 +252,7 @@ digest-only:
 - `evidence.promotion` embeds the closed promotion evidence projection; its canonical recomputed digest must equal
   `evidence.promotionSha256`.
 
-A promotable receipt also has:
+A promotable legacy receipt also has:
 
 ```text
 observation.outcome = stamped
@@ -274,7 +262,7 @@ routePlan.executionPath = canonical-launch-stamp-router-v1
 routePlan.directFactoryCall = false
 ```
 
-At one canonical block, require the same nonzero `launchId` from both the token lookup and the
+For reproduction at one canonical block, require the same nonzero `launchId` from both the token lookup and the
 PoolManager-plus-pool lookup, the matching `launchStamp`, and every required `stampProof`. Custom kind `1` requires
 matching token and exclusive-hook component proofs. Classic kind `2` requires the token proof and rejects a hook proof,
 because its shared hook is not launch identity. The provenance identity is:
@@ -295,14 +283,14 @@ node scripts/generate-registry.mjs --check
 npm test
 ```
 
-The finalized receipt is required only for a future maintainer-accepted Ethereum chain-1 v4 market promoted to
-`available`; it remains bound if that project is later suspended or retired. Legacy records, no-market projects,
-non-Ethereum projects, and projects that have not reached that promotion state are not retroactively forced through
-this gate.
+These file-based receipt rules apply only to preserved maintainer Registry provenance. They are not a prerequisite for
+an API caller to prepare, sign, or broadcast a new launch. The live platform owns its separate finalized verification
+and indexing path; no-market projects, non-Ethereum projects, and unpromoted launches must not be relabeled through a
+legacy receipt.
 
 ## Understand what a pass does not mean
 
-Application validity, readiness, a Router stamp, or Registry promotion does not prove an audit, safety, current
+API request validity, readiness, a Router stamp, or Registry promotion does not prove an audit, safety, current
 liquidity, sellability, tradability, provider support, Uniswap endorsement, or suitability for a transaction. A Router
 stamp proves only the documented atomic Router provenance and recorded identities at the verified block.
 
@@ -312,5 +300,5 @@ other terminal has adopted the Programmable labels. Each terminal controls its o
 before integrating, then resolve the current Developer manifest rather than assuming adoption or a permanent Router.
 
 The authenticated Universal Admission queue remains `reference-only-disabled`. It has no public endpoint, audience,
-trust snapshot, worker plane, production capacity, or launch authority. Use the public GitHub application path; do not
+trust snapshot, worker plane, production capacity, or launch authority. Use the Custom Launch API; do not
 wait for or attempt to activate the reference queue.

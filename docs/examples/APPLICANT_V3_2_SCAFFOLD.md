@@ -1,5 +1,9 @@
 # Application V3.2 scaffold
 
+> [!NOTE]
+> This scaffold remains for offline compatibility and historical inspection. GitHub application intake is closed; new
+> launches use the [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+
 This command creates a small, local draft workspace for people and agents that do not use Hookbuilder:
 
 ```sh

@@ -76,7 +76,7 @@
           "properties": {
             "authorGitHubUserId": { "$ref": "#/$defs/opaqueId" },
             "baseCommitOid": { "$ref": "#/$defs/gitOid" },
-            "baseRepository": { "const": "0xprogrammable/submit-launch" },
+            "baseRepository": { "const": "0xprogrammable/launch-policy" },
             "baseRepositoryId": { "const": "1320171831" },
             "baseTreeOid": { "$ref": "#/$defs/gitOid" },
             "headCommitOid": { "$ref": "#/$defs/gitOid" },
