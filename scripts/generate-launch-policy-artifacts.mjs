@@ -11,6 +11,11 @@ import {
   validateActiveContractManifestV2
 } from "./active-contract-manifest-core.mjs";
 import {
+  APPLICANT_COMPATIBILITY_V2_PATH,
+  buildApplicantCompatibilityContractV2,
+  canonicalApplicantJson
+} from "./applicant-compatibility-core.mjs";
+import {
   canonicalJson,
   parseLaunchPolicyBytes,
   renderLaunchPolicyMarkdown
@@ -26,6 +31,7 @@ export const ACTIVE_CONTRACT_ROLE_PATHS_V2 = Object.freeze({
   validator: Object.freeze([
     "review/launch-policy-review-core.mjs",
     "scripts/active-contract-manifest-core.mjs",
+    "scripts/applicant-compatibility-core.mjs",
     "scripts/applicant-v3_2-scaffold-core.mjs",
     "scripts/applicant-v3_2-scaffold.mjs",
     "scripts/programmable-launch-router-readiness-core.mjs",
@@ -78,6 +84,7 @@ export const ACTIVE_CONTRACT_ROLE_PATHS_V1 = Object.freeze({
   policy: Object.freeze([POLICY_PATH, ACTIVE_CONTRACT_V2_PATH])
 });
 const GENERATED_PATHS = Object.freeze([
+  APPLICANT_COMPATIBILITY_V2_PATH,
   RENDERED_POLICY_PATH,
   ACTIVE_CONTRACT_PATH,
   ACTIVE_CONTRACT_V2_PATH
@@ -103,17 +110,20 @@ export function buildLaunchPolicyArtifacts(options) {
 
 function buildArtifactState(repositoryRoot) {
   const policyRecord = readRepositoryLaunchPolicy({ repositoryRoot });
+  const applicantCompatibilityV2Source = `${canonicalApplicantJson(buildApplicantCompatibilityContractV2({ repositoryRoot }))}\n`;
   const activeContractV2 = validateActiveContractManifestV2({
     $schema: "urn:programmable:active-contract-manifest:2.0.0",
     schemaVersion: "2.0.0",
     kind: "programmable-active-contract",
-    contractId: "submit-launch",
+    contractId: "launch-policy",
     defaultBranch: "main",
     artifacts: Object.fromEntries(Object.entries(ACTIVE_CONTRACT_ROLE_PATHS_V2).map(([role, paths]) => [
       role,
       paths.map((relativePath) => ({
         path: relativePath,
-        sha256: digestBytes(readRegularFile(repositoryRoot, relativePath, MAXIMUM_ARTIFACT_BYTES))
+        sha256: relativePath === APPLICANT_COMPATIBILITY_V2_PATH
+          ? digestBytes(Buffer.from(applicantCompatibilityV2Source, "utf8"))
+          : digestBytes(readRegularFile(repositoryRoot, relativePath, MAXIMUM_ARTIFACT_BYTES))
       }))
     ]))
   }, { defaultBranch: "main" });
@@ -122,7 +132,7 @@ function buildArtifactState(repositoryRoot) {
     $schema: "urn:programmable:active-contract-manifest:1.0.0",
     schemaVersion: "1.0.0",
     kind: "programmable-active-contract",
-    contractId: "submit-launch",
+    contractId: "launch-policy",
     defaultBranch: "main",
     artifacts: Object.fromEntries(Object.entries(ACTIVE_CONTRACT_ROLE_PATHS_V1).map(([role, paths]) => [
       role,
@@ -137,6 +147,7 @@ function buildArtifactState(repositoryRoot) {
 
   return {
     artifacts: new Map([
+      [APPLICANT_COMPATIBILITY_V2_PATH, applicantCompatibilityV2Source],
       [RENDERED_POLICY_PATH, renderLaunchPolicyMarkdown(policyRecord)],
       [ACTIVE_CONTRACT_V2_PATH, activeContractV2Source],
       [ACTIVE_CONTRACT_PATH, `${canonicalJson(activeContractV1)}\n`]

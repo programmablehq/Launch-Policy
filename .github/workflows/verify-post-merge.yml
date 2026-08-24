@@ -39,11 +39,11 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Verify trusted Submit a Launch revision
+      - name: Verify trusted Launch Policy revision
         working-directory: source
         run: npm test
 
-      - name: Validate all maintained applications
+      - name: Validate preserved historical application records
         if: matrix.node == 24
         shell: bash
         run: |

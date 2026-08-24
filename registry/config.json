@@ -2,10 +2,10 @@
   "activeIntake": {
     "baseBranch": "main",
     "directory": "submissions",
-    "repository": "0xprogrammable/submit-launch",
-    "state": "open"
+    "repository": "0xprogrammable/launch-policy",
+    "state": "closed"
   },
-  "historyVersion": "1.10.0",
+  "historyVersion": "1.11.0",
   "legacyIntake": [
     {
       "baseBranch": "main",
@@ -23,5 +23,5 @@
     "registry/projects/stock-paired/project.json"
   ],
   "schemaVersion": "1.0.0",
-  "updatedAt": "2026-08-21T00:00:00Z"
+  "updatedAt": "2026-08-24T18:56:33Z"
 }

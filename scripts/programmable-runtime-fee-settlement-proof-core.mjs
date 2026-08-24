@@ -38,7 +38,7 @@ export {
   validateProgrammableRuntimeFeeSettlementProofV1
 } from "./programmable-runtime-fee-settlement-proof-validation.mjs";
 
-const REPOSITORY_REMOTE = "https://github.com/0xprogrammable/submit-launch.git";
+const REPOSITORY_REMOTE = "https://github.com/0xprogrammable/launch-policy.git";
 const PROOF_ROOT = "platform-evidence/runtime-fee-settlement";
 const MAXIMUM_PROMOTION_BYTES = 1024 * 1024;
 const protectedPendingRecords = new WeakSet();
@@ -75,7 +75,7 @@ export function readProtectedProgrammableRuntimeFeeSettlementObservationFromGitV
   if (normalizeRemote(observedRemote) !== REPOSITORY_REMOTE) {
     failRuntimeFeeSettlementV1(
       "RUNTIME_FEE_PROOF_GIT_IDENTITY_INVALID",
-      "Trusted proof repository origin is not 0xprogrammable/submit-launch."
+      "Trusted proof repository origin is not 0xprogrammable/launch-policy."
     );
   }
   const baseCommit = runGitText(
@@ -261,7 +261,10 @@ function readGitBlob(repositoryRoot, baseCommit, relativePath, maximumBytes) {
 
 function normalizeRemote(remote) {
   const trimmed = remote.trim().replace(/\/$/u, "");
+  if (trimmed === "git@github.com:0xprogrammable/launch-policy.git") return REPOSITORY_REMOTE;
+  if (trimmed === "https://github.com/0xprogrammable/launch-policy") return REPOSITORY_REMOTE;
   if (trimmed === "git@github.com:0xprogrammable/submit-launch.git") return REPOSITORY_REMOTE;
+  if (trimmed === "https://github.com/0xprogrammable/submit-launch.git") return REPOSITORY_REMOTE;
   if (trimmed === "https://github.com/0xprogrammable/submit-launch") return REPOSITORY_REMOTE;
   return trimmed;
 }

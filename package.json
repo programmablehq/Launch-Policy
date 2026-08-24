@@ -1,6 +1,6 @@
 {
-  "name": "@programmable/submit-launch",
-  "version": "1.10.0",
+  "name": "@programmable/launch-policy",
+  "version": "1.11.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -32,10 +32,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/0xprogrammable/submit-launch.git"
+    "url": "git+https://github.com/0xprogrammable/launch-policy.git"
   },
   "bugs": {
-    "url": "https://github.com/0xprogrammable/submit-launch/issues"
+    "url": "https://github.com/0xprogrammable/launch-policy/issues"
   },
-  "homepage": "https://github.com/0xprogrammable/submit-launch#readme"
+  "homepage": "https://github.com/0xprogrammable/launch-policy#readme"
 }

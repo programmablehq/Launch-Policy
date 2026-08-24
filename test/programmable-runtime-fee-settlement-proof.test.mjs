@@ -353,7 +353,7 @@ function writeFixtureRepository(t, {
     fs.writeFileSync(absolutePath, bytes);
   }
   runGit(repositoryRoot, ["init", "--initial-branch=main"]);
-  runGit(repositoryRoot, ["remote", "add", "origin", "https://github.com/0xprogrammable/submit-launch.git"]);
+  runGit(repositoryRoot, ["remote", "add", "origin", "https://github.com/0xprogrammable/launch-policy.git"]);
   runGit(repositoryRoot, ["add", "."]);
   runGit(repositoryRoot, ["commit", "-m", "protected proof fixture"]);
   const expectedBaseCommit = runGit(repositoryRoot, ["rev-parse", "HEAD^{commit}"]);

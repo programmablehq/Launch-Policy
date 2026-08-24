@@ -698,7 +698,7 @@
             "repositoryRef": {
               "properties": {
                 "repository": {
-                  "const": "0xprogrammable/submit-launch"
+                  "const": "0xprogrammable/launch-policy"
                 },
                 "numericRepositoryId": {
                   "const": "1320171831"

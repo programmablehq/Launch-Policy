@@ -1,5 +1,5 @@
 name: Documentation correction
-description: Report inaccurate, missing, or unclear Submit a Launch documentation.
+description: Report inaccurate, missing, or unclear Programmable Launch Policy documentation.
 title: "[Docs] "
 labels:
   - documentation
@@ -9,7 +9,7 @@ body:
     attributes:
       label: Page or file
       description: Link to the exact page, file, or section.
-      placeholder: https://github.com/0xprogrammable/submit-launch/blob/main/README.md
+      placeholder: https://github.com/0xprogrammable/launch-policy/blob/main/README.md
     validations:
       required: true
   - type: textarea

@@ -44,7 +44,7 @@ export const VALIDATOR_VERSION = "2.0.0";
 export const PUBLIC_APPLICATION_SCHEMA_ID = "https://programmable.money/schemas/public-pr-application-v2.json";
 export const PUBLIC_BETA_DISCLAIMER =
   "Builder-declared compatibility evidence; not an audit, approval, deployment, Uniswap endorsement, or launch.";
-export const PUBLIC_INTAKE_STATES = Object.freeze(["prelaunch", "open", "paused-new", "paused-all"]);
+export const PUBLIC_INTAKE_STATES = Object.freeze(["prelaunch", "open", "paused-new", "paused-all", "closed"]);
 export const MAXIMUM_MAINTAINED_LEGACY_PACKAGES = 32;
 export const MAINTAINED_LEGACY_PACKAGE_TIMEOUT_MS = 120_000;
 
@@ -593,7 +593,7 @@ export async function preflightPublicApplicationCandidateFetch({
     };
   }
 
-  if (intakeStatus.state === "prelaunch" || intakeStatus.state === "paused-all") {
+  if (["prelaunch", "paused-all", "closed"].includes(intakeStatus.state)) {
     enforceTrustedIntakeStatus({ intakeStatus, isUpdate: false, pullRequestNumber, applicationId: null });
   }
 
@@ -3159,6 +3159,12 @@ function enforceTrustedIntakeStatus({ intakeStatus, isUpdate, pullRequestNumber,
   }
   if (intakeStatus?.state === "paused-all") {
     systemBlocked("INTAKE_PAUSED_ALL", "Public Builder Beta intake is temporarily paused for all application changes.");
+  }
+  if (intakeStatus?.state === "closed") {
+    systemBlocked(
+      "INTAKE_CLOSED",
+      "GitHub launch intake is retired. Use the Programmable Custom Launch API."
+    );
   }
   systemBlocked("INTAKE_STATUS_INVALID", "The trusted intake state could not be enforced.");
 }

@@ -1,5 +1,9 @@
 # Review and promotion lifecycle
 
+> [!IMPORTANT]
+> GitHub application intake is closed. Application states below remain as historical and compatibility evidence; new
+> launch preparation uses the [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+
 Every Programmable-specific launch requirement comes from
 [`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json). Application schemas define inert transport and
 evidence contracts; the [policy-bound reviewer](OPEN_REVIEW_STANDARD.md), readiness checker, Workflow Canary, and
@@ -17,7 +21,7 @@ list. See the [complete launch requirements](COMPLETE_LAUNCH_REQUIREMENTS.md) fo
 | Reviewed | Policy-bound decision for the exact application, source, policy, and subject | Review findings are attributable; missing facts remain `analysis_pending` |
 | Launch readiness checked | Exact `LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED` result under `launch-readiness` | Conditional fee and Router-plan checks passed; signing, deployment, broadcast, routing, promotion, and funds authority remain false |
 | Accepted | Separate exact maintainer acceptance bound to the application and source | The application is accepted; signing, deployment, launch, indexing, and promotion authority are not implied |
-| Launch authorized | Separate external owner or service authority | An authorized actor may prepare signing or broadcast; Submit a Launch readiness never creates this authority |
+| Launch authorized | Separate external owner or service authority | An authorized actor may prepare signing or broadcast; Launch Policy readiness never creates this authority |
 | Deployed | Deployment evidence | Contracts or services were deployed; they are not automatically available |
 | Launched and finalized | Canonical transaction and finalized block evidence | A transaction is final; this alone does not prove canonical Programmable provenance |
 | Canonical stamp verified | Maintainer receipt matching the exact acceptance and manifest-selected Router active at the observed launch block, `chainId + Router address + launchId`, both lookups, stamp, and proofs | Router provenance is proven at one finalized canonical block; no audit or terminal adoption is implied |
@@ -27,9 +31,8 @@ list. See the [complete launch requirements](COMPLETE_LAUNCH_REQUIREMENTS.md) fo
 
 For an official Programmable Ethereum market, Application V3.2 and Submission 2.1 are required before readiness.
 No-market is `not-applicable`; an unresolved route remains `analysis-pending`; a tradable route outside the official
-Programmable path must not receive a Programmable Classic or Programmable Custom label. Application V3.1 remains open
-for new and existing compatibility drafts, but an official-route project must add a new V3.2 revision rather than
-rewriting V3.1 bytes.
+Programmable path must not receive a Programmable Classic or Programmable Custom label. Application V3.1 remains a
+historical compatibility contract and its bytes must not be rewritten.
 
 The readiness result binds the exact 10 bps fee tuple and the applicant-owned
 `.programmable/launch-router-readiness.v1.json` plan. A separate precommit preparation step embeds the current official
@@ -62,9 +65,9 @@ The checked-in Universal Admission queue is not a lifecycle entrypoint. Its disc
 audience, trust snapshot, remote worker or admin plane, or production capacity. `QUEUED`, `DUPLICATE`, lease, retry,
 dead-letter, completion, and snapshot states describe transport processing only. They never imply `Built`, review
 completion, readiness, acceptance, Registry promotion, deployment, Website eligibility, availability, or launch
-authority. Use the public GitHub application path.
+authority. Use the Custom Launch API for current launches.
 
-The six-file V2 application remains an open but frozen legacy transport while the checked-in intake state is `open`.
+The six-file V2 application is a frozen historical transport and the checked-in intake state is `closed`.
 Its compatibility checks, green checks, merge, or old [launch-entitlement
 bridge](ACCEPTANCE_ENTITLEMENT_BRIDGE_V1.md) cannot satisfy Workflow Canary, Website eligibility, readiness, or current
 launch-policy requirements. The `production-launch` profile is disabled and no path emits `LAUNCH_APPROVED`.

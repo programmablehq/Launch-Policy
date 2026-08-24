@@ -22,9 +22,12 @@ const SCHEMA_VERSION = "programmable.launch-policy-authority-ownership.v1";
 const POLICY_PATH = "policy/launch-policy.v1.json";
 const POLICY_SCHEMA_PATH = "policy/schemas/launch-policy.v1.schema.json";
 const MANIFEST_SCHEMA_PATH = "policy/schemas/launch-policy-authority-ownership.v1.schema.json";
-const REPOSITORY_NAME = "0xprogrammable/submit-launch";
+const REPOSITORY_NAME = "0xprogrammable/launch-policy";
+const LEGACY_REPOSITORY_NAME = "0xprogrammable/submit-launch";
 const REPOSITORY_ID = "1320171831";
 const REPOSITORY_BRANCH = "main";
+const CURRENT_RELEASE_DOCUMENT = "docs/releases/v1.11.0.md";
+const CURRENT_RELEASE_HISTORY = "registry/history/1.11.0.json";
 const VENDOR_ROOT = "vendor/programmable-v4-hook-builder";
 const VENDOR_PREFIX = `${VENDOR_ROOT}/`;
 const APPLICANT_VALIDATOR_ROOT = "vendor/programmable-applicant-validator";
@@ -66,8 +69,10 @@ const ENTRYPOINT_ROLES = new Set([
   "current-policy-read",
   "current-review",
   "frozen-legacy-review",
+  "historical-intake",
   "launch-readiness",
   "public-intake",
+  "disabled-reference",
   "workflow-canary",
   "website-canary-eligibility",
   "disabled-legacy-entitlement",
@@ -247,7 +252,11 @@ export function verifyLaunchPolicyAuthorityOwnership(options) {
 
 export function writeLaunchPolicyAuthorityOwnershipHashes(options) {
   const repositoryRoot = requireRepositoryRoot(options);
-  const manifest = readManifest(repositoryRoot, { requireCompleteHashes: false });
+  const manifest = readManifest(repositoryRoot, {
+    allowLegacyRepositoryName: true,
+    requireCompleteHashes: false
+  });
+  migrateLaunchPolicyCutoverManifest({ manifest, repositoryRoot });
   verifyFrozenVendor({ manifest, repositoryRoot });
   const repositoryFiles = listRepositoryFiles(repositoryRoot);
   const observedFiles = repositoryFiles.filter((relativePath) => !isBoundedApplicantDataPath(manifest, relativePath));
@@ -300,7 +309,7 @@ function verifyManifestAgainstRepository({ manifest, repositoryRoot, verifyHashe
   return Object.freeze({ ...report, observedFiles: Object.freeze(observedFiles) });
 }
 
-function readManifest(repositoryRoot, { requireCompleteHashes }) {
+function readManifest(repositoryRoot, { allowLegacyRepositoryName = false, requireCompleteHashes }) {
   const manifestPath = resolveRepositoryPath(repositoryRoot, AUTHORITY_OWNERSHIP_MANIFEST_PATH);
   const bytes = readRegularFile(manifestPath, MAXIMUM_MANIFEST_BYTES, "AUTHORITY_OWNERSHIP_MANIFEST_INVALID");
   let source;
@@ -319,11 +328,11 @@ function readManifest(repositoryRoot, { requireCompleteHashes }) {
   if (source !== `${canonicalAuthorityJson(manifest)}\n`) {
     fail("AUTHORITY_OWNERSHIP_MANIFEST_NONCANONICAL", "The authority-ownership manifest must be canonical JSON with one trailing newline.");
   }
-  validateManifestShape(manifest, { requireCompleteHashes });
+  validateManifestShape(manifest, { allowLegacyRepositoryName, requireCompleteHashes });
   return manifest;
 }
 
-function validateManifestShape(manifest, { requireCompleteHashes }) {
+function validateManifestShape(manifest, { allowLegacyRepositoryName = false, requireCompleteHashes }) {
   assertPlainObject(manifest, "AUTHORITY_OWNERSHIP_MANIFEST_INVALID", "Manifest");
   assertExactKeys(manifest, [
     "boundedApplicantData",
@@ -343,7 +352,12 @@ function validateManifestShape(manifest, { requireCompleteHashes }) {
 
   assertPlainObject(manifest.repository, "AUTHORITY_OWNERSHIP_MANIFEST_INVALID", "repository");
   assertExactKeys(manifest.repository, ["branch", "name", "numericRepositoryId"], "AUTHORITY_OWNERSHIP_MANIFEST_INVALID", "repository");
-  assertEqual(manifest.repository.name, REPOSITORY_NAME, "AUTHORITY_OWNERSHIP_REPOSITORY_INVALID", "repository.name");
+  if (
+    manifest.repository.name !== REPOSITORY_NAME
+    && !(allowLegacyRepositoryName && manifest.repository.name === LEGACY_REPOSITORY_NAME)
+  ) {
+    fail("AUTHORITY_OWNERSHIP_REPOSITORY_INVALID", "repository.name is invalid.");
+  }
   assertEqual(manifest.repository.numericRepositoryId, REPOSITORY_ID, "AUTHORITY_OWNERSHIP_REPOSITORY_INVALID", "repository.numericRepositoryId");
   assertEqual(manifest.repository.branch, REPOSITORY_BRANCH, "AUTHORITY_OWNERSHIP_REPOSITORY_INVALID", "repository.branch");
 
@@ -361,6 +375,58 @@ function validateManifestShape(manifest, { requireCompleteHashes }) {
   validatePublicProjections(manifest.publicProjections);
   validateSemanticRuleMap(manifest.semanticRuleMap);
   validateModuleOwnership(manifest.moduleOwnership);
+}
+
+function migrateLaunchPolicyCutoverManifest({ manifest, repositoryRoot }) {
+  manifest.repository.name = REPOSITORY_NAME;
+  for (const releasePath of [CURRENT_RELEASE_DOCUMENT, CURRENT_RELEASE_HISTORY]) {
+    if (!manifest.fileClasses["repository-support"].includes(releasePath)) {
+      manifest.fileClasses["repository-support"].push(releasePath);
+    }
+  }
+  manifest.fileClasses["repository-support"].sort(compareUtf8);
+
+  const historicalEntrypointIds = new Set([
+    "application-v3.2-scaffold-cli",
+    "public-intake-validator"
+  ]);
+  const disabledReferenceEntrypointIds = new Set([
+    "universal-admission-cli",
+    "universal-admission-service-api",
+    "universal-admission-sqlite-reference-cli"
+  ]);
+  for (const entrypoint of manifest.entrypoints) {
+    if (historicalEntrypointIds.has(entrypoint.id)) entrypoint.role = "historical-intake";
+    if (disabledReferenceEntrypointIds.has(entrypoint.id)) entrypoint.role = "disabled-reference";
+  }
+
+  const repositoryFiles = listRepositoryFiles(repositoryRoot);
+  const observedFiles = repositoryFiles.filter((relativePath) => !isBoundedApplicantDataPath(manifest, relativePath));
+  const importGraph = inspectStaticImports({
+    modulePaths: observedFiles.filter((relativePath) => relativePath.endsWith(".mjs")),
+    repositoryRoot
+  });
+  const ownedFiles = new Set(observedFiles);
+  const generatorEntrypoint = manifest.entrypoints.find(({ id }) => id === "policy-projection-generator");
+  const observedClosure = resolveEntrypointClosure({
+    entrypointPath: generatorEntrypoint.path,
+    importGraph,
+    ownedFiles,
+    repositoryRoot
+  });
+  generatorEntrypoint.moduleClosure = observedClosure.moduleClosure;
+  generatorEntrypoint.frozenVendorImports = observedClosure.frozenVendorImports;
+
+  for (const projectionPath of [".programmable/active-contract.json", ".programmable/active-contract.v2.json"]) {
+    const projection = manifest.publicProjections.find(({ path: candidatePath }) => candidatePath === projectionPath);
+    for (const sourcePath of [
+      ".programmable/applicant-compatibility.v2.json",
+      "scripts/applicant-compatibility-core.mjs"
+    ]) {
+      if (!projection.sourcePaths.includes(sourcePath)) projection.sourcePaths.push(sourcePath);
+    }
+    projection.sourcePaths.sort(compareUtf8);
+  }
 }
 
 function validateBoundedApplicantData(value) {
@@ -547,7 +613,7 @@ function verifyFrozenVendor({ manifest, repositoryRoot }) {
     fail("AUTHORITY_OWNERSHIP_VENDOR_INVALID", "The frozen Hookbuilder root must be a real directory.");
   }
 
-  const temporaryIndex = path.join(os.tmpdir(), `submit-launch-vendor-index-${process.pid}-${crypto.randomBytes(8).toString("hex")}`);
+  const temporaryIndex = path.join(os.tmpdir(), `launch-policy-vendor-index-${process.pid}-${crypto.randomBytes(8).toString("hex")}`);
   try {
     const environment = { ...process.env, GIT_INDEX_FILE: temporaryIndex };
     runGit(repositoryRoot, ["read-tree", "--empty"], { environment });

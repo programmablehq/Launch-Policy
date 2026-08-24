@@ -1,6 +1,11 @@
 # Architecture
 
-Submit a Launch keeps project source, admission policy, checking, Website eligibility, Registry promotion, and
+> [!IMPORTANT]
+> GitHub launch intake and Workflow Canary intake are retired. Current launch preparation uses the
+> [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md). Application and Canary sections
+> below describe preserved compatibility contracts and historical provenance.
+
+Programmable Launch Policy keeps project source, admission policy, checking, API preparation, Registry promotion, and
 production facts as separate authorities.
 
 1. An applicant-owned public repository is the source authority for a project.
@@ -30,10 +35,10 @@ production facts as separate authorities.
    policy-neutral Submission 2.1 and, for each selected tradable market, Trade Capability Manifest V2, selected policy,
    and review-package records without a project-type or capability allowlist. No-market projects attach no trade
    manifest.
-8. The Application V3.1 compatibility contract remains byte-unchanged. New and existing V3.1 revisions can still
-   enter review, but they are never reinterpreted as V3.2 and cannot establish `launch-readiness` or the official
+8. The Application V3.1 compatibility contract remains byte-unchanged for historical reproduction. Its revisions are
+   never reinterpreted as V3.2 and cannot establish `launch-readiness` or the official
    Programmable Router route.
-9. Protected-base intake validates one bounded revision as inert untrusted data. It may emit only a valid or invalid
+9. The preserved protected-base validator validates one bounded revision as inert untrusted data. It may emit only a valid or invalid
    draft-for-review result; it cannot record review completion, acceptance, approval, deployment, or launch.
 10. For a selected Programmable Ethereum market, a separate precommit preparation step embeds the current official
     manifest projection in `.programmable/launch-router-readiness.v1.json`. The offline checker consumes only that
@@ -42,7 +47,7 @@ production facts as separate authorities.
     verified V3.2 package, source closure, readiness record, and current protected policy. Before it may mint a
     readiness decision, the platform must independently recheck trust and required freshness. None of these grants
     signing, launch, discovery, routing, audit, or funds authority.
-11. A one-file Workflow Canary may prove only the hidden, non-production GitHub handoff against that same policy.
+11. A historical one-file Workflow Canary proved only the hidden, non-production GitHub handoff against that policy.
 12. A signed audience-bound Website eligibility envelope may expose that exact Canary result only to the Website
    environment named by protected deployment configuration. It grants no public, production, funds, audit, or launch
    authority.
@@ -50,15 +55,10 @@ production facts as separate authorities.
     Ethereum v4 market can be promoted to Registry, API, or terminal classification. Deployment, runtime verification,
     provider support, third-party terminal adoption, and public availability remain separate facts.
 
-The public full-launch flow is: source → small Universal Admission envelope → immutable Application V3.2 revision →
-protected validation → independent review → conditional launch-readiness check. Signing, transaction broadcast, and
-deployment require separate external authority. After finality, canonical Router verification precedes any Registry,
-API, or terminal promotion. The authenticated queue is currently only a reference implementation between the envelope
-and a future review worker; it is not deployed. The separate hidden path remains:
-policy → reviewer → Workflow Canary →
-signed audience-bound Website eligibility. Every step rechecks the exact policy, application, source, and prior-result
-identity before it can emit its narrower result. A changed policy fails closed as drift; it is never silently copied into
-a consumer.
+The current launch flow is: API key → closed contract bundle and required evidence → Custom Launch API preparation →
+wallet review and signature → broadcast and finality → indexing. Canonical Router verification still precedes any
+Registry or terminal promotion. The Universal Admission queue and GitHub application paths remain disabled or
+historical reference surfaces and are not production ingress.
 
 The V1 `.programmable/active-contract.json` compatibility envelope retains every prior direct legacy binding and binds
 the complete same-tree `.programmable/active-contract.v2.json` through its policy role. The V2 manifest closes the
@@ -69,11 +69,10 @@ remains a legacy discovery contract. The Universal Admission contract is intenti
 both active-contract versions; it cannot change Application V3.2 or the bytes and meaning of V3.1 compatibility.
 A future live queue activation requires a new exact contract state; a URL or local benchmark alone cannot enable it.
 
-The source repository never moves into this repository. An application pull request never gains permission to edit
-policy, workflows, schemas, project records, or another application. The receipt-bound
-`vendor/programmable-v4-hook-builder/` tree is frozen validation data for the open legacy six-file V2 intake, not a
-current central-policy requirement source. New V2 applications remain accepted only while the checked-in intake state
-is `open`; V2 packages and frozen compatibility checks cannot satisfy Workflow Canary or Website eligibility.
+Project source never moves into this repository. The historical application namespaces are immutable and cannot edit
+policy, workflows, schemas, project records, or another record. The receipt-bound
+`vendor/programmable-v4-hook-builder/` tree is frozen validation data for retired six-file V2 records, not a current
+central-policy requirement source. No new V2 application is accepted.
 
 Application V3.2 does not replace or reinterpret V3.1, legacy V2, or Canary bytes. New V3.2 revisions are add-only under
 `submissions/<application-id>/v3/revisions/<revision>/`. The manifest closes its own application-package file set while
@@ -95,7 +94,7 @@ bind the exact 10 bps fee tuple plus `.programmable/launch-router-readiness.v1.j
 Before the applicant pins the source commit, a separate preparation step resolves the Router from the current official
 Developer discovery document and exact manifest and embeds that projection. The offline checker verifies the supplied
 bound snapshot. Before it may mint a protected readiness decision, the platform must independently recheck trust and
-required freshness. Submit a Launch does not expose a fetch or mutation server. The binding does not permanently copy
+required freshness. Programmable Launch Policy does not expose a fetch or mutation server. The binding does not permanently copy
 one Router address into policy or documentation. The trust binding includes chain, active
 block range, Router address, runtime-code hash, ABI URL and digest, immutable dependencies, route commitments, launch
 kind, permit commitments, and launch-wallet late-binding constraints. The public wallet address is supplied before

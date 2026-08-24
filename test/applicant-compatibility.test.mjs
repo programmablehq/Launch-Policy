@@ -11,6 +11,7 @@ import {
   APPLICANT_COMPATIBILITY_V2_PATH,
   APPLICANT_VALIDATOR_RECEIPT_PATH,
   ApplicantCompatibilityError,
+  buildApplicantCompatibilityContractV2,
   canonicalApplicantJson,
   parseApplicantCompatibilityBytesV1,
   parseApplicantCompatibilityBytesV2,
@@ -21,6 +22,11 @@ import {
 } from "../scripts/applicant-compatibility-core.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "..");
+
+test("Applicant Compatibility V2 is a deterministic projection of its bound contracts", () => {
+  const generated = `${canonicalApplicantJson(buildApplicantCompatibilityContractV2({ repositoryRoot }))}\n`;
+  assert.equal(fs.readFileSync(path.join(repositoryRoot, APPLICANT_COMPATIBILITY_V2_PATH), "utf8"), generated);
+});
 
 test("published compatibility and compact receipt schemas accept only the closed contracts", (t) => {
   const fixture = createCompactFixture(t);

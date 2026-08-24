@@ -4,25 +4,6 @@ on:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - "submissions/*/application.json"
-      - "submissions/*/PROPOSAL.md"
-      - "submissions/*/TEST_PLAN.md"
-      - "submissions/*/THREAT_MODEL.md"
-      - "submissions/*/compatibility-report.json"
-      - "submissions/*/evidence-index.json"
-      - "submissions/*/v3/revisions/*/**"
-  pull_request_target:
-    branches:
-      - main
-    paths:
-      - "submissions/*/application.json"
-      - "submissions/*/PROPOSAL.md"
-      - "submissions/*/TEST_PLAN.md"
-      - "submissions/*/THREAT_MODEL.md"
-      - "submissions/*/compatibility-report.json"
-      - "submissions/*/evidence-index.json"
-      - "submissions/*/v3/revisions/*/**"
   push:
     branches:
       - main
@@ -32,13 +13,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: apply-codeql-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  group: launch-policy-codeql-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   codeql:
-    if: github.event_name != 'pull_request_target'
-    name: Candidate CodeQL
+    name: CodeQL
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -61,65 +41,3 @@ jobs:
 
       - name: Analyze
         uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
-
-  bounded-application:
-    if: github.event_name == 'pull_request_target'
-    name: Bounded application / CodeQL not applicable
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout protected base validator
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.base.sha }}
-          path: trusted
-          persist-credentials: false
-          fetch-depth: 1
-          lfs: false
-          submodules: false
-
-      - name: Set up Node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24
-
-      - name: Prove bounded application-only paths from trusted metadata
-        env:
-          CANDIDATE_READ_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          timeout --signal=KILL 30s node \
-            "$GITHUB_WORKSPACE/trusted/scripts/verify-public-hook-application.mjs" \
-            --verify-bounded-application-paths \
-            --repository "${{ github.repository }}" \
-            --pull-request-number "${{ github.event.pull_request.number }}" \
-            --expected-base-commit "${{ github.event.pull_request.base.sha }}" \
-            --expected-candidate-commit "${{ github.event.pull_request.head.sha }}"
-
-  required:
-    if: always()
-    needs:
-      - codeql
-      - bounded-application
-    name: CodeQL
-    runs-on: ubuntu-latest
-    timeout-minutes: 1
-
-    steps:
-      - name: Require the selected verification route
-        env:
-          BOUNDED_RESULT: ${{ needs.bounded-application.result }}
-          CANDIDATE_RESULT: ${{ needs.codeql.result }}
-          EVENT_NAME: ${{ github.event_name }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "$EVENT_NAME" == "pull_request_target" ]]; then
-            [[ "$BOUNDED_RESULT" == "success" && "$CANDIDATE_RESULT" == "skipped" ]]
-          else
-            [[ "$CANDIDATE_RESULT" == "success" && "$BOUNDED_RESULT" == "skipped" ]]
-          fi

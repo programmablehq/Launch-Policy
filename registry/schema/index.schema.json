@@ -8,8 +8,8 @@
       "properties": {
         "baseBranch": { "const": "main" },
         "directory": { "const": "submissions" },
-        "repository": { "const": "0xprogrammable/submit-launch" },
-        "state": { "enum": ["prelaunch", "open", "paused-new", "paused-all"] }
+        "repository": { "const": "0xprogrammable/launch-policy" },
+        "state": { "enum": ["prelaunch", "open", "paused-new", "paused-all", "closed"] }
       },
       "required": ["baseBranch", "directory", "repository", "state"],
       "type": "object"

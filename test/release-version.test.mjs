@@ -15,11 +15,11 @@ const root = path.resolve(".");
 test("release version is identical across package, lockfile, config, and current history", () => {
   const result = verifyReleaseVersion({ repositoryRoot: root });
   assert.deepEqual(result, {
-    historyFiles: 14,
+    historyFiles: 15,
     ok: true,
-    version: "1.10.0"
+    version: "1.11.0"
   });
-  assert.equal(RELEASE_VERSION, "1.10.0");
+  assert.equal(RELEASE_VERSION, "1.11.0");
 });
 
 test("the complete repository verifier invokes the release integrity gate", () => {
@@ -31,13 +31,13 @@ test("the complete repository verifier invokes the release integrity gate", () =
 
 test("every release version projection fails closed when changed independently", (t) => {
   const cases = [
-    ["package.json", (value) => { value.version = "1.10.1"; }, "RELEASE_VERSION_MISMATCH"],
-    ["package-lock.json", (value) => { value.version = "1.10.1"; }, "RELEASE_VERSION_MISMATCH"],
-    ["package-lock.json", (value) => { value.packages[""].version = "1.10.1"; }, "RELEASE_VERSION_MISMATCH"],
-    ["registry/config.json", (value) => { value.historyVersion = "1.10.1"; }, "RELEASE_VERSION_MISMATCH"],
+    ["package.json", (value) => { value.version = "1.11.1"; }, "RELEASE_VERSION_MISMATCH"],
+    ["package-lock.json", (value) => { value.version = "1.11.1"; }, "RELEASE_VERSION_MISMATCH"],
+    ["package-lock.json", (value) => { value.packages[""].version = "1.11.1"; }, "RELEASE_VERSION_MISMATCH"],
+    ["registry/config.json", (value) => { value.historyVersion = "1.11.1"; }, "RELEASE_VERSION_MISMATCH"],
     ["registry/config.json", (value) => { value.updatedAt = "2026-08-21T00:00:01Z"; }, "RELEASE_HISTORY_MISMATCH"],
-    ["registry/history/1.10.0.json", (value) => { value.version = "1.10.1"; }, "RELEASE_HISTORY_MISMATCH"],
-    ["registry/history/1.10.0.json", (value) => { value.generatedAt = "2026-08-21T00:00:01Z"; }, "RELEASE_HISTORY_MISMATCH"]
+    ["registry/history/1.11.0.json", (value) => { value.version = "1.11.1"; }, "RELEASE_HISTORY_MISMATCH"],
+    ["registry/history/1.11.0.json", (value) => { value.generatedAt = "2026-08-21T00:00:01Z"; }, "RELEASE_HISTORY_MISMATCH"]
   ];
 
   for (const [relativePath, mutate, code] of cases) {

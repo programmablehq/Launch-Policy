@@ -28,7 +28,7 @@
         "policyId": { "pattern": "^[a-z0-9][a-z0-9.-]{2,79}$", "type": "string" },
         "policyVersion": { "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$", "type": "string" },
         "profileId": { "const": "workflow-canary" },
-        "repository": { "const": "0xprogrammable/submit-launch" },
+        "repository": { "const": "0xprogrammable/launch-policy" },
         "schemaVersion": { "const": "programmable.launch-policy-binding.v1" },
         "sha256": { "$ref": "#/$defs/sha256" }
       },

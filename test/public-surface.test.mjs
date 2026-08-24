@@ -6,24 +6,31 @@ import test from "node:test";
 const root = path.resolve(".");
 const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 
-test("the public landing page states the checker and intake boundaries", () => {
+test("the public landing page leads with the API-first launch boundary", () => {
   const readme = read("README.md");
-  assert.match(readme, /Three intake transports are open/u);
-  assert.match(readme, /Application V3\.2 is the complete current contract/u);
-  assert.match(readme, /Application V3\.1 remains accepted/u);
-  assert.match(readme, /Hidden Workflow Canary/u);
-  assert.match(readme, /Open legacy V2/u);
-  assert.match(readme, /existing V2 applications use that bounded compatibility validator/u);
-  assert.match(readme, /does not fetch\nproject repositories, reproduce evidence, perform an audit/u);
-  assert.match(readme, /checkerOnly: true/u);
-  assert.match(readme, /launchAuthorized: false/u);
-  assert.ok(readme.indexOf("Three intake transports are open") < readme.indexOf("## How it works"));
-  assert.doesNotMatch(readme, /programmable-registry|programmable-v4-builder/u);
+  assert.match(readme, /<h1 align="center">Programmable Launch Policy<\/h1>/u);
+  assert.match(readme, /\*\*GitHub launch intake is closed\.\*\*/u);
+  assert.match(readme, /https:\/\/programmable\.market\/developers\/api-keys/u);
+  assert.match(readme, /https:\/\/programmable\.market\/developers\/custom-launch-api-v1\.md/u);
+  assert.match(readme, /https:\/\/programmable\.market\/openapi\.json/u);
+  assert.match(readme, /POST https:\/\/api\.programmable\.market\/v1\/custom-launches/u);
+  assert.match(readme, /does not accept or launch projects/u);
+  assert.ok(readme.indexOf("GitHub launch intake is closed") < readme.indexOf("## Launch policy"));
+});
+
+test("the current owner is launch-policy while legacy provenance remains explicit", () => {
+  const readme = read("README.md");
+  assert.match(readme, /0xprogrammable\/launch-policy/u);
+  assert.match(readme, /formerly named `0xprogrammable\/submit-launch`/u);
+  assert.match(readme, /versioned legacy protocol\s+identifiers, frozen vendor bytes, historical snapshots, and old provenance links/u);
+  assert.match(readme, /submissions\/.*preserves former V2, V3\.1, and V3\.2 application records/su);
+  assert.match(readme, /canary-submissions\/.*preserves former Workflow Canary records/su);
+  assert.doesNotMatch(readme, /Three intake transports are open|Open legacy V2/u);
 });
 
 test("public support routes are canonical and have issue forms", () => {
   const config = read(".github/ISSUE_TEMPLATE/config.yml");
-  assert.match(config, /https:\/\/github\.com\/0xprogrammable\/submit-launch\/security\/advisories\/new/u);
+  assert.match(config, /https:\/\/github\.com\/0xprogrammable\/launch-policy\/security\/advisories\/new/u);
   assert.match(config, /https:\/\/github\.com\/0xprogrammable\/hookbuilder\/issues\/new\/choose/u);
   assert.doesNotMatch(config, /programmable-registry|programmable-v4-builder|hookbuilder\/discussions/u);
   for (const form of ["review-or-registry-bug.yml", "documentation.yml"]) {
@@ -39,24 +46,20 @@ test("the security policy separates private reports, testing limits, and rewards
   assert.match(security, /This is not a standing bug bounty program/u);
 });
 
-test("contribution paths and the pull request template stay in sync", () => {
+test("contribution surfaces accept maintenance and preserve historical records", () => {
   const contributing = read("CONTRIBUTING.md");
   const maturity = read("docs/CODE_MATURITY.md");
   const migration = read("docs/MIGRATION.md");
   const template = read(".github/PULL_REQUEST_TEMPLATE.md");
-  assert.match(contributing, /four intentionally separate contribution paths/u);
-  assert.match(contributing, /Open legacy V2 intake/u);
-  assert.match(contributing, /separate lightweight one-file intake path/u);
-  assert.match(maturity, /receipt-bound Hookbuilder v0\.10\.3 tree also remains open/u);
-  assert.match(maturity, /cannot satisfy Canary or Website eligibility/u);
-  assert.match(migration, /activated the Hookbuilder 0\.5\.1 bridge/u);
-  assert.match(migration, /current open, frozen legacy V2 transport/u);
-  assert.match(migration, /separate lightweight one-file Workflow Canary/u);
-  assert.match(template, /Generated six-file application package/u);
-  assert.match(template, /Application V3\.2 or V3\.1 compatibility revision/u);
-  assert.match(template, /Hidden workflow-canary application/u);
-  assert.match(template, /Submit a Launch repository maintenance/u);
-  assert.match(template, /Open Review Standard maintenance/u);
+  assert.match(contributing, /GitHub launch intake is closed/u);
+  assert.match(contributing, /Repository pull requests are for maintenance only/u);
+  assert.match(contributing, /Changes under `submissions\/` or `canary-submissions\/` are rejected/u);
+  assert.match(maturity, /checked-in intake state is\s+`closed`/u);
+  assert.match(migration, /GitHub intake is retired/u);
+  assert.match(migration, /old `0xprogrammable\/submit-launch` name.*historical provenance/su);
+  assert.match(template, /Programmable Launch Policy accepts maintenance pull requests only/u);
+  assert.match(template, /does not submit a launch, application, template, or Workflow Canary/u);
+  assert.doesNotMatch(template, /Generated six-file application package|Hidden workflow-canary application/u);
 });
 
 test("public Markdown does not contain a broken relative link", () => {

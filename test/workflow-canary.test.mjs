@@ -23,7 +23,7 @@ import {
 import { classifyPublicIntakePullRequest } from "../scripts/verify-public-hook-application-core.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
-const BASE_REPOSITORY = "0xprogrammable/submit-launch";
+const BASE_REPOSITORY = "0xprogrammable/launch-policy";
 const BASE_REPOSITORY_ID = "1320171831";
 const HEAD_REPOSITORY = "alice/submit-launch-fork";
 const HEAD_REPOSITORY_ID = "88001";
@@ -330,7 +330,7 @@ function createCanaryFixture(t, { mutateApplication } = {}) {
   const candidate = path.join(fixtureRoot, "candidate");
   fs.mkdirSync(base);
   git(base, ["init", "--initial-branch=main"]);
-  git(base, ["remote", "add", "origin", "https://github.com/0xprogrammable/submit-launch.git"]);
+  git(base, ["remote", "add", "origin", "https://github.com/0xprogrammable/launch-policy.git"]);
   writeFile(base, "policy/launch-policy.v1.json", fs.readFileSync(path.join(root, "policy/launch-policy.v1.json")));
   writeFile(base, "README.md", "trusted base\n");
   const baseCommit = commitAll(base, "trusted base");

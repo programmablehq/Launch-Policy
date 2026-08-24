@@ -40,7 +40,7 @@ const OPAQUE_ID = /^[1-9][0-9]{0,63}$/u;
 const GITHUB_URI = /^https:\/\/github\.com\/[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/u;
 const ZERO_ADDRESS = `0x${"0".repeat(40)}`;
 const ZERO_BYTES32 = `0x${"0".repeat(64)}`;
-const SUBMIT_LAUNCH_REPOSITORY_ID = "1320171831";
+const LAUNCH_POLICY_REPOSITORY_ID = "1320171831";
 const PROGRAMMABLE_TREASURY = "0x4957f49620AFf3Adbbe8195a4f633E49cc93376c";
 const DEVELOPER_WELL_KNOWN_URL = "https://developers.programmable.family/.well-known/programmable.json";
 const DEVELOPER_MANIFEST_URL = "https://developers.programmable.family/api/v2/manifest";
@@ -195,10 +195,10 @@ function validateConfig(value) {
   if (!/^1\.[0-9]+\.[0-9]+$/u.test(value.historyVersion ?? "")) fail("CONFIG_INVALID", "historyVersion must be a v1 semantic version");
   requireTimestamp(value.updatedAt, "registry config updatedAt");
   exactKeys(value.activeIntake, ["baseBranch", "directory", "repository", "state"], "activeIntake");
-  if (value.activeIntake.baseBranch !== "main" || value.activeIntake.directory !== "submissions" || value.activeIntake.repository !== "0xprogrammable/submit-launch") {
+  if (value.activeIntake.baseBranch !== "main" || value.activeIntake.directory !== "submissions" || value.activeIntake.repository !== "0xprogrammable/launch-policy") {
     fail("CONFIG_INVALID", "active intake identity is not canonical");
   }
-  if (!new Set(["prelaunch", "open", "paused-new", "paused-all"]).has(value.activeIntake.state)) fail("CONFIG_INVALID", "active intake state is invalid");
+  if (!new Set(["prelaunch", "open", "paused-new", "paused-all", "closed"]).has(value.activeIntake.state)) fail("CONFIG_INVALID", "active intake state is invalid");
   if (!Array.isArray(value.projectPaths) || value.projectPaths.length < 1 || value.projectPaths.length > MAX_RECORDS) fail("CONFIG_INVALID", "projectPaths is invalid");
   assertSortedUnique(value.projectPaths, "projectPaths");
   if (!Array.isArray(value.legacyIntake) || value.legacyIntake.length > 8) fail("CONFIG_INVALID", "legacyIntake is invalid");
@@ -327,7 +327,7 @@ function validateAcceptance(acceptance, relativePath, projectId) {
   validateTextSet(acceptance.conditions, `${relativePath}.conditions`, 32, false);
 
   exactKeys(acceptance.application, ["applicationId", "applicationRevision", "packageDigest", "pullRequest"], `${relativePath}.application`);
-  if (acceptance.application.applicationId !== projectId || !Number.isSafeInteger(acceptance.application.applicationRevision) || acceptance.application.applicationRevision < 1 || !/^sha256:[0-9a-f]{64}$/u.test(acceptance.application.packageDigest ?? "") || !/^https:\/\/github\.com\/0xprogrammable\/submit-launch\/pull\/[1-9][0-9]{0,19}$/u.test(acceptance.application.pullRequest ?? "")) {
+  if (acceptance.application.applicationId !== projectId || !Number.isSafeInteger(acceptance.application.applicationRevision) || acceptance.application.applicationRevision < 1 || !/^sha256:[0-9a-f]{64}$/u.test(acceptance.application.packageDigest ?? "") || !/^https:\/\/github\.com\/0xprogrammable\/(?:launch-policy|submit-launch)\/pull\/[1-9][0-9]{0,19}$/u.test(acceptance.application.pullRequest ?? "")) {
     fail("ACCEPTANCE_INVALID", `${relativePath} has an invalid application binding`);
   }
   exactKeys(acceptance.source, ["numericRepositoryId", "repositoryUri", "revisionObjectId", "treeObjectId"], `${relativePath}.source`);
@@ -394,7 +394,7 @@ function validateLaunchStampPromotion(promotion, relativePath, directoryProjectI
 
   const application = promotion.application;
   exactKeys(application, ["applicationId", "applicationRevision", "applicationSha256", "packageDigest", "packagePreimage", "pullRequest"], `${relativePath}.application`);
-  if (application.applicationId !== promotion.projectId || !Number.isSafeInteger(application.applicationRevision) || application.applicationRevision < 1 || application.applicationRevision > 1_000_000 || !SHA256.test(application.applicationSha256 ?? "") || !SHA256.test(application.packageDigest ?? "") || !/^https:\/\/github\.com\/0xprogrammable\/submit-launch\/pull\/[1-9][0-9]{0,19}$/u.test(application.pullRequest ?? "")) {
+  if (application.applicationId !== promotion.projectId || !Number.isSafeInteger(application.applicationRevision) || application.applicationRevision < 1 || application.applicationRevision > 1_000_000 || !SHA256.test(application.applicationSha256 ?? "") || !SHA256.test(application.packageDigest ?? "") || !/^https:\/\/github\.com\/0xprogrammable\/(?:launch-policy|submit-launch)\/pull\/[1-9][0-9]{0,19}$/u.test(application.pullRequest ?? "")) {
     fail("PROMOTION_APPLICATION_INVALID", `${relativePath} has an invalid exact application binding`);
   }
 
@@ -408,7 +408,7 @@ function validateLaunchStampPromotion(promotion, relativePath, directoryProjectI
 
   const policy = promotion.policy;
   exactKeys(policy, ["baseCommit", "baseTree", "gitBlobOid", "launchReadinessDecision", "launchReadinessDecisionSha256", "numericRepositoryId", "path", "policyId", "policyVersion", "profileId", "repository", "sha256"], `${relativePath}.policy`);
-  if (policy.repository !== "0xprogrammable/submit-launch" || policy.numericRepositoryId !== SUBMIT_LAUNCH_REPOSITORY_ID || policy.path !== "policy/launch-policy.v1.json" || policy.policyId !== "programmable-central-launch-policy" || policy.policyVersion !== "2.1.0" || policy.profileId !== "launch-readiness" || !SHA1.test(policy.baseCommit ?? "") || !SHA1.test(policy.baseTree ?? "") || !SHA1.test(policy.gitBlobOid ?? "") || !SHA256.test(policy.sha256 ?? "") || !SHA256.test(policy.launchReadinessDecisionSha256 ?? "")) {
+  if (policy.repository !== "0xprogrammable/launch-policy" || policy.numericRepositoryId !== LAUNCH_POLICY_REPOSITORY_ID || policy.path !== "policy/launch-policy.v1.json" || policy.policyId !== "programmable-central-launch-policy" || policy.policyVersion !== "2.1.0" || policy.profileId !== "launch-readiness" || !SHA1.test(policy.baseCommit ?? "") || !SHA1.test(policy.baseTree ?? "") || !SHA1.test(policy.gitBlobOid ?? "") || !SHA256.test(policy.sha256 ?? "") || !SHA256.test(policy.launchReadinessDecisionSha256 ?? "")) {
     fail("PROMOTION_POLICY_INVALID", `${relativePath} does not bind the exact launch-readiness policy projection`);
   }
 

@@ -14,8 +14,8 @@ const DOCUMENT_KIND = "programmable-launch-router-readiness";
 const DOCUMENT_VERSION = "1.0.0";
 const DEVELOPER_REPOSITORY = "0xprogrammable/developers";
 const DEVELOPER_REPOSITORY_ID = "1322379959";
-const SUBMIT_LAUNCH_REPOSITORY = "0xprogrammable/submit-launch";
-const SUBMIT_LAUNCH_REPOSITORY_ID = "1320171831";
+const LAUNCH_POLICY_REPOSITORY = "0xprogrammable/launch-policy";
+const LAUNCH_POLICY_REPOSITORY_ID = "1320171831";
 const DISCOVERY_DOCUMENT_URL = "https://developers.programmable.family/.well-known/programmable.json";
 const MANIFEST_URL = "https://developers.programmable.family/api/v2/manifest";
 const ROUTER_MANIFEST_POINTER = "/launchStampRouter";
@@ -593,9 +593,9 @@ function validateNotApplicable(document) {
     "tree",
     "trustBasis"
   ], "PROGRAMMABLE_ROUTER_NOT_APPLICABLE_INVALID", "trusted applicability declaration");
-  assertEqual(declaration.repository, SUBMIT_LAUNCH_REPOSITORY, "PROGRAMMABLE_ROUTER_NOT_APPLICABLE_INVALID", "trusted declaration repository");
-  assertEqual(declaration.numericRepositoryId, SUBMIT_LAUNCH_REPOSITORY_ID, "PROGRAMMABLE_ROUTER_NOT_APPLICABLE_INVALID", "trusted declaration repository id");
-  assertEqual(declaration.trustBasis, "protected-submit-launch-base-content-addressed", "PROGRAMMABLE_ROUTER_NOT_APPLICABLE_INVALID", "trusted declaration basis");
+  assertEqual(declaration.repository, LAUNCH_POLICY_REPOSITORY, "PROGRAMMABLE_ROUTER_NOT_APPLICABLE_INVALID", "trusted declaration repository");
+  assertEqual(declaration.numericRepositoryId, LAUNCH_POLICY_REPOSITORY_ID, "PROGRAMMABLE_ROUTER_NOT_APPLICABLE_INVALID", "trusted declaration repository id");
+  assertEqual(declaration.trustBasis, "protected-launch-policy-base-content-addressed", "PROGRAMMABLE_ROUTER_NOT_APPLICABLE_INVALID", "trusted declaration basis");
   assertEqual(declaration.declaredRouteMode, document.applicability.routeMode, "PROGRAMMABLE_ROUTER_NOT_APPLICABLE_INVALID", "trusted declaration route mode");
   const expectedKind = declaration.declaredRouteMode === "no-market"
     ? "trusted-no-market-declaration"
