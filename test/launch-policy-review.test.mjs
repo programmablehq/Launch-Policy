@@ -405,18 +405,13 @@ test("LLM observations cannot invent requirements severity or approval", (t) => 
   assert.equal(decision.authority.launchAuthorized, false);
 });
 
-test("disabled production profile never yields approval", (t) => {
+test("enabled production requirements never yield approval authority", (t) => {
   const fixture = trustedReviewFixture(t);
-  const input = {
-    ...validInput(fixture.policyRecord),
-    profileId: "production-launch",
-    expectedPolicyBinding: null,
-    evaluations: []
-  };
+  const input = validInput(fixture.policyRecord, "production-launch");
   const decision = evaluate(fixture, input);
-  assert.equal(decision.status, "profile_disabled");
-  assert.equal(decision.outcome, null);
-  assert.equal(decision.currentPolicyBinding, null);
+  assert.equal(decision.status, "passed");
+  assert.equal(decision.outcome, "PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED");
+  assert.equal(decision.currentPolicyBinding.profileId, "production-launch");
   assert.equal(decision.authority.launchAuthorized, false);
   assert.doesNotMatch(JSON.stringify(decision), /LAUNCH_APPROVED/u);
 });
@@ -685,8 +680,10 @@ test("new schemas compile strictly and validate examples and decisions", (t) => 
   const validateDecision = ajv.compile(readJson("review/schemas/launch-policy-review-decision.v1.schema.json"));
 
   for (const name of ["canary-passed.json", "canary-analysis-pending.json", "production-disabled.json"]) {
-    const input = readJson(`review/examples/${name}`);
-    if (input.profileId !== "production-launch") input.expectedPolicyBinding = buildLaunchPolicyBinding(fixture.policyRecord, input.profileId);
+    const input = name === "production-disabled.json"
+      ? validInput(fixture.policyRecord, "production-launch")
+      : readJson(`review/examples/${name}`);
+    if (input.expectedPolicyBinding !== null) input.expectedPolicyBinding = buildLaunchPolicyBinding(fixture.policyRecord, input.profileId);
     assert.equal(validateInput(input), true, `${name}: ${JSON.stringify(validateInput.errors)}`);
     const decision = evaluate(fixture, input);
     assert.equal(validateDecision(decision), true, `${name}: ${JSON.stringify(validateDecision.errors)}`);

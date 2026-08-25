@@ -51,10 +51,10 @@
     "productionProfile": {
       "additionalProperties": false,
       "properties": {
-        "authority": { "$ref": "#/$defs/disabledAuthority" },
-        "enabled": { "const": false },
+        "authority": { "$ref": "#/$defs/checkerAuthority" },
+        "enabled": { "const": true },
         "id": { "const": "production-launch" },
-        "outcome": { "type": "null" }
+        "outcome": { "const": "PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED" }
       },
       "required": ["authority", "enabled", "id", "outcome"],
       "type": "object"
@@ -224,7 +224,7 @@
       "type": "object"
     },
     "policyId": { "pattern": "^[a-z0-9][a-z0-9.-]{2,79}$", "type": "string" },
-    "policyVersion": { "const": "2.1.0" },
+    "policyVersion": { "const": "2.2.0" },
     "profiles": {
       "items": false,
       "maxItems": 4,

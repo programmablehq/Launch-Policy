@@ -84,7 +84,10 @@ export function validateLaunchPolicyReviewInput(input) {
   }
   if (input.profileId === "production-launch") {
     if (input.expectedPolicyBinding !== null) {
-      fail("REVIEW_POLICY_BINDING_INVALID", "Disabled production review records no enabled-profile binding.");
+      validatePolicyBinding(input.expectedPolicyBinding);
+      if (input.expectedPolicyBinding.profileId !== input.profileId) {
+        fail("REVIEW_POLICY_BINDING_INVALID", "Recorded policy binding profile does not match the review profile.");
+      }
     }
   } else {
     validatePolicyBinding(input.expectedPolicyBinding);
@@ -136,6 +139,10 @@ export function evaluateTrustedLaunchPolicyReview(options) {
       findings: [],
       advisories
     });
+  }
+
+  if (input.expectedPolicyBinding === null) {
+    fail("REVIEW_POLICY_BINDING_INVALID", "An enabled production review requires the exact policy binding.");
   }
 
   const currentPolicyBinding = buildLaunchPolicyBinding(policyRecord, input.profileId);
@@ -688,7 +695,7 @@ function validatePolicyBinding(binding) {
     || !OBJECT_ID.test(binding.gitBlobOid ?? "")
     || !/^[a-z0-9][a-z0-9.-]{2,79}$/u.test(binding.policyId ?? "")
     || !/^(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)$/u.test(binding.policyVersion ?? "")
-    || !new Set(["build", "launch-readiness", "workflow-canary"]).has(binding.profileId)
+    || !new Set(["build", "launch-readiness", "production-launch", "workflow-canary"]).has(binding.profileId)
     || !SHA256.test(binding.sha256 ?? "")
   ) {
     fail("REVIEW_POLICY_BINDING_INVALID", "Expected policy binding must be the exact closed eleven-field binding contract.");

@@ -49,6 +49,20 @@ function ethereumTreasuryTenBpsHandler(context) {
   return exactEvidenceHandler(context, ["basis", "chainId", "hundredthsOfBip", "network", "treasury"]);
 }
 
+function programmableExactFeeTemplateHandler(context) {
+  return exactEvidenceHandler(context, [
+    "assetMode",
+    "basis",
+    "chainId",
+    "claimPrerequisite",
+    "enforcementProof",
+    "hundredthsOfBip",
+    "network",
+    "rateDenominator",
+    "treasury"
+  ]);
+}
+
 const SHA256 = /^sha256:[0-9a-f]{64}$/u;
 const OBJECT_ID = /^[0-9a-f]{40}$/u;
 const ADDRESS = /^0x[0-9A-Fa-f]{40}$/u;
@@ -398,6 +412,12 @@ const RULE_HANDLERS_BY_POLICY_VERSION = Object.freeze({
     "programmable-router-promotion-v1": programmableRouterPromotionHandler,
     "programmable-router-readiness-v1": programmableRouterReadinessHandler,
     "programmable-runtime-fee-settlement-v1": programmableRuntimeFeeSettlementHandler
+  }),
+  "2.2.0": Object.freeze({
+    "ethereum-treasury-10-bps-v1": ethereumTreasuryTenBpsHandler,
+    "programmable-exact-fee-template-v1": programmableExactFeeTemplateHandler,
+    "programmable-router-promotion-v1": programmableRouterPromotionHandler,
+    "programmable-router-readiness-v1": programmableRouterReadinessHandler
   })
 });
 
