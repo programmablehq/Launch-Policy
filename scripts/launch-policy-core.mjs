@@ -507,8 +507,10 @@ function validTimestamp(value) {
 
 function normalizeRemote(remote) {
   const trimmed = remote.trim().replace(/\/$/u, "");
-  if (trimmed === "git@github.com:0xprogrammable/launch-policy.git") return REPOSITORY_REMOTE;
-  if (trimmed === "https://github.com/0xprogrammable/launch-policy") return REPOSITORY_REMOTE;
+  const canonicalCandidate = trimmed.toLowerCase();
+  if (canonicalCandidate === "git@github.com:0xprogrammable/launch-policy.git") return REPOSITORY_REMOTE;
+  if (canonicalCandidate === REPOSITORY_REMOTE) return REPOSITORY_REMOTE;
+  if (canonicalCandidate === "https://github.com/0xprogrammable/launch-policy") return REPOSITORY_REMOTE;
   if (trimmed === "git@github.com:0xprogrammable/submit-launch.git") return REPOSITORY_REMOTE;
   if (trimmed === "https://github.com/0xprogrammable/submit-launch.git") return REPOSITORY_REMOTE;
   if (trimmed === "https://github.com/0xprogrammable/submit-launch") return REPOSITORY_REMOTE;

@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/0xprogrammable/launch-policy/actions/workflows/verify.yml"><img src="https://github.com/0xprogrammable/launch-policy/actions/workflows/verify.yml/badge.svg?branch=main" alt="Repository verification"></a>
-  <a href="https://github.com/0xprogrammable/launch-policy/actions/workflows/codeql.yml"><img src="https://github.com/0xprogrammable/launch-policy/actions/workflows/codeql.yml/badge.svg?branch=main" alt="CodeQL analysis"></a>
-  <a href="https://github.com/0xprogrammable/launch-policy/releases/latest"><img src="https://img.shields.io/github/v/release/0xprogrammable/launch-policy?label=release" alt="Latest release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/0xprogrammable/launch-policy" alt="MIT License"></a>
+  <a href="https://github.com/0xprogrammable/Launch-Policy/actions/workflows/verify.yml"><img src="https://github.com/0xprogrammable/Launch-Policy/actions/workflows/verify.yml/badge.svg?branch=main" alt="Repository verification"></a>
+  <a href="https://github.com/0xprogrammable/Launch-Policy/actions/workflows/codeql.yml"><img src="https://github.com/0xprogrammable/Launch-Policy/actions/workflows/codeql.yml/badge.svg?branch=main" alt="CodeQL analysis"></a>
+  <a href="https://github.com/0xprogrammable/Launch-Policy/releases/latest"><img src="https://img.shields.io/github/v/release/0xprogrammable/Launch-Policy?label=release" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/0xprogrammable/Launch-Policy" alt="MIT License"></a>
 </p>
 
 > [!IMPORTANT]
@@ -63,8 +63,8 @@ evidence remains `analysis-pending`. Unknown project types are not rejected mere
 Node.js 24.12 or newer is required.
 
 ```bash
-git clone --depth 1 https://github.com/0xprogrammable/launch-policy.git
-cd launch-policy
+git clone --depth 1 https://github.com/0xprogrammable/Launch-Policy.git
+cd Launch-Policy
 npm run policy -- validate-policy
 npm run policy -- requirements --profile build
 npm run policy -- requirements --profile launch-readiness
@@ -106,7 +106,8 @@ Pull requests that modify the historical application namespaces fail closed and 
 
 The repository was formerly named `0xprogrammable/submit-launch`. That name remains only in versioned legacy protocol
 identifiers, frozen vendor bytes, historical snapshots, and old provenance links where changing it would rewrite the
-record. Current repository and policy references use `0xprogrammable/launch-policy`.
+record. Current public links use `0xprogrammable/Launch-Policy`; protected bindings retain the case-normalized machine
+identity `0xprogrammable/launch-policy`.
 
 ## Discovery registry
 
@@ -128,10 +129,10 @@ records.
 
 ## Report a problem
 
-- [Report a non-sensitive policy, checker, schema, or registry problem](https://github.com/0xprogrammable/launch-policy/issues/new/choose).
-- [Discuss a policy or architecture idea](https://github.com/0xprogrammable/launch-policy/discussions).
-- [Report an exploitable vulnerability privately](https://github.com/0xprogrammable/launch-policy/security/advisories/new).
+- [Report a non-sensitive policy, checker, schema, or registry problem](https://github.com/0xprogrammable/Launch-Policy/issues/new/choose).
+- [Discuss a policy or architecture idea](https://github.com/0xprogrammable/Launch-Policy/discussions).
+- [Report an exploitable vulnerability privately](https://github.com/0xprogrammable/Launch-Policy/security/advisories/new).
 
-Use [Hookbuilder issues](https://github.com/0xprogrammable/hookbuilder/issues/new/choose) for builder installation or
+Use [Hookbuilder issues](https://github.com/0xprogrammable/Hookbuilder-Skill/issues/new/choose) for builder installation or
 project-construction support. Repository issues do not provide project approval, wallet authorization, deployment,
 investment advice, or guaranteed implementation support.

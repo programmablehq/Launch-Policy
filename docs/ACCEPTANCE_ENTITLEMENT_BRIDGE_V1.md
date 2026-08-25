@@ -7,7 +7,7 @@ The central `production-launch` profile is disabled. The legacy
 historical contracts, but the compiler cannot currently emit a production entitlement.
 
 After validating the command's closed shape, pinned Ed25519 key, signature, and time window, the compiler requires the
-exact WeakSet-bound policy record read from the fixed protected Submit Launch checkout. It checks the current
+exact WeakSet-bound policy record read from the fixed protected Launch Policy checkout. It checks the current
 `production-launch` profile before reading a package directory or launch-plan file and returns
 `PRODUCTION_LAUNCH_DISABLED`. The command's old opaque `review.policyBundleDigest` is not policy authority and cannot
 enable the path.
@@ -37,10 +37,10 @@ The fixed-purpose compiler now also requires the protected checkout and exact au
 ```bash
 npm run compile:entitlement -- \
   --signed-command /trusted/input/signed-command.json \
-  --package-directory /trusted/submit-launch/submissions/example-hook \
+  --package-directory /trusted/launch-policy/submissions/example-hook \
   --launch-plan-file /trusted/resolved-source/launch-plan.json \
   --trusted-authority-public-key /trusted/config/acceptance-ed25519-public.pem \
-  --trusted-policy-repository-root /trusted/submit-launch \
+  --trusted-policy-repository-root /trusted/launch-policy \
   --expected-policy-base-commit <40-hex-base-commit>
 ```
 

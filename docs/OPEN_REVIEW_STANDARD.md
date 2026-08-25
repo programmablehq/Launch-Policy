@@ -5,7 +5,7 @@ Programmable review decisions consume the canonical
 Review adapter cannot add requirements, change severity or enforcement, select a policy file, or create an approval
 outcome.
 
-The protected evaluator reads the policy only from the exact trusted Submit Launch base commit at the fixed repository
+The protected evaluator reads the policy only from the exact trusted Launch Policy base commit at the fixed repository
 and path. It compares all eleven fields of the recorded policy binding before it considers rule evaluations. A changed
 repository, commit, tree, policy blob, version, profile, or digest returns `policy_drift`.
 
@@ -72,7 +72,7 @@ pending rules, findings, status, and outcome from those trusted bytes; a digest 
 - [`canary-analysis-pending.json`](../review/examples/canary-analysis-pending.json)
 - [`production-disabled.json`](../review/examples/production-disabled.json)
 
-The enabled-profile examples are immutable snapshot fixtures. They bind exact Submit Launch commit
+The enabled-profile examples are immutable snapshot fixtures. They bind exact Launch Policy commit
 `599cbb7f9e6c6daf8a1aeca85340429db5a4f134` and policy 1.1.0 in their eleven-field binding; they are not current-HEAD
 bindings. A protected consumer never treats those example fields as current. It resolves the live exact protected base
 it was invoked for and requires the applicant's binding to match it. Reusing a snapshot fixture against a later base
@@ -95,6 +95,6 @@ approval.
 npm run review -- review/examples/disclosed-high-fee.json
 ```
 
-This command reads the exact local Submit Launch `HEAD` policy blob. Its result is a deterministic local snapshot, not
+This command reads the exact local Launch Policy `HEAD` policy blob. Its result is a deterministic local snapshot, not
 proof of protected main, an independent audit, a signature, Website eligibility, routing, deployment, funds authority,
 or launch authorization.
