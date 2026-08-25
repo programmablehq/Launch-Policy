@@ -10,13 +10,20 @@ evidence contracts; the [policy-bound reviewer](OPEN_REVIEW_STANDARD.md), readin
 Website eligibility verifier consume one exact protected-base policy binding. None may maintain a second requirement
 list. See the [complete launch requirements](COMPLETE_LAUNCH_REQUIREMENTS.md) for the Rule-ID and command map.
 
-## Keep every state distinct
+## Current Custom Launch API lifecycle
+
+The API contract owns the current request states:
+`received → validating → prepared → authorized → submitted → finalized`.
+`failed` and `cancelled` are terminal alternatives. `authorized` means that the exact wallet transaction is available
+for separate review; it does not sign or broadcast it.
+
+## Preserved compatibility and promotion evidence states
 
 | State | Exact evidence | Meaning |
 | --- | --- | --- |
 | Admission envelope prepared | Canonical Universal Admission V1 bytes | Source coordinates and disclosures are declared; they are not remotely verified or reviewed |
-| Application V3.2 valid | One immutable V3.2 revision plus protected package-validator result | The current full application package is valid for review; no review, readiness, or launch right exists |
-| Application V3.1 compatible | V3.1 revision validated only under the unchanged compatibility contract | A new or existing compatibility draft is valid for review; it cannot establish `launch-readiness` or the official Programmable route |
+| Historical Application V3.2 valid | One immutable V3.2 revision plus protected package-validator result | A preserved full application package was valid for review under the retired GitHub flow; no current launch right exists |
+| Historical Application V3.1 compatible | V3.1 revision validated only under the unchanged compatibility contract | A preserved compatibility draft remains reproducible; it cannot establish a current launch or the official Programmable route |
 | Built | `BUILT_NOT_REVIEWED` under the bound `build` profile | The Builder completed declared checks; no review or launch right exists |
 | Reviewed | Policy-bound decision for the exact application, source, policy, and subject | Review findings are attributable; missing facts remain `analysis_pending` |
 | Launch readiness checked | Exact `LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED` result under `launch-readiness` | Conditional fee and Router-plan checks passed; signing, deployment, broadcast, routing, promotion, and funds authority remain false |
@@ -29,10 +36,10 @@ list. See the [complete launch requirements](COMPLETE_LAUNCH_REQUIREMENTS.md) fo
 | Available | Platform release evidence and, for an applicable future Ethereum v4 market, the bound promotion receipt | Programmable currently exposes the project; provider and third-party terminal support remain separate facts |
 | Suspended or retired | Maintainer lifecycle record retaining any required promotion binding | Availability is intentionally restricted or ended |
 
-For an official Programmable Ethereum market, Application V3.2 and Submission 2.1 are required before readiness.
-No-market is `not-applicable`; an unresolved route remains `analysis-pending`; a tradable route outside the official
-Programmable path must not receive a Programmable Classic or Programmable Custom label. Application V3.1 remains a
-historical compatibility contract and its bytes must not be rewritten.
+Current API launches do not create or update Application V3.2 records. They bind the applicable policy, fee and Router
+plan through the API artifact and remain separate from wallet authorization. For historical readiness reproduction,
+the original Application V3.2 and Submission 2.1 bytes remain required. Application V3.1 remains a historical
+compatibility contract and its bytes must not be rewritten.
 
 The readiness result binds the exact 10 bps fee tuple and the applicant-owned
 `.programmable/launch-router-readiness.v1.json` plan. A separate precommit preparation step embeds the current official
@@ -41,7 +48,8 @@ but does not fetch the endpoint or independently prove freshness. Before it may 
 the platform must recheck trust and required freshness. It never makes one copied Router address permanent, and a
 direct Classic Factory, Graph Factory, or Single Factory call cannot be relabeled as canonical Router provenance.
 
-After an independently authorized launch, promotion requires the separate maintainer receipt
+For preserved application-bound promotion evidence, an independently authorized launch required the separate
+maintainer receipt
 `registry/promotions/<project-id>/<launch-id>.json`, valid under
 [`registry/schema/launch-stamp-promotion-v1.schema.json`](../registry/schema/launch-stamp-promotion-v1.schema.json).
 The receipt must show `observation.outcome: "stamped"`, `observation.finality: "finalized"`, and internally consistent
@@ -53,8 +61,8 @@ accepted package, and recomputes all remaining digests and cross-bindings; a wel
 cannot substitute for the accepted content. Missing, indeterminate, non-finalized, direct-factory, or mismatched
 evidence blocks Registry, API, and terminal promotion.
 
-Policy, application, source, subject, manifest, or prior-result drift stops the chain before a semantic pass. The
-Website must independently pin its signer and exact policy binding.
+For preserved Canary and Website-envelope verification, policy, application, source, subject, manifest, or prior-result
+drift stops the chain before a semantic pass. The Website must independently pin its signer and exact policy binding.
 It must pin the expected Website audience from protected deployment configuration,
 current time, and protected replay state; copying those values from an envelope is not authority.
 

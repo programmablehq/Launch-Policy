@@ -133,6 +133,6 @@ records.
 - [Discuss a policy or architecture idea](https://github.com/0xprogrammable/Launch-Policy/discussions).
 - [Report an exploitable vulnerability privately](https://github.com/0xprogrammable/Launch-Policy/security/advisories/new).
 
-Use [Hookbuilder issues](https://github.com/0xprogrammable/Hookbuilder-Skill/issues/new/choose) for builder installation or
-project-construction support. Repository issues do not provide project approval, wallet authorization, deployment,
-investment advice, or guaranteed implementation support.
+Launch Policy issues cover policy, checker, schema, Registry, and documentation defects. They do not provide project
+construction, API operation, project approval, wallet authorization, deployment, investment advice, or guaranteed
+implementation support.

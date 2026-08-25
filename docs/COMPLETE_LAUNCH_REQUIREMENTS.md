@@ -14,8 +14,8 @@ infer future requirements from that label alone; always bind the exact policy by
 
 ## Start here
 
-Hookbuilder is optional. You may use it, another tool or agent, or prepare the API bundle manually. In every case,
-resolve the canonical policy from the same exact protected Launch Policy commit.
+Use project-specific tooling or an agent to prepare the API bundle. In every case, resolve the canonical policy from
+the same exact protected Launch Policy commit.
 Node.js 24.12 or newer is required for the repository tools.
 
 Create an [API key](https://programmable.market/developers/api-keys), read the
@@ -41,7 +41,7 @@ a binding or `LAUNCH_APPROVED`; its requirements command is inspection-only and 
 ## Decide whether the Router rules apply
 
 Do not classify a project from its name, project kind, use of Uniswap v4, or similarity to an existing launch. Use the
-exact bound application and route state.
+exact validated API request bundle and route state.
 
 API callers never set the canonical policy predicate `subject.routerProvenanceRequired`. The platform derives the
 opaque decision from the validated request bundle and its bound source evidence. A requested route is a caller

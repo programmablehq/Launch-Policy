@@ -498,7 +498,11 @@ test("public docs separate the current API flow from historical GitHub eligibili
     assert.match(source, /policy\/launch-policy\.v1\.json/u, `${name} must name the sole authored policy`);
   }
   assert.match(architecture, /current launch flow is: API key → closed contract bundle and required evidence → Custom Launch API preparation/u);
-  assert.match(lifecycle, /expected Website audience from protected deployment configuration/u);
+  assert.match(lifecycle, /received → validating → prepared → authorized → submitted → finalized/u);
+  assert.match(lifecycle, /Preserved compatibility and promotion evidence states/u);
+  assert.match(architecture, /checked-in namespaces are now immutable and\s+accept no new revisions/u);
+  assert.match(agents, /final complete contract of the retired GitHub application flow/u);
+  assert.doesNotMatch(agents + architecture + lifecycle, /complete current launch contract|current full application package|new or existing compatibility draft|New V3\.2 revisions|may enter only as an unreviewed draft|must use Application V3\.2/u);
   assert.match(beta, /GitHub launch intake is closed/u);
   assert.match(beta, /No contract in that list opens GitHub intake/u);
   assert.match(agents, /only authored source of current Programmable-specific admission requirements/u);
