@@ -299,7 +299,7 @@ function validateProfiles(profiles, policyVersion) {
   const legacy = new Set(["1.0.0", "1.1.0", "1.2.0", "1.3.0"]).has(policyVersion);
   const expectedProfileIds = legacy
     ? ["build", "production-launch", "workflow-canary"]
-    : new Set(["2.0.0", "2.1.0"]).has(policyVersion)
+    : new Set(["2.0.0", "2.1.0", "2.2.0"]).has(policyVersion)
       ? ["build", "launch-readiness", "production-launch", "workflow-canary"]
       : null;
   if (expectedProfileIds === null) {
@@ -331,8 +331,17 @@ function validateProfiles(profiles, policyVersion) {
     if (!readiness.enabled || readiness.outcome !== "LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED") fail("LAUNCH_POLICY_PROFILE_INVALID", "Launch-readiness profile outcome is invalid.");
     if (!closedAuthority(readiness.authority, true)) fail("LAUNCH_POLICY_AUTHORITY_INVALID", "Launch-readiness authority must remain checker-only and non-production.");
   }
-  if (production.enabled || production.outcome !== null) fail("LAUNCH_POLICY_PROFILE_INVALID", "Production launch profile must remain disabled without an outcome.");
-  if (!closedAuthority(production.authority, false)) fail("LAUNCH_POLICY_AUTHORITY_INVALID", "Production launch authority must remain fully disabled.");
+  if (policyVersion === "2.2.0") {
+    if (!production.enabled || production.outcome !== "PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED") {
+      fail("LAUNCH_POLICY_PROFILE_INVALID", "Production requirements must be enabled with the non-authorizing outcome.");
+    }
+    if (!closedAuthority(production.authority, true)) {
+      fail("LAUNCH_POLICY_AUTHORITY_INVALID", "Production requirements may check policy but cannot confer launch authority.");
+    }
+  } else {
+    if (production.enabled || production.outcome !== null) fail("LAUNCH_POLICY_PROFILE_INVALID", "Production launch profile must remain disabled without an outcome.");
+    if (!closedAuthority(production.authority, false)) fail("LAUNCH_POLICY_AUTHORITY_INVALID", "Production launch authority must remain fully disabled.");
+  }
   if (!canary.enabled || canary.outcome !== "CANARY_WORKFLOW_PASSED") fail("LAUNCH_POLICY_PROFILE_INVALID", "Workflow canary outcome is invalid.");
   if (!closedAuthority(canary.authority, true)) fail("LAUNCH_POLICY_AUTHORITY_INVALID", "Workflow canary authority must remain checker-only and non-production.");
 }

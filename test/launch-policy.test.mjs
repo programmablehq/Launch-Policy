@@ -154,16 +154,17 @@ function trustedPolicyFixture(t, policy = canonicalPolicyRecord().policy) {
   };
 }
 
-test("canonical policy exposes build readiness canary and disabled production profiles without authority", () => {
+test("canonical policy exposes enabled production requirements without authority", () => {
   const record = canonicalPolicyRecord();
-  assert.equal(record.policy.policyVersion, "2.1.0");
+  assert.equal(record.policy.policyVersion, "2.2.0");
   assert.deepEqual(record.policy.profiles.map(({ id }) => id), ["build", "launch-readiness", "production-launch", "workflow-canary"]);
   assert.equal(selectLaunchPolicyProfile(record.policy, "build").enabled, true);
   assert.equal(selectLaunchPolicyProfile(record.policy, "launch-readiness").enabled, true);
-  assert.equal(selectLaunchPolicyProfile(record.policy, "production-launch").enabled, false);
+  assert.equal(selectLaunchPolicyProfile(record.policy, "production-launch").enabled, true);
   assert.equal(selectLaunchPolicyProfile(record.policy, "workflow-canary").enabled, true);
   assert.equal(selectLaunchPolicyProfile(record.policy, "build").outcome, "BUILT_NOT_REVIEWED");
   assert.equal(selectLaunchPolicyProfile(record.policy, "launch-readiness").outcome, "LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED");
+  assert.equal(selectLaunchPolicyProfile(record.policy, "production-launch").outcome, "PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED");
   assert.equal(selectLaunchPolicyProfile(record.policy, "workflow-canary").outcome, "CANARY_WORKFLOW_PASSED");
   for (const profile of record.policy.profiles) {
     assert.equal(profile.authority.launchAuthorized, false);
@@ -176,9 +177,10 @@ test("canonical policy exposes build readiness canary and disabled production pr
 
 test("market-bearing readiness is closed while no-market stays admissible and unsupported integration stays pending", (t) => {
   const { policy } = canonicalPolicyRecord();
-  assert.equal(policy.policyVersion, "2.1.0");
+  assert.equal(policy.policyVersion, "2.2.0");
   assert.deepEqual(policy.rules.map(({ id }) => id), [
     "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS",
+    "LAUNCH.ETHEREUM_EXACT_FEE_TEMPLATE_BEFORE_AUTHORIZATION",
     "LAUNCH.ETHEREUM_FINALIZED_ROUTER_STAMP_BEFORE_PROMOTION",
     "LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION",
     "LAUNCH.ETHEREUM_ROUTER_PROVENANCE_READINESS"
@@ -190,12 +192,15 @@ test("market-bearing readiness is closed while no-market stays admissible and un
   ]);
   assert.deepEqual(rulesForProfile(policy, "production-launch").map(({ id }) => id), [
     "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS",
+    "LAUNCH.ETHEREUM_EXACT_FEE_TEMPLATE_BEFORE_AUTHORIZATION",
     "LAUNCH.ETHEREUM_FINALIZED_ROUTER_STAMP_BEFORE_PROMOTION",
-    "LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION",
     "LAUNCH.ETHEREUM_ROUTER_PROVENANCE_READINESS"
   ]);
   assert.deepEqual(rulesForProfile(policy, "workflow-canary"), []);
-  assert.equal(policy.rules.some(({ status }) => status !== "active"), false);
+  assert.deepEqual(
+    policy.rules.filter(({ status }) => status !== "active").map(({ id }) => id),
+    ["LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION"],
+  );
 
   const { record } = trustedPolicyFixture(t);
   const validEvidence = launchReadinessEvidence();
@@ -341,7 +346,7 @@ test("active rules cannot become non-enforcing historical records", () => {
 });
 
 test("checker-only profiles cannot carry routing discovery or real-user funds", () => {
-  for (const profileId of ["build", "launch-readiness", "workflow-canary"]) {
+  for (const profileId of ["build", "launch-readiness", "production-launch", "workflow-canary"]) {
     for (const [field, invalidValue] of [
       ["checkerOnly", false],
       ["independentAudit", true],
@@ -361,7 +366,7 @@ test("checker-only profiles cannot carry routing discovery or real-user funds", 
   }
 });
 
-test("workflow canary carries no admission requirement while production remains disabled", (t) => {
+test("workflow canary carries no admission requirement while production remains non-authorizing", (t) => {
   const { record } = trustedPolicyFixture(t);
   const passed = evaluateLaunchPolicyRules({
     policyRecord: record,
@@ -375,10 +380,15 @@ test("workflow canary carries no admission requirement while production remains 
   assert.equal(passed.authority.publicRoutingAllowed, false);
   assert.equal(passed.authority.realUserFundsAllowed, false);
 
-  assert.throws(
-    () => evaluateLaunchPolicyRules({ policyRecord: record, profileId: "production-launch", subject: {}, evidence: {} }),
-    hasCode("LAUNCH_POLICY_PROFILE_DISABLED")
-  );
+  const production = evaluateLaunchPolicyRules({
+    policyRecord: record,
+    profileId: "production-launch",
+    subject: { routerProvenanceRequired: true },
+    evidence: {},
+  });
+  assert.equal(production.passed, false);
+  assert.equal(production.authority.launchAuthorized, false);
+  assert.equal(production.authority.realUserFundsAllowed, false);
 });
 
 test("fabricated records cannot mint bindings or evaluate policy", () => {
@@ -476,7 +486,7 @@ test("trusted Git reader rejects a different GitHub owner or repository", (t) =>
   }
 });
 
-test("JSON Schema rejects profile duplication production enablement approval and authority escalation", () => {
+test("JSON Schema rejects profile duplication production disablement approval and authority escalation", () => {
   const schema = JSON.parse(fs.readFileSync(path.join(root, "policy/schemas/launch-policy.v1.schema.json"), "utf8"));
   const validate = new Ajv2020({ allErrors: true, strict: true }).compile(schema);
   const canonical = canonicalPolicyRecord().policy;
@@ -489,7 +499,7 @@ test("JSON Schema rejects profile duplication production enablement approval and
     (policy) => { policy.profiles[0].authority.publicRoutingAllowed = true; },
     (policy) => { policy.profiles[1].enabled = false; },
     (policy) => { policy.profiles[1].outcome = "LAUNCH_APPROVED"; },
-    (policy) => { policy.profiles[2].enabled = true; },
+    (policy) => { policy.profiles[2].enabled = false; },
     (policy) => { policy.profiles[2].authority.realUserFundsAllowed = true; },
     (policy) => { policy.profiles[3].authority.realUserFundsAllowed = true; },
     (policy) => { policy.rules.find(({ status }) => status === "active").applicability = { mode: "historical" }; }
@@ -507,6 +517,7 @@ test("Markdown projection identifies itself as generated and binds exact policy 
   assert.match(markdown, /^# Programmable Launch Policy\n/u);
   assert.match(markdown, /Generated from the canonical policy/u);
   assert.match(markdown, new RegExp(record.sha256, "u"));
-  assert.match(markdown, /Production Launch \(disabled\)/u);
+  assert.match(markdown, /## Production Launch/u);
+  assert.match(markdown, /PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED/u);
   assert.doesNotMatch(markdown, /LAUNCH_APPROVED/u);
 });

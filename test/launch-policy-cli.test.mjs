@@ -184,23 +184,24 @@ test("launch-readiness requirements are enabled checker-only and project only pr
   assert.doesNotMatch(result.stdout, /LAUNCH_APPROVED/u);
 });
 
-test("requirements can describe disabled production without inventing approval authority", () => {
+test("requirements expose enabled production checks without inventing approval authority", () => {
   const result = run(["requirements", "--profile", "production-launch"]);
   assert.equal(result.status, 0, result.stderr);
   const output = parseCanonicalOutput(result);
-  assert.equal(output.profile.enabled, false);
-  assert.equal(output.profile.outcome, null);
+  assert.equal(output.profile.enabled, true);
+  assert.equal(output.profile.outcome, "PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED");
+  assert.equal(output.profile.authority.checkerOnly, true);
   assert.equal(output.profile.authority.launchAuthorized, false);
   assert.deepEqual(output.rules.map(({ id }) => id), [
     "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS",
+    "LAUNCH.ETHEREUM_EXACT_FEE_TEMPLATE_BEFORE_AUTHORIZATION",
     "LAUNCH.ETHEREUM_FINALIZED_ROUTER_STAMP_BEFORE_PROMOTION",
-    "LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION",
     "LAUNCH.ETHEREUM_ROUTER_PROVENANCE_READINESS"
   ]);
   assert.doesNotMatch(result.stdout, /LAUNCH_APPROVED/u);
 });
 
-test("binding CLI binds the fixed Git policy and rejects disabled production", () => {
+test("binding CLI binds the fixed Git policy for readiness and non-authorizing production checks", () => {
   const result = run(["binding", "--profile", "launch-readiness"]);
   assert.equal(result.status, 0, result.stderr);
   const binding = parseCanonicalOutput(result);
@@ -210,12 +211,10 @@ test("binding CLI binds the fixed Git policy and rejects disabled production", (
   assert.equal(binding.path, "policy/launch-policy.v1.json");
   assert.equal(binding.profileId, "launch-readiness");
 
-  const disabled = run(["binding", "--profile", "production-launch"]);
-  assert.equal(disabled.status, 1);
-  assert.equal(disabled.stdout, "");
-  const finding = JSON.parse(disabled.stderr);
-  assert.equal(disabled.stderr, `${canonicalJson(finding)}\n`);
-  assert.equal(finding.error.code, "LAUNCH_POLICY_PROFILE_DISABLED");
+  const production = run(["binding", "--profile", "production-launch"]);
+  assert.equal(production.status, 0, production.stderr);
+  const productionBinding = parseCanonicalOutput(production);
+  assert.equal(productionBinding.profileId, "production-launch");
 });
 
 test("validate-policy and render read only the fixed local policy", () => {

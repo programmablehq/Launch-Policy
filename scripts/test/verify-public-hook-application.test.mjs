@@ -400,7 +400,7 @@ test("unchanged V2 bytes bind the exact trusted policy snapshot without canary o
     path: "policy/launch-policy.v1.json",
     gitBlobOid: git(fixture.base, ["rev-parse", `${fixture.baseCommit}:policy/launch-policy.v1.json`]),
     policyId: "programmable-central-launch-policy",
-    policyVersion: "2.1.0",
+    policyVersion: "2.2.0",
     sha256: `sha256:${crypto.createHash("sha256").update(TRUSTED_POLICY_BYTES).digest("hex")}`
   });
   assert.equal(Object.hasOwn(report.policyBinding, "profileId"), false);

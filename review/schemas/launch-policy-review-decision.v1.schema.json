@@ -55,7 +55,7 @@
         "path": { "const": "policy/launch-policy.v1.json" },
         "policyId": { "pattern": "^[a-z0-9][a-z0-9.-]{2,79}$", "type": "string" },
         "policyVersion": { "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$", "type": "string" },
-        "profileId": { "enum": ["build", "launch-readiness", "workflow-canary"] },
+        "profileId": { "enum": ["build", "launch-readiness", "production-launch", "workflow-canary"] },
         "repository": { "const": "0xprogrammable/launch-policy" },
         "schemaVersion": { "const": "programmable.launch-policy-binding.v1" },
         "sha256": { "$ref": "#/$defs/sha256" }
@@ -145,15 +145,29 @@
     {
       "if": { "properties": { "profileId": { "const": "production-launch" } }, "required": ["profileId"], "type": "object" },
       "then": {
-        "properties": {
-          "currentPolicyBinding": { "type": "null" },
-          "currentSubject": { "properties": { "routerProvenanceRequired": { "type": "boolean" } }, "required": ["routerProvenanceRequired"], "type": "object" },
-          "expectedPolicyBinding": { "type": "null" },
-          "expectedSubject": { "properties": { "routerProvenanceRequired": { "type": "boolean" } }, "required": ["routerProvenanceRequired"], "type": "object" },
-          "outcome": { "type": "null" },
-          "status": { "const": "profile_disabled" }
-        },
-        "type": "object"
+        "oneOf": [
+          {
+            "properties": {
+              "currentPolicyBinding": { "type": "null" },
+              "currentSubject": { "properties": { "routerProvenanceRequired": { "type": "boolean" } }, "required": ["routerProvenanceRequired"], "type": "object" },
+              "expectedPolicyBinding": { "type": "null" },
+              "expectedSubject": { "properties": { "routerProvenanceRequired": { "type": "boolean" } }, "required": ["routerProvenanceRequired"], "type": "object" },
+              "outcome": { "type": "null" },
+              "status": { "const": "profile_disabled" }
+            },
+            "type": "object"
+          },
+          {
+            "properties": {
+              "currentPolicyBinding": { "allOf": [{ "$ref": "#/$defs/binding" }, { "properties": { "profileId": { "const": "production-launch" } }, "required": ["profileId"], "type": "object" }] },
+              "currentSubject": { "properties": { "routerProvenanceRequired": { "type": "boolean" } }, "required": ["routerProvenanceRequired"], "type": "object" },
+              "expectedPolicyBinding": { "allOf": [{ "$ref": "#/$defs/binding" }, { "properties": { "profileId": { "const": "production-launch" } }, "required": ["profileId"], "type": "object" }] },
+              "expectedSubject": { "properties": { "routerProvenanceRequired": { "type": "boolean" } }, "required": ["routerProvenanceRequired"], "type": "object" },
+              "status": { "not": { "const": "profile_disabled" } }
+            },
+            "type": "object"
+          }
+        ]
       },
       "else": {
         "properties": {
@@ -202,6 +216,18 @@
       }
     },
     {
+      "if": { "properties": { "profileId": { "const": "production-launch" } }, "required": ["profileId"], "type": "object" },
+      "then": {
+        "properties": {
+          "currentPolicyBinding": { "properties": { "profileId": { "const": "production-launch" } }, "required": ["profileId"], "type": "object" },
+          "expectedPolicyBinding": { "properties": { "profileId": { "const": "production-launch" } }, "required": ["profileId"], "type": "object" },
+          "status": { "not": { "const": "profile_disabled" } },
+          "trustedPolicy": { "properties": { "profileId": { "const": "production-launch" } }, "required": ["profileId"], "type": "object" }
+        },
+        "type": "object"
+      }
+    },
+    {
       "if": { "properties": { "status": { "const": "passed" } }, "required": ["status"], "type": "object" },
       "then": {
         "properties": {
@@ -210,7 +236,7 @@
             "type": "array"
           },
           "findings": { "maxItems": 0, "type": "array" },
-          "outcome": { "enum": ["BUILT_NOT_REVIEWED", "CANARY_WORKFLOW_PASSED", "LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED"] },
+          "outcome": { "enum": ["BUILT_NOT_REVIEWED", "CANARY_WORKFLOW_PASSED", "LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED", "PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED"] },
           "pendingRuleIds": { "maxItems": 0, "type": "array" }
         },
         "type": "object"
@@ -266,6 +292,10 @@
       "then": { "properties": { "outcome": { "const": "LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED" } }, "type": "object" }
     },
     {
+      "if": { "properties": { "profileId": { "const": "production-launch" }, "status": { "const": "passed" } }, "required": ["profileId", "status"], "type": "object" },
+      "then": { "properties": { "outcome": { "const": "PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED" } }, "type": "object" }
+    },
+    {
       "if": { "properties": { "profileId": { "const": "workflow-canary" }, "status": { "const": "passed" } }, "required": ["profileId", "status"], "type": "object" },
       "then": { "properties": { "outcome": { "const": "CANARY_WORKFLOW_PASSED" } }, "type": "object" }
     }
@@ -281,7 +311,7 @@
     "expectedSubject": { "$ref": "#/$defs/subject" },
     "findings": { "items": { "$ref": "#/$defs/finding" }, "maxItems": 256, "type": "array" },
     "notApplicableRuleIds": { "items": { "$ref": "#/$defs/ruleId" }, "maxItems": 256, "type": "array", "uniqueItems": true },
-    "outcome": { "enum": [null, "BUILT_NOT_REVIEWED", "CANARY_WORKFLOW_PASSED", "LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED"] },
+    "outcome": { "enum": [null, "BUILT_NOT_REVIEWED", "CANARY_WORKFLOW_PASSED", "LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED", "PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED"] },
     "pendingRuleIds": { "items": { "$ref": "#/$defs/ruleId" }, "maxItems": 256, "type": "array", "uniqueItems": true },
     "profileId": { "enum": ["build", "launch-readiness", "production-launch", "workflow-canary"] },
     "schemaVersion": { "const": "programmable.launch-policy-review-decision.v1" },

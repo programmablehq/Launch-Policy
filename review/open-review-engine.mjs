@@ -2,7 +2,11 @@ import childProcess from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { canonicalJson as canonicalPolicyJson } from "../scripts/launch-policy-core.mjs";
+import {
+  buildLaunchPolicyBinding,
+  canonicalJson as canonicalPolicyJson,
+  readTrustedLaunchPolicyFromGit
+} from "../scripts/launch-policy-core.mjs";
 import { evaluateTrustedLaunchPolicyReview } from "./launch-policy-review-core.mjs";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -23,12 +27,20 @@ const LEGACY_WITNESS_RULES = new Set([
 ]);
 
 // Compatibility only: legacy Open Review inputs are bounded and projected into
-// the disabled production profile. They can no longer select or inject policy.
+// the current checker-only production profile. They can no longer select or
+// inject policy, satisfy current rules, or produce launch authority.
 export function evaluateOpenReview(input) {
   validateOpenReviewInput(input);
   const expectedBaseCommit = trustedLocalHead();
+  const policyRecord = readTrustedLaunchPolicyFromGit({
+    repositoryRoot,
+    expectedBaseCommit
+  });
   return evaluateTrustedLaunchPolicyReview({
-    input: toCentralReviewInput(input),
+    input: toCentralReviewInput(
+      input,
+      buildLaunchPolicyBinding(policyRecord, "production-launch")
+    ),
     repositoryRoot,
     expectedBaseCommit
   });
@@ -63,11 +75,11 @@ export function validateOpenReviewInput(input) {
 
 export const canonicalJson = canonicalPolicyJson;
 
-function toCentralReviewInput(input) {
+function toCentralReviewInput(input, expectedPolicyBinding) {
   return {
     schemaVersion: "programmable.launch-policy-review-input.v1",
     profileId: "production-launch",
-    expectedPolicyBinding: null,
+    expectedPolicyBinding,
     expectedSubject: toSubject(input.reviewedRevision),
     currentSubject: toSubject(input.currentRevision),
     evaluations: [],
