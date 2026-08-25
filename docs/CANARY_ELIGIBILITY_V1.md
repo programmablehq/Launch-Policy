@@ -12,7 +12,7 @@ The compiler accepts all of the following as separate inputs:
 2. canonical raw bytes of the complete `programmable.workflow-canary-result.v1` result;
 3. a signed `programmable.protected-canary-eligibility-command.v1` command;
 4. a pinned Ed25519 authority public key; and
-5. the exact trusted policy record read from the fixed protected Submit Launch checkout.
+5. the exact trusted policy record read from the fixed protected Launch Policy checkout.
 
 The Task 5 parsers semantically revalidate the application, result, embedded review decision, Rule IDs, authority
 flags, result digest, and current policy binding. The eligibility compiler then cross-checks the complete application,
@@ -71,7 +71,7 @@ npm run compile:canary-eligibility -- \
   --application /trusted/input/application.json \
   --workflow-canary-result /trusted/input/workflow-canary-result.json \
   --trusted-authority-public-key /trusted/config/canary-ed25519-public.pem \
-  --trusted-policy-repository-root /trusted/submit-launch \
+  --trusted-policy-repository-root /trusted/launch-policy \
   --expected-policy-base-commit <40-hex-base-commit>
 ```
 
