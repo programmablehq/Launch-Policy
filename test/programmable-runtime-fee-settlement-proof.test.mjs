@@ -334,7 +334,19 @@ function writeFixtureRepository(t, {
   if (mutateProof) mutateProof(values.proof);
 
   const policy = JSON.parse(fs.readFileSync(path.join(root, "policy/launch-policy.v1.json"), "utf8"));
-  policy.rules.find(({ id }) => id === "LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION").profiles = [
+  // Exercise the retired settlement handler against its last active policy
+  // contract without reactivating it in the current v2.2 production profile.
+  policy.policyVersion = "2.1.0";
+  policy.effective.startsAt = "2026-08-20T00:00:00Z";
+  const productionProfile = policy.profiles.find(({ id }) => id === "production-launch");
+  productionProfile.enabled = false;
+  productionProfile.outcome = null;
+  productionProfile.authority.checkerOnly = false;
+  policy.rules = policy.rules.filter(({ id }) => id !== "LAUNCH.ETHEREUM_EXACT_FEE_TEMPLATE_BEFORE_AUTHORIZATION");
+  const settlementRule = policy.rules.find(({ id }) => id === "LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION");
+  settlementRule.status = "active";
+  settlementRule.retiredIn = null;
+  settlementRule.profiles = [
     "launch-readiness",
     "production-launch"
   ];

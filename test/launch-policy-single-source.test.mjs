@@ -366,6 +366,11 @@ test("every semantic finding and handler maps bijectively to a central Rule ID",
       "scripts/registry-core.mjs",
       "scripts/verify-public-application-v3-core.mjs"
     ],
+    "LAUNCH.ETHEREUM_EXACT_FEE_TEMPLATE_BEFORE_AUTHORIZATION": [
+      "review/launch-policy-review-core.mjs",
+      "scripts/launch-policy-core.mjs",
+      "scripts/launch-policy-handlers.mjs"
+    ],
     "LAUNCH.ETHEREUM_FINALIZED_ROUTER_STAMP_BEFORE_PROMOTION": [
       "review/launch-policy-review-core.mjs",
       "scripts/launch-policy-core.mjs",
@@ -407,20 +412,20 @@ test("every semantic finding and handler maps bijectively to a central Rule ID",
     assert.deepEqual(rules, []);
   }
 
-  // The production route remains disabled; its active rule is metadata-bound
-  // but cannot be evaluated or used as an approval path.
-  assert.throws(
-    () => evaluateLaunchPolicyRules({
-      policyRecord,
-      profileId: "production-launch",
-      subject: { usesUniswapV4: true },
-      evidence: passedEvidenceForRules(activeRules)
-    }),
-    (error) => error?.code === "LAUNCH_POLICY_PROFILE_DISABLED"
-  );
+  // Production requirements are evaluable but remain strictly checker-only.
+  const productionDecision = evaluateLaunchPolicyRules({
+    policyRecord,
+    profileId: "production-launch",
+    subject: { routerProvenanceRequired: true, usesUniswapV4: true },
+    evidence: passedEvidenceForRules(activeRules)
+  });
+  assert.equal(productionDecision.passed, false);
+  assert.equal(productionDecision.outcome, null);
+  assert.equal(productionDecision.results.length, 4);
+  assert.equal(productionDecision.authority.launchAuthorized, false);
 
   const legacyDecision = evaluateOpenReview(readJson("review/examples/disclosed-high-fee.json"));
-  assert.equal(legacyDecision.status, "profile_disabled");
+  assert.equal(legacyDecision.status, "analysis_pending");
   assert.deepEqual(
     [...new Set(legacyDecision.advisories.map(({ ruleId }) => ruleId))],
     ["LEGACY_V2.ADMISSION"]

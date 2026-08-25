@@ -50,7 +50,7 @@ test("historical six-file package inspection remains explicit and non-authoritat
   assert.equal(inspection.application.applicationId, fixture.data.application.applicationId);
 });
 
-test("current trusted v1 policy disables production before package or launch-plan I/O", (t) => {
+test("legacy v1 entitlement stays unsupported before package or launch-plan I/O", (t) => {
   const fixture = createFixture(t);
   const signedCommand = signFixtureCommand(fixture, makeCommand(fixture));
   assert.throws(
@@ -62,7 +62,7 @@ test("current trusted v1 policy disables production before package or launch-pla
       trustedPolicyRecord: fixture.policyRecord,
       now: NOW
     }),
-    hasCode("PRODUCTION_LAUNCH_DISABLED")
+    hasCode("PRODUCTION_COMMAND_VERSION_UNSUPPORTED")
   );
 });
 
@@ -72,7 +72,7 @@ test("opaque policyBundleDigest cannot enable production and copied policy recor
   command.review.policyBundleDigest = `sha256:${"f".repeat(64)}`;
   assert.throws(
     () => compileFixture(fixture, { signedCommand: signFixtureCommand(fixture, command) }),
-    hasCode("PRODUCTION_LAUNCH_DISABLED")
+    hasCode("PRODUCTION_COMMAND_VERSION_UNSUPPORTED")
   );
   assert.throws(
     () => compileFixture(fixture, { trustedPolicyRecord: { ...fixture.policyRecord } }),
@@ -80,7 +80,7 @@ test("opaque policyBundleDigest cannot enable production and copied policy recor
   );
 });
 
-test("legacy signature key and time validation still fail before the disabled production gate", (t) => {
+test("legacy signature key and time validation still fail before the checker-only production gate", (t) => {
   const fixture = createFixture(t);
   const attacker = crypto.generateKeyPairSync("ed25519");
   assert.throws(
@@ -113,7 +113,7 @@ test("legacy signature key and time validation still fail before the disabled pr
   );
 });
 
-test("legacy protected CLI loads only fixed protected policy identity and exits disabled before source I/O", (t) => {
+test("legacy protected CLI loads only fixed protected policy identity and exits unsupported before source I/O", (t) => {
   const fixture = createFixture(t);
   const clock = new Date();
   const command = makeCommand(fixture, {
@@ -135,8 +135,8 @@ test("legacy protected CLI loads only fixed protected policy identity and exits 
   ], { encoding: "utf8", shell: false, env: { ...process.env, TZ: "UTC" } });
   assert.equal(result.status, 1);
   assert.deepEqual(JSON.parse(result.stderr), {
-    code: "PRODUCTION_LAUNCH_DISABLED",
-    error: "The current central launch policy keeps production launch disabled.",
+    code: "PRODUCTION_COMMAND_VERSION_UNSUPPORTED",
+    error: "The legacy v1 entitlement command cannot authorize production from the checker-only policy.",
     status: "rejected"
   });
   assert.equal(result.stdout, "");

@@ -154,10 +154,11 @@ export function compileLaunchEntitlementEnvelope({
   if (productionProfile.enabled !== true) {
     reject("PRODUCTION_LAUNCH_DISABLED", "The current central launch policy keeps production launch disabled.");
   }
-  // The v1 policy contract itself forbids an enabled production profile. If a
-  // future policy changes that authority, it must introduce a new command and
-  // signing domain rather than reviving the opaque v1 policyBundleDigest.
-  reject("PRODUCTION_COMMAND_VERSION_UNSUPPORTED", "Production enablement requires a new policy-bound entitlement command version.");
+  // The current production profile is an enabled checker, not launch
+  // authority. This retired v1 command must never turn that checker result (or
+  // its opaque policyBundleDigest) into an entitlement. A future authorizing
+  // flow would require a new command and signing domain.
+  reject("PRODUCTION_COMMAND_VERSION_UNSUPPORTED", "The legacy v1 entitlement command cannot authorize production from the checker-only policy.");
 }
 
 export function parseCanonicalSignedCommand(source) {

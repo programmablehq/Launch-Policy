@@ -11,12 +11,18 @@ import { canonicalJson, evaluateOpenReview, validateOpenReviewInput } from "../r
 
 const root = path.resolve(import.meta.dirname, "..");
 
-test("legacy Open Review is a disabled production compatibility preview", () => {
+test("legacy Open Review is a non-authorizing production compatibility preview", () => {
   const decision = evaluateOpenReview(fixture("disclosed-high-fee.json"));
   assert.equal(decision.profileId, "production-launch");
-  assert.equal(decision.status, "profile_disabled");
+  assert.equal(decision.status, "analysis_pending");
   assert.equal(decision.outcome, null);
-  assert.equal(decision.currentPolicyBinding, null);
+  assert.deepEqual(decision.currentPolicyBinding, decision.expectedPolicyBinding);
+  assert.deepEqual(decision.pendingRuleIds, [
+    "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS",
+    "LAUNCH.ETHEREUM_EXACT_FEE_TEMPLATE_BEFORE_AUTHORIZATION",
+    "LAUNCH.ETHEREUM_FINALIZED_ROUTER_STAMP_BEFORE_PROMOTION",
+    "LAUNCH.ETHEREUM_ROUTER_PROVENANCE_READINESS"
+  ]);
   assert.deepEqual(decision.authority, {
     checkerOnly: true,
     independentAudit: false,
@@ -29,12 +35,12 @@ test("legacy Open Review is a disabled production compatibility preview", () => 
 
 test("legacy novelty unknowns and witnesses remain bounded advisories only", () => {
   const novel = evaluateOpenReview(fixture("novel-platform-pending.json"));
-  assert.equal(novel.status, "profile_disabled");
+  assert.equal(novel.status, "analysis_pending");
   assert.deepEqual(novel.findings, []);
   assert.equal(novel.advisories.length, 5);
 
   const witness = evaluateOpenReview(fixture("proven-unauthorized-diversion.json"));
-  assert.equal(witness.status, "profile_disabled");
+  assert.equal(witness.status, "analysis_pending");
   assert.deepEqual(witness.findings, []);
   assert.equal(witness.advisories.some(({ summary }) => summary.includes("UNAUTHORIZED_VALUE_DIVERSION")), true);
 });
@@ -66,7 +72,7 @@ test("legacy exact revisions remain visible without becoming launch authority", 
   const input = fixture("disclosed-high-fee.json");
   input.currentRevision.commit = "d".repeat(40);
   const decision = evaluateOpenReview(input);
-  assert.equal(decision.status, "profile_disabled");
+  assert.equal(decision.status, "subject_drift");
   assert.equal(decision.expectedSubject.commit, "a".repeat(40));
   assert.equal(decision.currentSubject.commit, "d".repeat(40));
 });
@@ -123,7 +129,7 @@ test("the public CLI preserves its one-file checker-only transport", () => {
   const output = JSON.parse(result.stdout);
   assert.equal(result.stdout, `${canonicalJson(output)}\n`);
   assert.equal(output.ok, true);
-  assert.equal(output.decision.status, "profile_disabled");
+  assert.equal(output.decision.status, "analysis_pending");
   assert.equal(output.decision.authority.launchAuthorized, false);
 });
 
