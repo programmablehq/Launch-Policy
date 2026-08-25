@@ -453,6 +453,29 @@ test("trusted Git reader binds fixed protected-base identity and rejects substit
   );
 });
 
+test("trusted Git reader accepts canonical GitHub URL casing without changing authority identity", (t) => {
+  const { baseCommit, repositoryRoot } = trustedPolicyFixture(t);
+  runGit(repositoryRoot, ["remote", "set-url", "origin", "https://github.com/0xProgrammable/Launch-Policy.git"]);
+
+  const record = readTrustedLaunchPolicyFromGit({ repositoryRoot, expectedBaseCommit: baseCommit });
+  assert.equal(record.repository, "0xprogrammable/launch-policy");
+  assert.equal(record.numericRepositoryId, "1320171831");
+});
+
+test("trusted Git reader rejects a different GitHub owner or repository", (t) => {
+  for (const remote of [
+    "https://github.com/not-programmable/Launch-Policy.git",
+    "https://github.com/0xprogrammable/Launch-Policies.git"
+  ]) {
+    const { baseCommit, repositoryRoot } = trustedPolicyFixture(t);
+    runGit(repositoryRoot, ["remote", "set-url", "origin", remote]);
+    assert.throws(
+      () => readTrustedLaunchPolicyFromGit({ repositoryRoot, expectedBaseCommit: baseCommit }),
+      hasCode("LAUNCH_POLICY_GIT_IDENTITY_INVALID")
+    );
+  }
+});
+
 test("JSON Schema rejects profile duplication production enablement approval and authority escalation", () => {
   const schema = JSON.parse(fs.readFileSync(path.join(root, "policy/schemas/launch-policy.v1.schema.json"), "utf8"));
   const validate = new Ajv2020({ allErrors: true, strict: true }).compile(schema);
