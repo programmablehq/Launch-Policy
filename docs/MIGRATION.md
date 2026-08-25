@@ -10,13 +10,13 @@ compatibility. These are stable legacy protocol names, not the current repositor
 
 ## Application V3.2 and V3.1 compatibility
 
-Application V3.2 is the complete current launch contract, not an in-place rewrite of V3.1, legacy V2, or Workflow
-Canary data. The central schema owner is
+Application V3.2 is the final complete contract of the retired GitHub application flow, not an in-place rewrite of
+V3.1, legacy V2, or Workflow Canary data. The preserved schema owner is
 [`intake/schemas/public-pr-application-v3.2.schema.json`](../intake/schemas/public-pr-application-v3.2.schema.json).
 Historical pull requests added one revision under `submissions/<application-id>/v3/revisions/<positive-decimal-revision>/`;
 those bytes now remain unchanged.
 
-The current machine discovery record is
+The preserved machine discovery record is
 [`applicant-compatibility.v2.json`](../.programmable/applicant-compatibility.v2.json), validated by
 [`intake/schemas/applicant-compatibility-v2.schema.json`](../intake/schemas/applicant-compatibility-v2.schema.json). It
 content-binds V3.2 and its supporting Submission 2.1, Trade Capability Manifest V2, and Router-readiness contracts while
@@ -26,8 +26,8 @@ The V3.1 compatibility contract remains byte-unchanged for historical reproducti
 revalidated or reinterpreted as V3.2 and cannot establish `launch-readiness` or the official Programmable Router route.
 Do not copy, delete, relabel, or infer approval from the old package or pull request.
 
-V3.2 remains project-agnostic. No-market, tradable, hook, token, app, game, service, hybrid, and previously unknown
-project shapes use the same contract. Required review records remain the common review floor, while novel capability
+V3.2 was project-agnostic. No-market, tradable, hook, token, app, game, service, hybrid, and previously unknown
+project shapes used the same contract. Required review records remain the common historical review floor, while novel capability
 evidence can remain in the pinned source closure or additional review records. This preserves information without
 turning an unrecognized capability into an intake rejection or an implicit approval rule.
 
@@ -41,8 +41,9 @@ and `standardVersion: "2.1.0"`. Each trade manifest uses
 `2.0.0`; it describes tradability and tests without embedding Programmable fee, Router, approval, label, or promotion
 policy.
 
-No-market remains `not-applicable`; an unknown or unresolved route remains `analysis-pending`. A selected Programmable
-Ethereum market additionally binds `.programmable/launch-router-readiness.v1.json` and the exact `launch-readiness`
+For preserved V3.2 readiness evidence, no-market remains `not-applicable`; an unknown or unresolved route remains
+`analysis-pending`. A selected Programmable Ethereum market additionally binds
+`.programmable/launch-router-readiness.v1.json` and the exact `launch-readiness`
 policy binding. Before pinning the source commit, a separate Builder or preparation step obtains and embeds the current
 official manifest projection. The offline readiness checker verifies its exact bytes against the pinned official
 Developer artifact without fetching the endpoint or independently proving endpoint freshness. Before it may mint a
@@ -59,7 +60,7 @@ and the closed promotion evidence projection. Registry validation re-derives the
 embedded root bytes, matches it to acceptance, and recomputes every digest and cross-binding. This postlaunch evidence
 is never fabricated inside an earlier application revision.
 
-A V3.1 or V3.2 pass proves only that the bound draft is valid for review. Readiness adds no signing or launch authority,
+A preserved V3.1 or V3.2 pass proves only that the bound draft was valid for review. Readiness adds no signing or launch authority,
 and a Router stamp adds no audit or safety guarantee. No migration inherits acceptance, Canary or Website eligibility,
 review completion, deployment permission, Registry promotion, public routing, or real-funds authority.
 

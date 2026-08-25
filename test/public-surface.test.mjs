@@ -30,9 +30,14 @@ test("the current owner is launch-policy while legacy provenance remains explici
 
 test("public support routes are canonical and have issue forms", () => {
   const config = read(".github/ISSUE_TEMPLATE/config.yml");
-  assert.match(config, /https:\/\/github\.com\/0xprogrammable\/launch-policy\/security\/advisories\/new/u);
-  assert.match(config, /https:\/\/github\.com\/0xprogrammable\/hookbuilder\/issues\/new\/choose/u);
+  const support = read("SUPPORT.md");
+  const readme = read("README.md");
+  assert.match(config, /https:\/\/github\.com\/0xprogrammable\/Launch-Policy\/security\/advisories\/new/u);
+  assert.match(config, /https:\/\/programmable\.market\/developers\/custom-launch-api-v1\.md/u);
   assert.doesNotMatch(config, /programmable-registry|programmable-v4-builder|hookbuilder\/discussions/u);
+  for (const source of [config, support, readme]) {
+    assert.doesNotMatch(source, /github\.com\/0xprogrammable\/(?:hookbuilder|Hookbuilder-Skill)/u);
+  }
   for (const form of ["review-or-registry-bug.yml", "documentation.yml"]) {
     assert.equal(fs.existsSync(path.join(root, ".github/ISSUE_TEMPLATE", form)), true);
   }

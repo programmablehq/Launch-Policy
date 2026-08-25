@@ -8,7 +8,9 @@
 Programmable Launch Policy keeps project source, admission policy, checking, API preparation, Registry promotion, and
 production facts as separate authorities.
 
-1. An applicant-owned public repository is the source authority for a project.
+1. One closed Custom Launch API request is the current transport authority for its exact source descriptor, graph
+   bundle, and controller-wallet binding. Referenced repository content is caller data; the API does not clone or
+   compile it.
 2. [`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json) is the sole authored source of current
    Programmable-specific launch requirements. Its stable Rule IDs, profiles, outcomes, and parameters are consumed
    from one exact protected-base Git identity.
@@ -18,8 +20,11 @@ production facts as separate authorities.
    or indirect imported gates fail the repository check until explicitly classified and reviewed.
 4. The deterministic reviewer projects findings from those Rule IDs. Analyzer observations cannot add requirements,
    severity, enforcement, or approval authority.
-5. [`intake/schemas/universal-admission-v1.schema.json`](../intake/schemas/universal-admission-v1.schema.json) is the
-   cheap, project-agnostic front door. It records declared source coordinates and truthful disclosure without requiring
+Items 5 through 12 describe disabled reference machinery and preserved compatibility contracts. They are not current
+launch ingress.
+
+5. [`intake/schemas/universal-admission-v1.schema.json`](../intake/schemas/universal-admission-v1.schema.json) is a
+   disabled project-agnostic reference envelope. It records declared source coordinates and truthful disclosure without requiring
    an audit, a category allowlist, or a fabricated market/fee artifact. It emits only `ADMITTED_FOR_REVIEW` or
    `ADMITTED_FOR_REVIEW_ANALYSIS_PENDING` (plus bounded transport errors). Its optional local CAS/spool reference
    validates first and then creates fixed-depth digest shards with an atomic first-writer marker. It provides neither
@@ -31,20 +36,20 @@ production facts as separate authorities.
    single-host, single-writer reference code: it publishes no endpoint or trust configuration and makes no distributed
    or production-capacity claim.
 7. [`intake/schemas/public-pr-application-v3.2.schema.json`](../intake/schemas/public-pr-application-v3.2.schema.json)
-   is the complete Application V3.2 launch contract. It binds applicant identity, exact public source, intent, evidence,
-   policy-neutral Submission 2.1 and, for each selected tradable market, Trade Capability Manifest V2, selected policy,
-   and review-package records without a project-type or capability allowlist. No-market projects attach no trade
-   manifest.
+   is the final complete contract of the retired GitHub application flow. It bound applicant identity, exact public
+   source, intent, evidence, policy-neutral Submission 2.1 and, for each selected tradable market, Trade Capability
+   Manifest V2, selected policy, and review-package records without a project-type or capability allowlist. It is not a
+   current launch entrypoint.
 8. The Application V3.1 compatibility contract remains byte-unchanged for historical reproduction. Its revisions are
    never reinterpreted as V3.2 and cannot establish `launch-readiness` or the official
    Programmable Router route.
 9. The preserved protected-base validator validates one bounded revision as inert untrusted data. It may emit only a valid or invalid
    draft-for-review result; it cannot record review completion, acceptance, approval, deployment, or launch.
-10. For a selected Programmable Ethereum market, a separate precommit preparation step embeds the current official
+10. For preserved V3.2 readiness evidence, a separate precommit preparation step embedded the current official
     manifest projection in `.programmable/launch-router-readiness.v1.json`. The offline checker consumes only that
     document and verifies its supplied bytes against the pinned official Developer artifact; it does not fetch the
     endpoint or independently prove endpoint freshness. Separately, the protected policy compiler combines the exact
-    verified V3.2 package, source closure, readiness record, and current protected policy. Before it may mint a
+    verified V3.2 package, source closure, readiness record, and protected policy. Before it may reproduce a
     readiness decision, the platform must independently recheck trust and required freshness. None of these grants
     signing, launch, discovery, routing, audit, or funds authority.
 11. A historical one-file Workflow Canary proved only the hidden, non-production GitHub handoff against that policy.
@@ -62,7 +67,7 @@ historical reference surfaces and are not production ingress.
 
 The V1 `.programmable/active-contract.json` compatibility envelope retains every prior direct legacy binding and binds
 the complete same-tree `.programmable/active-contract.v2.json` through its policy role. The V2 manifest closes the
-current validators, schemas, compatibility contract, Router-readiness and finalized-promotion surfaces. The current
+checked-in compatibility validators, schemas, Router-readiness and finalized-promotion surfaces. The latest preserved
 `.programmable/applicant-compatibility.v2.json` content-binds Application V3.2, Submission 2.1, Trade
 Capability Manifest V2, the Router-readiness schema and validator closure, and legacy V3.1. Applicant Compatibility V1
 remains a legacy discovery contract. The Universal Admission contract is intentionally separate from both of those and
@@ -74,22 +79,22 @@ policy, workflows, schemas, project records, or another record. The receipt-boun
 `vendor/programmable-v4-hook-builder/` tree is frozen validation data for retired six-file V2 records, not a current
 central-policy requirement source. No new V2 application is accepted.
 
-Application V3.2 does not replace or reinterpret V3.1, legacy V2, or Canary bytes. New V3.2 revisions are add-only under
-`submissions/<application-id>/v3/revisions/<revision>/`. The manifest closes its own application-package file set while
-content-addressed source-repository records remain at the exact pinned source revision. Required semantic review kinds
-establish a common review floor; additional slug-named records preserve novel capabilities and evidence without making
-them new launch-policy requirements. Submission 2.1 and the conditional per-market Trade Capability Manifest V2
-describe tradability without embedding Programmable treasury, Router, label, approval, or promotion policy.
+Application V3.2 does not replace or reinterpret V3.1, legacy V2, or Canary bytes. Its historical revision format was
+add-only under `submissions/<application-id>/v3/revisions/<revision>/`; the checked-in namespaces are now immutable and
+accept no new revisions. The manifest closes its own application-package file set while content-addressed source records
+remain at the exact pinned revision. Submission 2.1 and the conditional per-market Trade Capability Manifest V2 remain
+compatibility evidence and do not define current API ingress.
 
-A source-backed `proposal` may enter only as an unreviewed draft with unresolved trade capability,
+A source-backed `proposal` historically entered only as an unreviewed draft with unresolved trade capability,
 no trade manifest or result, and an `architecture-review-required` compatibility result. This transport state is not
 prototype evidence and grants no review, approval, deployment, or launch authority.
 
 ## Launch provenance boundary
 
 No-market and non-Programmable routes remain outside the Router rule. Unknown route state remains `analysis-pending`
-instead of being rejected or treated as exempt. An official Programmable Ethereum market must use Application V3.2 and
-bind the exact 10 bps fee tuple plus `.programmable/launch-router-readiness.v1.json` before readiness can pass.
+instead of being rejected or treated as exempt. Current API launches bind the exact applicable fee and Router plan in
+the API artifact; they do not create a V3.2 application. Historical V3.2 readiness reproduction still requires its
+original exact package and `.programmable/launch-router-readiness.v1.json` bytes.
 
 Before the applicant pins the source commit, a separate preparation step resolves the Router from the current official
 Developer discovery document and exact manifest and embeds that projection. The offline checker verifies the supplied

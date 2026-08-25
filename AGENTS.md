@@ -11,19 +11,19 @@ Launch requests use the Custom Launch API; repository pull requests are maintena
 - `policy/launch-policy-authority-ownership.v1.json` contains no requirement values. It closes the repository file
   inventory, admission entrypoints and import graph, Rule-ID-to-handler ownership, public projections, and the exact
   frozen vendor exclusion so an unregistered rule source or gate fails repository verification.
-- Applicant projects remain in applicant-owned public GitHub repositories.
+- The closed Custom Launch API request owns current source and graph commitments. A public GitHub application
+  repository is not current ingress, and the API does not fetch or compile caller source.
 - `submissions/` contains immutable legacy application records. It accepts no new or updated application pull requests.
-- Application V3.2 is the complete current contract. It remains project-agnostic and uses Submission 2.1 plus the
-  policy-neutral Trade Capability Manifest V2 when a tradable market is selected. The byte-unchanged V3.1 contract
-  remains accepted compatibility, but it cannot establish `launch-readiness` or the official Programmable Router route.
-- For a selected Programmable Ethereum market, the protected readiness compiler—not applicant assertions—derives the
-  conditional policy subject from the exact verified V3.2 package and source closure. It requires the manifest-resolved
-  canonical Router plan and the mandatory fee rule in `policy/launch-policy.v1.json`. A requested route alone never
-  grants an exemption: unresolved or contradictory source and trade state remains pending, while verified no-market and
-  external-route projects are not applicable rather than rejected.
-- A direct Classic, Graph, or Single Factory call is not canonical Programmable Router provenance. Applicants must not
-  self-assert a stamp, launch label, Registry promotion, or terminal support.
-- `registry/promotions/<project-id>/<launch-id>.json` is maintainer-owned postlaunch evidence. Before Registry, API,
+- Application V3.2 is the final complete contract of the retired GitHub application flow. Its records and the
+  byte-unchanged V3.1 compatibility contract remain available only for historical reproduction; neither is a current
+  launch entrypoint.
+- For preserved V3.2 readiness evidence, the protected compiler—not applicant assertions—derived the conditional policy
+  subject from the exact verified package and source closure. Current API launches bind the applicable Router and fee
+  requirements through the API artifact and the same canonical policy, without creating a GitHub application.
+- A direct Classic, Graph, or Single Factory call is not canonical Programmable Router provenance. API callers and
+  historical applicants must not self-assert a stamp, launch label, Registry promotion, or terminal support.
+- `registry/promotions/<project-id>/<launch-id>.json` is the preserved maintainer-owned postlaunch evidence contract.
+  It is not a current API-caller step. Before Registry, API,
   indexer, or terminal promotion, it must content-bind the passed readiness decision, exact readiness bytes, accepted
   application/package identity, finalized canonical Router transaction, launch identity, lookups, stamp, and proofs.
   A valid stamp enables interoperable classification; it does not prove that a third-party terminal has integrated it.
@@ -34,7 +34,7 @@ Launch requests use the Custom Launch API; repository pull requests are maintena
 - `registry/index.json`, `registry/search-index.json`, and `registry/history/` are generated from closed project records.
 - `.programmable/universal-admission-contract.v1.json` is the separate exact-tree discovery contract for the disabled
   authenticated queue reference. It does not modify the V1 active-contract compatibility envelope, its bound V2 active
-  contract, Applicant Compatibility V2 or legacy V1, Application V3.2, or V3.1 compatibility.
+  contract, Applicant Compatibility V2 or legacy V1, or the frozen Application V3.2 and V3.1 compatibility records.
   `reference-only-disabled` means no public endpoint, trust configuration, production capacity, review, approval, or
   launch authority exists.
 - `vendor/programmable-v4-hook-builder/` is the frozen, receipt-bound validation dependency for historical legacy V2
