@@ -11,9 +11,12 @@ test("the public landing page leads with the API-first launch boundary", () => {
   assert.match(readme, /<h1 align="center">Programmable Launch Policy<\/h1>/u);
   assert.match(readme, /\*\*GitHub launch intake is closed\.\*\*/u);
   assert.match(readme, /https:\/\/programmable\.market\/developers\/api-keys/u);
-  assert.match(readme, /https:\/\/programmable\.market\/developers\/custom-launch-api-v1\.md/u);
-  assert.match(readme, /https:\/\/programmable\.market\/openapi\.json/u);
-  assert.match(readme, /POST https:\/\/api\.programmable\.market\/v1\/custom-launches/u);
+  assert.match(readme, /https:\/\/programmable\.market\/\.well-known\/programmable\.json/u);
+  assert.match(readme, /https:\/\/api\.programmable\.market\/v3\/capabilities/u);
+  assert.match(readme, /https:\/\/programmable\.market\/docs\/developers\/custom-launch/u);
+  assert.match(readme, /https:\/\/programmable\.market\/openapi\/custom-launch-v3\.json/u);
+  assert.match(readme, /POST https:\/\/api\.programmable\.market\/v3\/custom-launches/u);
+  assert.match(readme, /409 CUSTOM_LAUNCH_V1_READ_ONLY/u);
   assert.match(readme, /does not accept or launch projects/u);
   assert.ok(readme.indexOf("GitHub launch intake is closed") < readme.indexOf("## Launch policy"));
 });
@@ -33,7 +36,7 @@ test("public support routes are canonical and have issue forms", () => {
   const support = read("SUPPORT.md");
   const readme = read("README.md");
   assert.match(config, /https:\/\/github\.com\/0xprogrammable\/Launch-Policy\/security\/advisories\/new/u);
-  assert.match(config, /https:\/\/programmable\.market\/developers\/custom-launch-api-v1\.md/u);
+  assert.match(config, /https:\/\/programmable\.market\/\.well-known\/programmable\.json/u);
   assert.doesNotMatch(config, /programmable-registry|programmable-v4-builder|hookbuilder\/discussions/u);
   for (const source of [config, support, readme]) {
     assert.doesNotMatch(source, /github\.com\/0xprogrammable\/(?:hookbuilder|Hookbuilder-Skill)/u);
@@ -59,7 +62,7 @@ test("contribution surfaces accept maintenance and preserve historical records",
   assert.match(contributing, /GitHub launch intake is closed/u);
   assert.match(contributing, /Repository pull requests are for maintenance only/u);
   assert.match(contributing, /Changes under `submissions\/` or `canary-submissions\/` are rejected/u);
-  assert.match(maturity, /checked-in intake state is\s+`closed`/u);
+  assert.match(maturity, /GitHub application and Workflow Canary intake is closed/u);
   assert.match(migration, /GitHub intake is retired/u);
   assert.match(migration, /old `0xprogrammable\/submit-launch` name.*historical provenance/su);
   assert.match(template, /Programmable Launch Policy accepts maintenance pull requests only/u);

@@ -1,8 +1,12 @@
 # Contributing
 
 GitHub launch intake is closed. Do not submit a launch, application, template, or Workflow Canary through this
-repository. Use the [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md) with an
-[API key](https://programmable.market/developers/api-keys).
+repository. Start at the public
+[`/.well-known/programmable.json`](https://programmable.market/.well-known/programmable.json), follow its advertised
+[V3 capabilities](https://api.programmable.market/v3/capabilities), checksum-bound CLI, guide, and OpenAPI, then send
+the CLI-produced request bytes to `POST https://api.programmable.market/v3/custom-launches` with an
+[API key](https://programmable.market/developers/api-keys). V1 creation is historical read-only compatibility and
+returns non-retryable `409 CUSTOM_LAUNCH_V1_READ_ONLY`.
 
 Repository pull requests are for maintenance only. Keep one pull request to one of these paths:
 
@@ -16,20 +20,23 @@ the retired GitHub intake and must not be rewritten, extended, or repurposed.
 
 ## Launch policy maintenance
 
-`policy/launch-policy.v1.json` is the authored source for Programmable launch requirements. Do not copy a requirement
-into generated Markdown, a workflow, validator prose, or an API request. Keep stable Rule IDs, update the policy version
-when rule semantics change, add a focused regression, then run:
+`policy/launch-policy.v1.json` is the authored source for Programmable Router, fee, and promotion business obligations.
+`policy/custom-launch-admission-v3.json` separately publishes the current V3 profile, finding codes, evidence duties,
+and claim boundaries; it cannot add or override business rules. The private API remains the executable admission
+authority. Do not copy either contract into a hidden workflow or caller-controlled assertion. Keep stable IDs, update
+the appropriate version when semantics change, add a focused regression, then run:
 
 ```bash
 npm run policy:generate
 npm run policy:check
+npm run admission:v3 -- --check
 npm run authority:write
 npm run authority:check
 npm test
 ```
 
-Do not hand-edit `docs/LAUNCH_POLICY.md`, `.programmable/active-contract.json`, or
-`.programmable/active-contract.v2.json`. The authority-ownership manifest records the exact reviewed file inventory,
+Do not hand-edit `docs/LAUNCH_POLICY.md`, `.programmable/custom-launch-admission.v3.json`,
+`.programmable/active-contract.json`, or `.programmable/active-contract.v2.json`. The authority-ownership manifest records the exact reviewed file inventory,
 entrypoints, import closures, Rule-ID handlers, public projections, and frozen legacy vendor exclusion.
 
 ## Registry maintenance

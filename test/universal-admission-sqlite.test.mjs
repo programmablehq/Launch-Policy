@@ -140,6 +140,40 @@ test("SQLite BEGIN IMMEDIATE closes same-request and conflicting-revision races 
   store.close();
 });
 
+test("SQLite constructor retries WAL configuration while another process owns the writer lock", async (t) => {
+  const directory = privateTemporaryDirectory();
+  t.after(() => fs.rmSync(directory, { force: true, recursive: true }));
+  const dbPath = path.join(directory, "admission.sqlite");
+  const readyPath = path.join(directory, "constructor-ready");
+  const bootstrap = new UniversalAdmissionSqliteStore({ dbPath, nowMs: "1000000", serviceAudience: DEFAULT_UNIVERSAL_ADMISSION_SERVICE_AUDIENCE });
+  bootstrap.close();
+
+  const writer = new DatabaseSync(dbPath, { readBigInts: true, timeout: 0 });
+  writer.exec("BEGIN IMMEDIATE");
+  try {
+    const bytes = admissionBytes({ applicationId: "constructor-lock-retry" });
+    const resultPromise = runWorker({
+      bytesBase64: bytes.toString("base64"),
+      constructorReadyPath: readyPath,
+      dbPath,
+      nowMs: "1000000",
+      operation: "submit",
+      policy: DEFAULT_SQLITE_RUNTIME_POLICY,
+      principalContext: principalContext(),
+      serviceAudience: DEFAULT_UNIVERSAL_ADMISSION_SERVICE_AUDIENCE,
+      ...requestBinding("constructor-lock-retry")
+    });
+    await waitForRegularFile(readyPath);
+    await new Promise((resolve) => setTimeout(resolve, 350));
+    writer.exec("ROLLBACK");
+    const result = await resultPromise;
+    assert.equal(result.status, "QUEUED");
+  } finally {
+    try { writer.exec("ROLLBACK"); } catch {}
+    writer.close();
+  }
+});
+
 test("SQLite persists deterministic equivocation rejection and request charge across restart", async (t) => {
   const directory = privateTemporaryDirectory();
   t.after(() => fs.rmSync(directory, { force: true, recursive: true }));
@@ -941,6 +975,19 @@ function privateTemporaryDirectory() {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "programmable-admission-sqlite-"));
   fs.chmodSync(directory, 0o700);
   return directory;
+}
+
+async function waitForRegularFile(filePath) {
+  const deadline = Date.now() + 5_000;
+  while (Date.now() < deadline) {
+    try {
+      if (fs.lstatSync(filePath).isFile()) return;
+    } catch (error) {
+      if (error?.code !== "ENOENT") throw error;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  throw new Error("Timed out waiting for the SQLite constructor race barrier.");
 }
 
 function mutateDatabase(dbPath, operation) {

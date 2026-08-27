@@ -1,8 +1,11 @@
 # Legacy intake migration
 
 > [!IMPORTANT]
-> GitHub intake is retired. This document preserves migration history; new launches use the
-> [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+> GitHub intake is retired. This document preserves migration history. New launches start at
+> [`/.well-known/programmable.json`](https://programmable.market/.well-known/programmable.json), follow its advertised
+> V3 capabilities, CLI, guide, and OpenAPI, then submit to
+> `POST https://api.programmable.market/v3/custom-launches`. V1 creation is historical read-only compatibility and
+> returns non-retryable `409 CUSTOM_LAUNCH_V1_READ_ONLY`.
 
 The version 1 review schemas retain their original `0xprogrammable/apply` and `submit-launch` identifiers for backward
 compatibility. These are stable legacy protocol names, not the current repository location. Current policy links use

@@ -1,5 +1,9 @@
 # Central Launch Policy Implementation Plan
 
+> Historical implementation plan. It records the retired GitHub application transport and must not be used as current
+> launch instructions. Current launches start at `https://programmable.market/.well-known/programmable.json` and use
+> the advertised V3 capabilities, CLI, guide, OpenAPI, and `POST https://api.programmable.market/v3/custom-launches`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Make `0xprogrammable/submit-launch` the single authored source of every Programmable-specific build, canary, review, and future production-launch requirement, with Hookbuilder, third-party agents, trusted intake, the future Security Bot, and Website eligibility acting only as bound consumers.

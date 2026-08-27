@@ -1,9 +1,12 @@
 # Policy-Bound Review Standard v1
 
-Programmable review decisions consume the canonical
-[`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json). The reviewer, an LLM, a scanner, and the legacy Open
-Review adapter cannot add requirements, change severity or enforcement, select a policy file, or create an approval
-outcome.
+This standard covers repository policy-checker decisions, not current V3 API admission. The canonical
+[`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json) owns Router, fee, and promotion business obligations;
+the separate public
+[`custom-launch-admission-v3.json`](../policy/custom-launch-admission-v3.json) discloses current admission findings,
+evidence duties, and claim boundaries. Only the private Custom Launch API exact-source scanner and Router simulation
+can issue executable admission evidence. The reviewer, an LLM, a local scanner, and the legacy Open Review adapter
+cannot add requirements, change severity or enforcement, select a policy file, or create an approval outcome.
 
 The protected evaluator reads the policy only from the exact trusted Launch Policy base commit at the fixed repository
 and path. It compares all eleven fields of the recorded policy binding before it considers rule evaluations. A changed
@@ -44,8 +47,9 @@ the declared Uniswap v4 context.
 | `profile_disabled` | The selected profile is disabled and has no outcome. |
 
 `build` may return `BUILT_NOT_REVIEWED`. `workflow-canary` may return `CANARY_WORKFLOW_PASSED` while remaining hidden,
-non-production and without real funds. `production-launch` is disabled and returns no outcome. No current profile can
-authorize a launch.
+non-production and without real funds. The enabled `production-launch` profile may return
+`PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED` only after every applicable current rule passes. No profile authorizes
+a launch.
 
 Every decision has this fixed authority:
 
@@ -87,8 +91,9 @@ Downstream consumers use `canonicalLaunchPolicyDecision(decision, trustedPolicyR
 
 The old `programmable.open-review-input.v1` files remain accepted by the one-file CLI so existing examples and callers
 fail closed. Because that legacy format cannot bind the current policy or prove the current launch requirement, the
-adapter evaluates only the disabled `production-launch` profile. Old obligations and witnesses remain bounded,
-explicitly unbound compatibility advisories. They are not central-policy Rule IDs and never become findings or
+adapter projects into the enabled checker-only `production-launch` profile with no caller-supplied current-rule
+evaluations. It therefore remains `analysis_pending` with a null outcome. Old obligations and witnesses remain bounded,
+explicitly unbound compatibility advisories; they are not central-policy Rule IDs and never become findings or
 approval.
 
 ```bash

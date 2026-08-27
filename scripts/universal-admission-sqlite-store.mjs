@@ -80,7 +80,7 @@ const TERMINAL_STATES = new Set(["dead-lettered", "processing-completed"]);
 const GC_CANDIDATE_REASONS = new Set(["orphan", "terminal-payload"]);
 const BUSY_ERRCODE = 5;
 const FULL_ERRCODE = 13;
-const MAX_BUSY_RETRIES = 4;
+const MAX_BUSY_RETRIES = 8;
 const SQLITE_APPLICATION_ID = 1_347_764_529;
 const MAX_PROTOCOL_TIMESTAMP = 999_999_999_999_999_999n;
 const SLEEP_ARRAY = new Int32Array(new SharedArrayBuffer(4));
@@ -1556,23 +1556,25 @@ export class UniversalAdmissionSqliteStore {
   }
 
   #configureDatabase() {
-    this.db.exec("PRAGMA page_size=4096");
-    this.db.exec("PRAGMA auto_vacuum=INCREMENTAL");
-    const mode = this.db.prepare("PRAGMA journal_mode=WAL").get();
-    if (String(mode.journal_mode).toLowerCase() !== "wal") protocolFail("UNIVERSAL_ADMISSION_SQLITE_WAL_UNAVAILABLE", "SQLite WAL mode is required for the reference backend.");
-    this.db.exec(`PRAGMA application_id=${SQLITE_APPLICATION_ID}`);
-    this.db.exec("PRAGMA synchronous=FULL");
-    this.db.exec("PRAGMA foreign_keys=ON");
-    this.db.exec("PRAGMA trusted_schema=OFF");
-    this.db.exec("PRAGMA cell_size_check=ON");
-    this.db.exec("PRAGMA wal_autocheckpoint=1000");
-    this.db.exec("PRAGMA journal_size_limit=67108864");
-    const maximumPages = this.maximumDatabaseBytes / 4096n;
-    if (maximumPages < 256n) protocolFail("UNIVERSAL_ADMISSION_SQLITE_POLICY_MISMATCH", "SQLite database byte limit must reserve at least 1 MiB.");
-    const pageLimit = this.#get(`PRAGMA max_page_count=${maximumPages}`).max_page_count;
-    if (pageLimit !== maximumPages) protocolFail("UNIVERSAL_ADMISSION_SQLITE_POLICY_MISMATCH", "SQLite could not enforce the configured database page limit.");
-    this.db.exec("PRAGMA temp_store=MEMORY");
-    this.db.exec("PRAGMA mmap_size=0");
+    this.#retryBusy(() => {
+      this.db.exec("PRAGMA page_size=4096");
+      this.db.exec("PRAGMA auto_vacuum=INCREMENTAL");
+      const mode = this.db.prepare("PRAGMA journal_mode=WAL").get();
+      if (String(mode.journal_mode).toLowerCase() !== "wal") protocolFail("UNIVERSAL_ADMISSION_SQLITE_WAL_UNAVAILABLE", "SQLite WAL mode is required for the reference backend.");
+      this.db.exec(`PRAGMA application_id=${SQLITE_APPLICATION_ID}`);
+      this.db.exec("PRAGMA synchronous=FULL");
+      this.db.exec("PRAGMA foreign_keys=ON");
+      this.db.exec("PRAGMA trusted_schema=OFF");
+      this.db.exec("PRAGMA cell_size_check=ON");
+      this.db.exec("PRAGMA wal_autocheckpoint=1000");
+      this.db.exec("PRAGMA journal_size_limit=67108864");
+      const maximumPages = this.maximumDatabaseBytes / 4096n;
+      if (maximumPages < 256n) protocolFail("UNIVERSAL_ADMISSION_SQLITE_POLICY_MISMATCH", "SQLite database byte limit must reserve at least 1 MiB.");
+      const pageLimit = this.#get(`PRAGMA max_page_count=${maximumPages}`).max_page_count;
+      if (pageLimit !== maximumPages) protocolFail("UNIVERSAL_ADMISSION_SQLITE_POLICY_MISMATCH", "SQLite could not enforce the configured database page limit.");
+      this.db.exec("PRAGMA temp_store=MEMORY");
+      this.db.exec("PRAGMA mmap_size=0");
+    });
   }
 
   #initialize(initialNow) {
@@ -2807,6 +2809,23 @@ export class UniversalAdmissionSqliteStore {
         if (begun) {
           try { this.db.exec("ROLLBACK"); } catch {}
         }
+        if (isBusy(error) && attempt < MAX_BUSY_RETRIES) {
+          Atomics.wait(SLEEP_ARRAY, 0, 0, 4 + attempt * 7);
+          continue;
+        }
+        if (isBusy(error)) throw new UniversalAdmissionProtocolError("UNIVERSAL_ADMISSION_SQLITE_BUSY", "SQLite writer is temporarily busy.", { retryable: true, retryAfterMs: "50" });
+        if (isFull(error)) throw new UniversalAdmissionProtocolError("UNIVERSAL_ADMISSION_SQLITE_DATABASE_CAPACITY", "SQLite database hard byte capacity is exhausted.", { retryable: true });
+        throw error;
+      }
+    }
+    throw new UniversalAdmissionProtocolError("UNIVERSAL_ADMISSION_SQLITE_BUSY", "SQLite writer is temporarily busy.", { retryable: true, retryAfterMs: "50" });
+  }
+
+  #retryBusy(operation) {
+    for (let attempt = 0; attempt <= MAX_BUSY_RETRIES; attempt += 1) {
+      try {
+        return operation();
+      } catch (error) {
         if (isBusy(error) && attempt < MAX_BUSY_RETRIES) {
           Atomics.wait(SLEEP_ARRAY, 0, 0, 4 + attempt * 7);
           continue;

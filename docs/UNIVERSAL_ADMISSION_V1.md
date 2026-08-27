@@ -1,15 +1,18 @@
 # Universal Admission V1
 
 > [!NOTE]
-> This is disabled reference code, not the current launch front door. Current launches use the
-> [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+> This is disabled reference code, not the current launch front door. Current launches start at
+> [`/.well-known/programmable.json`](https://programmable.market/.well-known/programmable.json), follow its advertised
+> V3 capabilities, CLI, guide, and OpenAPI, then submit to
+> `POST https://api.programmable.market/v3/custom-launches`. V1 creation is historical read-only compatibility and
+> returns non-retryable `409 CUSTOM_LAUNCH_V1_READ_ONLY`.
 
-Universal Admission is the small front door for an open-world project. It is deliberately separate from the
-Programmable launch policy and from the later security/review package.
+Universal Admission is a preserved project-neutral reference envelope for an open-world project. It is deliberately
+separate from the current Custom Launch API, the Programmable launch policy, and later security or review evidence.
 
 ## What it does
 
-An envelope can be filed when it has:
+A preserved envelope is structurally valid when it has:
 
 1. declared exact public source coordinates (`repositoryUrl`, commit, tree, path, and package digest);
 2. an explicit execution-surface list;
@@ -37,10 +40,10 @@ The JSON Schema closes field shapes, resource bounds, and byte-identical duplica
 runtime additionally requires each `id` to be unique inside its disclosure section; standard JSON Schema cannot express
 that keyed-array relationship. Schema acceptance is therefore a structural preflight, not the final admission result.
 
-The current central rule `LAUNCH.ETHEREUM_AND_TREASURY_10_BPS` is not a universal admission rule. If an applicant selects
-`programmable-ethereum-mainnet`, this front door returns `platform-route-pending`; the protected route/launch reviewer
-must resolve the exact current policy and its policy binding later. No applicant-authored envelope can self-certify that
-route.
+The current central rule `LAUNCH.ETHEREUM_AND_TREASURY_10_BPS` is not a Universal Admission rule. In the preserved
+reference evaluator, an envelope that selects `programmable-ethereum-mainnet` returns `platform-route-pending`; the
+result cannot satisfy the current V3 API's exact-source, admission-receipt, or Router-simulation evidence. No
+caller-authored envelope can self-certify that route.
 
 This separation follows the protocol boundary in the official Uniswap material: v4 hooks are permissionless protocol
 extensions, while frontend hook routing is a separate interface policy. Uniswap's hook security guidance is voluntary
@@ -99,15 +102,14 @@ verify every bound digest. `deployment.state: "reference-only-disabled"`, `enabl
 and trust-snapshot fields mean the queue cannot be selected as a live transport. The older active contract,
 Applicant Compatibility V1, and Application V3.1 remain separate and unchanged.
 
-The production-scale path remains a separate transport plane:
+The following production-scale diagram is a preserved reference design, not a current ingress or launch instruction:
 
 ```text
 canonical envelope + size/hash
         -> dedupe/CAS + tenant quota
         -> durable sharded queue
         -> bounded workers + shared (repo, commit, tree, path) cache
-        -> semantic/review evidence
-        -> optional GitHub draft adapter / maintainer decision
+        -> reference semantic/review evidence
 ```
 
 The local reference spool returns only `QUEUED` or `DUPLICATE`. A future production ingress may also need bounded

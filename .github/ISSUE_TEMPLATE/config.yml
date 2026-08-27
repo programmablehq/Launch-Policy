@@ -9,6 +9,6 @@ contact_links:
   - name: Propose a Launch Policy idea
     url: https://github.com/0xprogrammable/Launch-Policy/discussions/new?category=ideas
     about: Discuss a policy, registry, or checker improvement before opening a pull request.
-  - name: Read the Custom Launch API documentation
-    url: https://programmable.market/developers/custom-launch-api-v1.md
-    about: Prepare a request bundle and use the current API-first launch path.
+  - name: Start a V3 Custom Launch
+    url: https://programmable.market/.well-known/programmable.json
+    about: Follow current discovery to V3 capabilities, CLI, guide, OpenAPI, and API submission.

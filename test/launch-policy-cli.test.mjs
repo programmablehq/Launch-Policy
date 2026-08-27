@@ -84,6 +84,12 @@ test("generated Markdown and active contract are byte-exact projections", () => 
   assert.equal(artifacts.get(".programmable/active-contract.json"), read(".programmable/active-contract.json"));
   assert.deepEqual(verifyLaunchPolicyArtifacts({ repositoryRoot: root }), {
     activeContractPath: ".programmable/active-contract.json",
+    customLaunchAdmission: {
+      bindingPath: ".programmable/custom-launch-admission.v3.json",
+      descriptorPath: "policy/custom-launch-admission-v3.json",
+      descriptorSha256: JSON.parse(read(".programmable/custom-launch-admission.v3.json")).descriptor.sha256,
+      ok: true
+    },
     policyPath: "policy/launch-policy.v1.json",
     policySha256: record.sha256,
     renderedPolicyPath: "docs/LAUNCH_POLICY.md"
@@ -98,6 +104,7 @@ test("generated-artifact verifier fails closed on stale bytes", (t) => {
   const sourcePaths = new Set([
     ...Object.values(ACTIVE_CONTRACT_ROLE_PATHS_V1).flat(),
     ...Object.values(ACTIVE_CONTRACT_ROLE_PATHS_V2).flat(),
+    "policy/custom-launch-admission-v3.json",
     "vendor/programmable-applicant-validator/scripts/evm-encoding-core.mjs",
     "vendor/programmable-v4-hook-builder/scripts/github-public-source-lossless-json.mjs"
   ]);

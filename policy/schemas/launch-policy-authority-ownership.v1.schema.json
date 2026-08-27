@@ -209,6 +209,9 @@
         "canonical-admission-policy": {
           "$ref": "#/$defs/pathArray"
         },
+        "current-admission-disclosure": {
+          "$ref": "#/$defs/pathArray"
+        },
         "current-admission-implementation": {
           "$ref": "#/$defs/pathArray"
         },
@@ -236,6 +239,7 @@
         "authority-ownership-control",
         "authority-ownership-manifest",
         "canonical-admission-policy",
+        "current-admission-disclosure",
         "current-admission-implementation",
         "current-admission-support",
         "frozen-legacy-compatibility",

@@ -27,5 +27,5 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "::error title=GitHub launch intake is closed::Create an API key at https://programmable.market/developers/api-keys and submit through https://programmable.market/developers/custom-launch-api-v1.md"
+          echo "::error title=GitHub launch intake is closed::Create a key at https://programmable.market/developers/api-keys, then start at https://programmable.market/.well-known/programmable.json and follow the advertised V3 capabilities, CLI, https://programmable.market/developers/custom-launch-api-v1.md guide, and OpenAPI before submitting to POST https://api.programmable.market/v3/custom-launches. V1 creation is read-only compatibility."
           exit 1

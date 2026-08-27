@@ -1,8 +1,12 @@
 # Hidden Canary eligibility v1
 
-This contract turns one exact, passing Workflow Canary result into a short-lived Website-facing eligibility envelope.
-It is only for a hidden canary surface. It cannot enable public discovery, production routing, real funds, an audit
-claim, or launch authorization.
+> [!IMPORTANT]
+> This is preserved compatibility for historical Workflow Canary evidence. Canary intake is closed, and the current
+> V3 Custom Launch API neither creates nor consumes this envelope.
+
+For historical reproduction, this contract turns one exact passing Workflow Canary result into a short-lived
+Website-facing eligibility envelope. It is only for a hidden canary surface. It cannot enable public discovery,
+production routing, real funds, an audit claim, or launch authorization.
 
 ## Authority chain
 
