@@ -2,7 +2,11 @@
 
 > [!IMPORTANT]
 > Workflow Canary intake is retired. This document preserves the historical contract; do not submit a Canary pull
-> request. Current launches use the [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+> request. Current launches start at
+> [`/.well-known/programmable.json`](https://programmable.market/.well-known/programmable.json), follow its advertised
+> V3 capabilities, CLI, guide, and OpenAPI, then submit to
+> `POST https://api.programmable.market/v3/custom-launches`. V1 creation is historical read-only compatibility and
+> returns non-retryable `409 CUSTOM_LAUNCH_V1_READ_ONLY`.
 
 The workflow canary was a one-file, hidden test of the GitHub application path. It did not approve a launch, publish a
 project, create a Registry record, claim an audit, enable production routing, or permit real-user funds.

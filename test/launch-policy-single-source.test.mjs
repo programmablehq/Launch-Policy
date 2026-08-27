@@ -27,7 +27,7 @@ import { evaluateTrustedLaunchPolicyReview } from "../review/launch-policy-revie
 const root = path.resolve(import.meta.dirname, "..");
 const canonicalPolicyPath = "policy/launch-policy.v1.json";
 
-test("the closed ownership manifest proves one current authored admission authority", () => {
+test("the closed ownership manifest separates business-policy authority from the V3 admission disclosure", () => {
   const report = verifyLaunchPolicyAuthorityOwnership({ repositoryRoot: root });
   const manifest = readLaunchPolicyAuthorityOwnership({ repositoryRoot: root });
   const validateManifest = new Ajv2020({ allErrors: true, strict: true }).compile(
@@ -44,6 +44,7 @@ test("the closed ownership manifest proves one current authored admission author
     rules: manifest.semanticRuleMap.length
   });
   assert.deepEqual(manifest.fileClasses["canonical-admission-policy"], [canonicalPolicyPath]);
+  assert.deepEqual(manifest.fileClasses["current-admission-disclosure"], ["policy/custom-launch-admission-v3.json"]);
   assert.deepEqual(manifest.fileClasses["authority-ownership-manifest"], [AUTHORITY_OWNERSHIP_MANIFEST_PATH]);
   assert.equal(manifest.canonicalPolicy.path, canonicalPolicyPath);
   assert.equal(manifest.canonicalPolicy.schemaPath, "policy/schemas/launch-policy.v1.schema.json");
@@ -358,9 +359,10 @@ test("every semantic finding and handler maps bijectively to a central Rule ID",
   }
 
   const expectedConsumers = {
-    "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS": [
-      "review/launch-policy-review-core.mjs",
-      "scripts/launch-policy-core.mjs",
+      "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS": [
+        "review/launch-policy-review-core.mjs",
+        "scripts/custom-launch-admission-v3-core.mjs",
+        "scripts/launch-policy-core.mjs",
       "scripts/launch-policy-handlers.mjs",
       "scripts/programmable-launch-router-readiness-core.mjs",
       "scripts/registry-core.mjs",
@@ -500,18 +502,22 @@ test("public docs separate the current API flow from historical GitHub eligibili
     ["public intake", beta],
     ["agent contract", agents]
   ]) {
-    assert.match(source, /policy\/launch-policy\.v1\.json/u, `${name} must name the sole authored policy`);
+    assert.match(source, /policy\/launch-policy\.v1\.json/u, `${name} must name the canonical business policy`);
   }
-  assert.match(architecture, /current launch flow is: API key → closed contract bundle and required evidence → Custom Launch API preparation/u);
-  assert.match(lifecycle, /received → validating → prepared → authorized → submitted → finalized/u);
+  assert.match(architecture, /current launch flow is: `\.well-known` → live capabilities → advertised checksum-bound CLI → `pack`/u);
+  assert.match(lifecycle, /received -> validating[\s\S]*prepared -> simulating -> authorized -> submitted -> finalized/u);
+  assert.match(lifecycle, /awaiting_funding_authorization -> funding_authorization_verified/u);
   assert.match(lifecycle, /Preserved compatibility and promotion evidence states/u);
   assert.match(architecture, /checked-in namespaces are now immutable and\s+accept no new revisions/u);
   assert.match(agents, /final complete contract of the retired GitHub application flow/u);
   assert.doesNotMatch(agents + architecture + lifecycle, /complete current launch contract|current full application package|new or existing compatibility draft|New V3\.2 revisions|may enter only as an unreviewed draft|must use Application V3\.2/u);
   assert.match(beta, /GitHub launch intake is closed/u);
   assert.match(beta, /No contract in that list opens GitHub intake/u);
-  assert.match(agents, /only authored source of current Programmable-specific admission requirements/u);
-  assert.match(readme, /policy-defined 10 bps Programmable share of gross canonical-pool volume/u);
+  assert.match(agents, /only authored source of current Programmable Router, fee, and promotion business\s+obligations/u);
+  assert.match(agents, /separate public declarative contract for the current V3 profile/u);
+  assert.match(agents, /private Custom Launch API exact-source\/runtime scanner and platform-owned Router simulation are the sole\s+executable admission-evidence authorities/u);
+  assert.match(readme, /request-bound policy obligation for the 10 bps Programmable share/u);
+  assert.match(readme, /public V3 profile keeps `feeBehaviorClaim: false`/u);
   assert.match(readme, /launch-readiness.*checker-only/su);
   assert.match(readme, /GitHub launch intake is closed/u);
   assert.match(readme, /Custom Launch API/u);

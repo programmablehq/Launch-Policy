@@ -1,9 +1,39 @@
 # Discovery contract
 
-Agents and applications start with `registry/index.json` or `registry/search-index.json` at one exact Launch Policy
-commit. They do not crawl project repositories or load every application into context. Discovery answers what records
-exist; it is not the source of launch requirements. The sole normative source of Programmable-specific requirements is
-[`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json).
+New-launch agents start at the live
+[`https://programmable.market/.well-known/programmable.json`](https://programmable.market/.well-known/programmable.json)
+document, not this Registry and not a copied endpoint. They follow the advertised V3 capabilities, checksum-bound CLI,
+guide, pack-config schema, and OpenAPI before producing request bytes for `/v3/custom-launches`. V1 creation and the
+GitHub submission flow are historical compatibility only.
+
+Registry consumers separately start with `registry/index.json` or `registry/search-index.json` at one exact Launch
+Policy commit. They do not crawl project repositories or load every application into context. Registry discovery
+answers what preserved records exist; it is not current API ingress and it is not the source of launch requirements.
+
+Authority is intentionally split by responsibility. [`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json)
+owns Router, fee, and promotion business obligations. The public
+[V3 admission descriptor](../policy/custom-launch-admission-v3.json) discloses current profile invariants, hard-block
+finding rules, evidence-bound codes, and false claim boundaries. Its generated
+[digest/cross-projection contract](../.programmable/custom-launch-admission.v3.json) binds the descriptor and business
+policy digests plus the exact discovery, capabilities, and OpenAPI JSON pointers. The private Custom Launch API is the
+sole executable exact-source and Router-simulation evidence authority; a CLI, client, or agent cannot issue admission.
+
+## Required current-launch discovery behavior
+
+1. Fetch `https://programmable.market/.well-known/programmable.json` without authentication.
+2. Require `customLaunchApi.status: "live"`, select `customLaunchApi.generalHookProfile`, and follow its advertised
+   `capabilitiesUrl`, CLI release/checksum, guide, pack-config schema, and V3 OpenAPI URL.
+3. Require the live capabilities profile identity and admission boundaries to match the selected discovery profile.
+4. Install only the advertised checksum-bound CLI release and run `pack` then `validate --remote`.
+5. Submit the same byte-identical request to `POST https://api.programmable.market/v3/custom-launches`; preserve its
+   journal, request bytes, and idempotency key.
+6. Poll the single resource. Stop automation at every wallet action; the controller reviews, signs, and broadcasts the
+   exact transaction separately, then status polling resumes.
+7. Keep deployment, trading, platform-fee evidence, source verification, indexing, and featured placement as separate
+   truth axes.
+
+An API key is read only from `PROGRAMMABLE_API_KEY` or an encrypted secret store. It contains no policy, cannot sign,
+and must never appear in discovery requests, source, prompts, chat, logs, screenshots, or support reports.
 
 ## Required Registry consumer behavior
 
@@ -70,12 +100,12 @@ official Developer discovery document
   -> token lookup + PoolManager-plus-pool lookup + launchStamp + required stampProof values
 ```
 
-Resolve the Router through the current official
-[Developer discovery document](https://developers.programmable.family/.well-known/programmable.json) and its
-`manifestUrl`. Verify the manifest-selected chain, activation range, Router address, runtime-code hash, ABI URL and
-SHA-256, immutable bindings, and finality policy. Never treat one address copied into source, policy, documentation,
-token metadata, or an API response as an eternal Router address. For historical verification, the selected manifest
-record may now be `live` or `retired`, but it must have been active at the observed launch block.
+Resolve the Router from the `manifestUrl` advertised by the current official
+[Programmable discovery document](https://programmable.market/.well-known/programmable.json). Verify the
+manifest-selected chain, activation range, Router address, runtime-code hash, ABI URL and SHA-256, immutable bindings,
+and finality policy. Never treat one address copied into source, policy, documentation, token metadata, or an API
+response as an eternal Router address. For historical verification, the selected manifest record may now be `live` or
+`retired`, but it must have been active at the observed launch block.
 
 Only the atomic Router `launchAndStampV1` path creates canonical V1 provenance. Direct Classic Factory, Graph Factory,
 or Single Factory calls are not labelable afterward. A valid receipt therefore records
@@ -108,7 +138,7 @@ tradability, provider support, Uniswap endorsement, or suitability for a transac
 [launch-stamp reference](https://developers.programmable.family/reference/launch-stamp/) and
 [terminal and scanner guide](https://developers.programmable.family/guides/terminals-and-scanners/).
 
-## Transport discovery is separate
+## Disabled reference transport is separate
 
 `.programmable/universal-admission-contract.v1.json` is a same-tree discovery contract for the authenticated Universal
 Admission reference surface. It is not a Registry project record and is not part of the active contract, current

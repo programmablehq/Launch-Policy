@@ -2,26 +2,51 @@
 
 > [!IMPORTANT]
 > GitHub application intake is closed. Application states below remain as historical and compatibility evidence; new
-> launch preparation uses the [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+> launch preparation starts at
+> [`/.well-known/programmable.json`](https://programmable.market/.well-known/programmable.json) and follows its
+> advertised V3 capabilities, CLI, guide, and OpenAPI to `POST https://api.programmable.market/v3/custom-launches`.
+> V1 creation is historical read-only compatibility and returns non-retryable `409 CUSTOM_LAUNCH_V1_READ_ONLY`.
 
-Every Programmable-specific launch requirement comes from
-[`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json). Application schemas define inert transport and
-evidence contracts; the [policy-bound reviewer](OPEN_REVIEW_STANDARD.md), readiness checker, Workflow Canary, and
-Website eligibility verifier consume one exact protected-base policy binding. None may maintain a second requirement
-list. See the [complete launch requirements](COMPLETE_LAUNCH_REQUIREMENTS.md) for the Rule-ID and command map.
+[`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json) owns Programmable Router, fee, and promotion business
+obligations. The separate public
+[`policy/custom-launch-admission-v3.json`](../policy/custom-launch-admission-v3.json) discloses the current V3 profile,
+finding rules, evidence duties, and false-claim boundaries without adding business requirements. The private Custom
+Launch API exact-source scanner and Router simulation are the sole executable admission-evidence authorities.
+
+The application schemas, [policy-bound reviewer](OPEN_REVIEW_STANDARD.md), Workflow Canary, and Website eligibility
+verifier described below remain historical or compatibility consumers. They cannot accept a current API request or
+maintain a second requirement list. See the
+[complete launch requirements](COMPLETE_LAUNCH_REQUIREMENTS.md) for the current authority and Rule-ID map.
 
 ## Current Custom Launch API lifecycle
 
+Resolve the current transport from public
+[`discovery`](https://programmable.market/.well-known/programmable.json), require the advertised
+[`/v3/capabilities`](https://api.programmable.market/v3/capabilities) profile, and use its checksum-bound CLI to
+`pack`, `validate --remote`, and `submit` the byte-identical request. A repository application or pull request cannot
+enter this lifecycle.
+
 The API contract owns the current request states:
-`received → validating → prepared → authorized → submitted → finalized`.
-`failed` and `cancelled` are terminal alternatives. `authorized` means that the exact wallet transaction is available
-for separate review; it does not sign or broadcast it.
+
+```text
+received -> validating
+             |-> awaiting_funding_authorization -> funding_authorization_verified
+             |                                             |
+             +--------------------> pending_review <-> action_required
+                                           |
+                                      prepared -> simulating -> authorized -> submitted -> finalized
+```
+
+`failed` and `cancelled` are terminal alternatives. The funding-authorization branch applies only when the selected
+funding mode requires it. `action_required` carries deterministic remediation for an exact blocking condition; it is
+not a wallet action or a request for manual approval. Only `awaiting_funding_authorization` and `authorized` expose
+separate controller-wallet handoffs. The API never signs or broadcasts for the wallet.
 
 ## Preserved compatibility and promotion evidence states
 
 | State | Exact evidence | Meaning |
 | --- | --- | --- |
-| Admission envelope prepared | Canonical Universal Admission V1 bytes | Source coordinates and disclosures are declared; they are not remotely verified or reviewed |
+| Historical Universal Admission envelope prepared | Canonical Universal Admission V1 bytes | A preserved reference declaration is structurally valid; it is not current API ingress and its source coordinates are not remotely verified or reviewed |
 | Historical Application V3.2 valid | One immutable V3.2 revision plus protected package-validator result | A preserved full application package was valid for review under the retired GitHub flow; no current launch right exists |
 | Historical Application V3.1 compatible | V3.1 revision validated only under the unchanged compatibility contract | A preserved compatibility draft remains reproducible; it cannot establish a current launch or the official Programmable route |
 | Built | `BUILT_NOT_REVIEWED` under the bound `build` profile | The Builder completed declared checks; no review or launch right exists |
@@ -78,7 +103,8 @@ authority. Use the Custom Launch API for current launches.
 The six-file V2 application is a frozen historical transport and the checked-in intake state is `closed`.
 Its compatibility checks, green checks, merge, or old [launch-entitlement
 bridge](ACCEPTANCE_ENTITLEMENT_BRIDGE_V1.md) cannot satisfy Workflow Canary, Website eligibility, readiness, or current
-launch-policy requirements. The `production-launch` profile is disabled and no path emits `LAUNCH_APPROVED`.
+launch-policy requirements. The current `production-launch` profile is enabled only as a non-authorizing checker and
+emits `PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED`; no path emits `LAUNCH_APPROVED`.
 
 Application validity, review, readiness, a Router stamp, acceptance, or availability is not an independent audit,
 safety finding, liquidity or sellability guarantee, deployment authorization, provider guarantee, Uniswap

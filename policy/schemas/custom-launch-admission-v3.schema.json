@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/0xprogrammable/Launch-Policy/blob/main/policy/schemas/custom-launch-admission-v3.schema.json",
+  "title": "Programmable Custom Launch Admission Descriptor V3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "descriptorVersion",
+    "profile",
+    "authority",
+    "transport",
+    "staticAdmission",
+    "hardSafetyInvariants",
+    "behaviorAssurance",
+    "advancedFeaturesRequireEvidence",
+    "feePolicyProjection",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "programmable.custom-launch-admission-descriptor.v3" },
+    "descriptorVersion": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$" },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profileId", "profileRevision", "profileVersion", "chainId"],
+      "properties": {
+        "profileId": { "const": "programmable.direct-native-hook-graph.v1" },
+        "profileRevision": { "const": 3 },
+        "profileVersion": { "const": "3.2.0" },
+        "chainId": { "const": "1" }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["businessPolicyPath", "businessPolicyScope", "admissionDisclosurePath", "executableEvidenceAuthority", "clientAdmissionAuthority", "cliAdmissionAuthority", "agentAdmissionAuthority", "platformAdmissionReceiptRequired"],
+      "properties": {
+        "businessPolicyPath": { "const": "policy/launch-policy.v1.json" },
+        "businessPolicyScope": { "const": "programmable-router-fee-and-promotion-obligations" },
+        "admissionDisclosurePath": { "const": "policy/custom-launch-admission-v3.json" },
+        "executableEvidenceAuthority": { "const": "private-custom-launch-api" },
+        "clientAdmissionAuthority": { "const": false },
+        "cliAdmissionAuthority": { "const": false },
+        "agentAdmissionAuthority": { "const": false },
+        "platformAdmissionReceiptRequired": { "const": true }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["discoveryUrl", "capabilitiesUrl", "openApiUrl", "createPath", "preflightPath"],
+      "properties": {
+        "discoveryUrl": { "const": "https://programmable.market/.well-known/programmable.json" },
+        "capabilitiesUrl": { "const": "https://api.programmable.market/v3/capabilities" },
+        "openApiUrl": { "const": "https://programmable.market/openapi/custom-launch-v3.json" },
+        "createPath": { "const": "/v3/custom-launches" },
+        "preflightPath": { "const": "/v3/custom-launches/preflight" }
+      }
+    },
+    "staticAdmission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manualProjectAllowlist", "hardBlockFindingRules", "needsEvidenceFindingCodes", "unknownFindingDisposition", "routerSimulationRequiredBeforeAuthorization"],
+      "properties": {
+        "manualProjectAllowlist": { "const": false },
+        "hardBlockFindingRules": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "targetRoles"],
+            "properties": {
+              "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,127}$" },
+              "targetRoles": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 5,
+                "uniqueItems": true,
+                "items": { "enum": ["any", "token", "hook", "initializer", "platform_fee_binding"] }
+              }
+            }
+          }
+        },
+        "needsEvidenceFindingCodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,127}$" }
+        },
+        "unknownFindingDisposition": { "const": "needs-evidence" },
+        "routerSimulationRequiredBeforeAuthorization": { "const": true }
+      }
+    },
+    "hardSafetyInvariants": { "$ref": "#/$defs/idList" },
+    "behaviorAssurance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["vectorSetVersion", "riskClassifierVersion", "authorizationScope", "standardRequiredVectorIds", "advancedRequiredVectorIds", "missingRunnerEvidenceAuthority", "missingRunnerResult", "mutableSurfaceResult", "safetyResult"],
+      "properties": {
+        "vectorSetVersion": { "const": "1.1.0" },
+        "riskClassifierVersion": { "const": "1.1.0" },
+        "authorizationScope": { "const": "exact-launch-provenance-only" },
+        "standardRequiredVectorIds": { "$ref": "#/$defs/idList" },
+        "advancedRequiredVectorIds": { "$ref": "#/$defs/idList" },
+        "missingRunnerEvidenceAuthority": { "const": "none" },
+        "missingRunnerResult": { "const": "not_verified" },
+        "mutableSurfaceResult": { "const": "conditional" },
+        "safetyResult": { "const": "not_verified" }
+      }
+    },
+    "advancedFeaturesRequireEvidence": { "$ref": "#/$defs/idList" },
+    "feePolicyProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["businessPolicyRuleId", "programmableHundredthsOfBip", "denominator", "runtimeBehaviorClaim", "feeBehaviorClaim", "genericClaimingLive", "buybackManagementLive"],
+      "properties": {
+        "businessPolicyRuleId": { "const": "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS" },
+        "programmableHundredthsOfBip": { "const": "1000" },
+        "denominator": { "const": "1000000" },
+        "runtimeBehaviorClaim": { "const": "not-established-by-admission" },
+        "feeBehaviorClaim": { "const": false },
+        "genericClaimingLive": { "const": false },
+        "buybackManagementLive": { "const": false }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["safetyClaim", "auditClaim", "universalCompatibilityClaim", "feeBehaviorClaim"],
+      "properties": {
+        "safetyClaim": { "const": false },
+        "auditClaim": { "const": false },
+        "universalCompatibilityClaim": { "const": false },
+        "feeBehaviorClaim": { "const": false }
+      }
+    }
+  },
+  "$defs": {
+    "idList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9.-]{1,127}$" }
+    }
+  }
+}

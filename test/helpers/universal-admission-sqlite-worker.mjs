@@ -1,3 +1,5 @@
+import fs from "node:fs";
+
 import { UniversalAdmissionSqliteStore } from "../../scripts/universal-admission-sqlite-store.mjs";
 
 const encoded = process.argv[2];
@@ -8,6 +10,12 @@ if (typeof encoded !== "string" || encoded.length > 1024 * 1024) {
   let store;
   try {
     const request = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
+    if (request.constructorReadyPath !== undefined) {
+      if (typeof request.constructorReadyPath !== "string" || request.constructorReadyPath.length > 4096) {
+        throw Object.assign(new Error("Invalid SQLite constructor-ready path."), { code: "WORKER_REQUEST_INVALID" });
+      }
+      fs.writeFileSync(request.constructorReadyPath, "ready\n", { encoding: "utf8", flag: "wx", mode: 0o600 });
+    }
     store = new UniversalAdmissionSqliteStore({
       dbPath: request.dbPath,
       maxCasBytes: request.maxCasBytes ?? "4294967296",

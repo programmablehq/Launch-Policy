@@ -6,8 +6,17 @@ Launch requests use the Custom Launch API; repository pull requests are maintena
 
 ## Authority boundaries
 
-- `policy/launch-policy.v1.json` is the only authored source of current Programmable-specific admission requirements.
-  Reviewers, workflows, agents, and Website consumers may bind and evaluate it; they may not add private requirements.
+- `policy/launch-policy.v1.json` is the only authored source of current Programmable Router, fee, and promotion business
+  obligations. Reviewers, workflows, agents, and Website consumers may bind and evaluate it; they may not add private
+  business requirements.
+- `policy/custom-launch-admission-v3.json` is the separate public declarative contract for the current V3 profile,
+  hard-block finding rules, evidence-bound codes, evidence duties, and false claim boundaries. It does not execute
+  admission, authorize a launch, or own Router/fee business rules. `.programmable/custom-launch-admission.v3.json` is
+  its generated digest and cross-projection contract.
+- The private Custom Launch API exact-source/runtime scanner and platform-owned Router simulation are the sole
+  executable admission-evidence authorities. Their public hard-block IDs and evidence duties must remain projected by
+  the V3 descriptor, discovery, capabilities, and OpenAPI. A CLI, client, local LLM, or agent cannot mint an admission
+  receipt or a safety/fee-behavior claim.
 - `policy/launch-policy-authority-ownership.v1.json` contains no requirement values. It closes the repository file
   inventory, admission entrypoints and import graph, Rule-ID-to-handler ownership, public projections, and the exact
   frozen vendor exclusion so an unregistered rule source or gate fails repository verification.

@@ -1,28 +1,42 @@
 # Complete launch requirements
 
 This page is the shortest complete map for an agent or Builder preparing a Programmable launch. It is not a second
-policy. The sole normative source of Programmable-specific requirements is
-[`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json) at one exact protected `launch-policy:main` commit and
-tree. If this guide and that file differ, stop and follow the canonical policy.
+policy. [`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json) is the canonical business policy for
+Programmable Router, fee, and promotion obligations. The separate public
+[V3 admission descriptor](../policy/custom-launch-admission-v3.json) is the canonical disclosure of current profile
+identity, hard-block codes, evidence duties, and claim limitations. Bind both at one exact protected
+`launch-policy:main` commit and tree.
 
-The current machine identity in this tree is policy ID `programmable-central-launch-policy`, version `2.1.0`. Do not
+The current machine identity in this tree is policy ID `programmable-central-launch-policy`, version `2.2.0`. Do not
 infer future requirements from that label alone; always bind the exact policy bytes and Git identity.
 
 > [!IMPORTANT]
 > GitHub launch intake is closed. This page does not instruct a builder to open an application, scaffold, Canary, or
-> launch pull request. Current launches use the [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+> launch pull request. Current creation uses the public V3 Custom Launch API. V1 creation is historical read-only
+> compatibility and returns non-retryable `409 CUSTOM_LAUNCH_V1_READ_ONLY`.
 
 ## Start here
 
-Use project-specific tooling or an agent to prepare the API bundle. In every case, resolve the canonical policy from
-the same exact protected Launch Policy commit.
+Use project-specific tooling or an agent to prepare the API bundle. Do not start from a copied endpoint, CLI version,
+or prompt. Resolve the public surfaces in this order:
+
+1. [`https://programmable.market/.well-known/programmable.json`](https://programmable.market/.well-known/programmable.json);
+2. its advertised [`/v3/capabilities`](https://api.programmable.market/v3/capabilities) response;
+3. the exact checksum-bound CLI release advertised by discovery;
+4. the advertised [V3 guide](https://programmable.market/docs/developers/custom-launch),
+   [pack-config schema](https://programmable.market/schemas/custom-launch/v3/pack-config.json), and
+   [V3 OpenAPI](https://programmable.market/openapi/custom-launch-v3.json); and
+5. CLI-derived request bytes for `POST https://api.programmable.market/v3/custom-launches`.
+
+In every case, resolve the canonical business policy and public admission descriptor from the same exact protected
+Launch Policy commit.
 Node.js 24.12 or newer is required for the repository tools.
 
-Create an [API key](https://programmable.market/developers/api-keys), read the
-[OpenAPI document](https://programmable.market/openapi.json), and submit the request defined there to
-`POST https://api.programmable.market/v1/custom-launches`. The API contract owns the current request and response
-shape. This policy repository owns the requirements and offline verification contracts; it does not accept the
-request itself.
+Create an [API key](https://programmable.market/developers/api-keys) and keep it only in
+`PROGRAMMABLE_API_KEY` or an encrypted secret store. The API key authenticates the wallet owner; it contains no policy,
+cannot sign, and must never be pasted into source, config, prompts, chat, logs, screenshots, or command history. The API
+contract owns the current request and response shape. This repository publishes business policy and the admission
+disclosure; it does not accept the request itself.
 
 From an exact Launch Policy checkout, inspect and bind the current policy:
 
@@ -31,12 +45,48 @@ npm run policy -- validate-policy
 npm run policy -- requirements --profile launch-readiness
 npm run policy -- binding --profile launch-readiness
 npm run policy -- requirements --profile production-launch
+npm run admission:v3 -- --check
 ```
 
 The `launch-readiness` profile is enabled and checker-only. Its successful outcome is
 `LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED`. It does not authorize an audit, launch, deployment, Registry entry, public
-routing, production discovery, or real-user funds. The `production-launch` profile remains disabled and cannot produce
-a binding or `LAUNCH_APPROVED`; its requirements command is inspection-only and exposes the later promotion rule.
+routing, production discovery, or real-user funds. The `production-launch` profile is also enabled only as a
+non-authorizing checker. It emits `PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED`, never `LAUNCH_APPROVED`.
+
+## Public V3 admission contract
+
+The V3 descriptor and its generated binding are:
+
+- [`policy/custom-launch-admission-v3.json`](../policy/custom-launch-admission-v3.json), the declarative public profile,
+  hard-block, needs-evidence, invariant, and claim-boundary contract;
+- [`policy/schemas/custom-launch-admission-v3.schema.json`](../policy/schemas/custom-launch-admission-v3.schema.json),
+  its closed public shape; and
+- [`.programmable/custom-launch-admission.v3.json`](../.programmable/custom-launch-admission.v3.json), the generated
+  SHA-256 and JSON-pointer contract for the business policy, descriptor, discovery, capabilities, and V3 OpenAPI.
+
+This is one separated authority chain, not two competing policy engines:
+
+1. `launch-policy.v1.json` owns Programmable Router, fee, and promotion business obligations.
+2. `custom-launch-admission-v3.json` publicly declares the current generic admission envelope and stable finding IDs.
+3. The private Custom Launch API exact-source/runtime scanner and platform-owned Router simulation are the sole
+   executable evidence authorities. The backend must issue the bound admission receipt before wallet authorization.
+4. CLI checks, local LLM output, agent attestations, and caller claims are inputs only. They cannot approve a request,
+   hide a hard finding, establish safety, or establish fee behavior.
+
+The current hard blocks are deliberately narrow: `CALLCODE`, runtime or source `SELFDESTRUCT`, a missing or invalid
+PoolManager callback guard, a callback guard bound to the wrong PoolManager, or a missing implementation for an enabled
+v4 callback. Proxy/delegatecall, child creation, mutable admin/mint/tax/pause/transfer controls, external dependencies,
+transfer fees, liquidity custody, and other advanced surfaces are evidence duties rather than automatic rejections.
+Unknown future findings remain evidence-bound instead of disappearing or becoming a surprise categorical block.
+
+Run a local cross-projection check against separately downloaded production JSON without sending credentials:
+
+```bash
+node scripts/custom-launch-admission-v3.mjs --check-projections \
+  --well-known /tmp/programmable-well-known.json \
+  --capabilities /tmp/custom-launch-capabilities.json \
+  --openapi /tmp/custom-launch-v3-openapi.json
+```
 
 ## Decide whether the Router rules apply
 
@@ -73,10 +123,11 @@ membership come from the canonical policy bytes.
 
 | Rule ID | Minimal meaning | Machine evidence |
 | --- | --- | --- |
-| `LAUNCH.ETHEREUM_AND_TREASURY_10_BPS` | A selected Programmable Ethereum market routes exactly 10 bps of gross canonical-pool volume to the Programmable treasury | `programmable-launch-requirement` |
+| `LAUNCH.ETHEREUM_AND_TREASURY_10_BPS` | The selected Programmable Ethereum request binds the 10 bps business obligation; this is not runtime behavior proof | `programmable-launch-requirement` |
 | `LAUNCH.ETHEREUM_ROUTER_PROVENANCE_READINESS` | Before launch, the exact route plan binds the manifest-resolved canonical Router and required commitments | `programmable-router-readiness` |
+| `LAUNCH.ETHEREUM_EXACT_FEE_TEMPLATE_BEFORE_AUTHORIZATION` | Static/source composition must bind the selected fee template before authorization; `feeBehaviorClaim` remains false without executable evidence | `programmable-exact-fee-template` |
 | `LAUNCH.ETHEREUM_FINALIZED_ROUTER_STAMP_BEFORE_PROMOTION` | Before Registry, API, or terminal promotion, the launched market has one finalized, internally consistent canonical Router stamp and proof | `programmable-router-promotion` |
-| `LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION` | Before production promotion, each applicable deployed fee scope and asset has exact 10 bps settlement evidence for one inclusive finalized historical block range | `programmable-runtime-fee-settlement` |
+| `LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION` | Inactive historical settlement rule retained for reproduction; it is not a current runtime guarantee | `programmable-runtime-fee-settlement` |
 
 The exact fee tuple is:
 
@@ -90,20 +141,29 @@ The exact fee tuple is:
 This table is a human map of
 [`LAUNCH.ETHEREUM_AND_TREASURY_10_BPS`](../policy/launch-policy.v1.json), not a second source. Do not reinterpret the
 rule as 10% or as an optional creator fee. Do not apply it to a no-market or unresolved draft merely because the project
-uses v4.
+uses v4. The tuple is an admission/business obligation. It does not mean the API has already observed real swaps,
+excluded every bypass, excluded overcharge, or proved claim isolation. Those claims require private exact executable
+evidence for the specific launch, and the public profile therefore exposes `feeBehaviorClaim: false` by default.
 
 ## Prepare the current API request
 
-Use the API guide and OpenAPI document as the only current transport instructions. The normal sequence is:
+Use discovery, live capabilities, the advertised CLI, guide, and V3 OpenAPI as the only current transport instructions.
+The normal sequence is:
 
 1. create an API key through the authenticated developer surface;
-2. prepare the contract/source bundle and truthful route evidence required by the current API schema;
-3. send it to `POST https://api.programmable.market/v1/custom-launches`; and
-4. independently review and sign any returned transaction request with the authorized wallet.
+2. run `pack` from exact source and compiler artifacts without hand-writing derived hashes or addresses;
+3. run `validate --remote`, which executes the production preflight without consuming quota, allocating a nonce, or
+   persisting a launch;
+4. use `submit` to send the same byte-identical request to `POST https://api.programmable.market/v3/custom-launches`,
+   preserving the journal, request bytes, and `Idempotency-Key` for retries;
+5. poll the single resource until the API presents an explicit wallet action;
+6. independently review, sign, and broadcast only the exact transaction in the connected controller wallet; and
+7. poll the single resource again until a terminal state.
 
-An API key is authentication, not wallet authority. A successful request, policy match, or prepared transaction does
-not prove broadcast, finality, indexing, promotion, liquidity, or safety. Never put the API key, wallet secret, or
-private RPC credential in this repository or a public source bundle.
+An API key is authentication, not wallet authority. A successful request, policy match, static admission receipt, or
+prepared transaction does not prove broadcast, finality, indexing, source exact match, trading, platform-fee behavior,
+promotion, liquidity, or safety. Never put the API key, wallet secret, or private RPC credential in this repository or
+a public source bundle.
 
 ### Historical Application contracts
 

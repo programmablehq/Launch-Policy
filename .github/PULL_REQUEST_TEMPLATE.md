@@ -1,7 +1,9 @@
 <!--
 Programmable Launch Policy accepts maintenance pull requests only.
-GitHub launch intake is closed. Submit launches through:
-https://programmable.market/developers/custom-launch-api-v1.md
+GitHub launch intake is closed. Start launches at:
+https://programmable.market/.well-known/programmable.json
+Follow its V3 capabilities, CLI, guide, and OpenAPI to POST https://api.programmable.market/v3/custom-launches.
+V1 creation is historical read-only compatibility and returns non-retryable 409 CUSTOM_LAUNCH_V1_READ_ONLY.
 Do not include secrets, private RPC URLs, wallet material, or personal data.
 -->
 

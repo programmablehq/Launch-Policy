@@ -1,5 +1,9 @@
 # Central Programmable Launch Policy Design
 
+> Historical design record. It describes the retired GitHub application transport and its authority model at the time.
+> Current launches start at `https://programmable.market/.well-known/programmable.json`, follow the advertised V3
+> capabilities, CLI, guide, and OpenAPI, and submit to `POST https://api.programmable.market/v3/custom-launches`.
+
 ## Goal
 
 Make `0xprogrammable/submit-launch` the complete public source of every Programmable-specific launch requirement so an

@@ -2,8 +2,11 @@
 
 > [!IMPORTANT]
 > GitHub launch intake is closed. This document preserves the former transport contract for historical reproduction;
-> it is not a submission guide. Create an [API key](https://programmable.market/developers/api-keys) and use the
-> [Custom Launch API](https://programmable.market/developers/custom-launch-api-v1.md).
+> it is not a submission guide. Current launches start at
+> [`/.well-known/programmable.json`](https://programmable.market/.well-known/programmable.json), follow its advertised
+> V3 capabilities, CLI, guide, and OpenAPI, then submit to
+> `POST https://api.programmable.market/v3/custom-launches` with an
+> [API key](https://programmable.market/developers/api-keys).
 
 The former `0xprogrammable/submit-launch` repository accepted bounded application records under `submissions/` and
 one-file Workflow Canary records under `canary-submissions/`. The repository is now named
@@ -55,7 +58,13 @@ npm run policy -- requirements --profile launch-readiness
 
 ## Current launch path
 
-Launch preparation now uses `POST https://api.programmable.market/v1/custom-launches`. Read the
-[Custom Launch API guide](https://programmable.market/developers/custom-launch-api-v1.md) and the
-[OpenAPI document](https://programmable.market/openapi.json). Wallet review and signing remain separate from API
-authentication and cannot be performed by a repository pull request.
+Start at public
+[`discovery`](https://programmable.market/.well-known/programmable.json), require the advertised
+[`/v3/capabilities`](https://api.programmable.market/v3/capabilities) profile, install its exact checksum-bound CLI,
+and follow the advertised [guide](https://programmable.market/docs/developers/custom-launch), pack-config schema, and
+[V3 OpenAPI](https://programmable.market/openapi/custom-launch-v3.json). Submit the CLI-produced request bytes to
+`POST https://api.programmable.market/v3/custom-launches`.
+
+V1 creation is historical read-only compatibility and returns non-retryable
+`409 CUSTOM_LAUNCH_V1_READ_ONLY`. Wallet review and signing remain separate from API authentication and cannot be
+performed by a repository pull request.

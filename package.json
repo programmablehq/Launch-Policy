@@ -10,6 +10,7 @@
     "admission:contract:check": "node scripts/universal-admission-contract.mjs --check",
     "admission:contract:write": "node scripts/universal-admission-contract.mjs --write",
     "admission:reference:benchmark": "node scripts/benchmark-universal-admission-sqlite.mjs",
+    "admission:v3": "node scripts/custom-launch-admission-v3.mjs",
     "applicant:scaffold": "node scripts/applicant-v3_2-scaffold.mjs",
     "authority:check": "node scripts/launch-policy-authority-ownership.mjs --check",
     "authority:write": "node scripts/launch-policy-authority-ownership.mjs --write",
