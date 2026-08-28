@@ -280,6 +280,11 @@ test("V3.4 exact executed fee gate is a frozen inactive candidate, never a calle
     sourceDecisionReceiptRequired: true,
     walletHandoffRequiresClosure: true
   });
+  assert.deepEqual(candidate.parameters.requiredSettlementDataflowClosureReceiptClaims, {
+    feePathImmutable: true,
+    routeCodehashBindingComplete: true,
+    upgradeAuthority: "none"
+  });
   assert.equal(candidate.parameters.platformFeeConformanceStatus, "verified");
   assert.equal(candidate.parameters.otherBehaviorAxesDisposition, "unclaimed-unless-separately-executed");
   assert.equal(candidate.parameters.feeVaultReleaseBindingSha256, "sha256:39ccdfdf8cd61620bf5c62bf07fb8428adbd66d2608b1cf3ad583343116d7ed9");

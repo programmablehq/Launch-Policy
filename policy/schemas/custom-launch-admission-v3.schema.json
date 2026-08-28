@@ -420,6 +420,26 @@
             "platformFeeObservationSha256"
           ]
         },
+        "requiredSettlementDataflowClosureReceiptClaims": {
+          "additionalProperties": false,
+          "properties": {
+            "feePathImmutable": {
+              "const": true
+            },
+            "routeCodehashBindingComplete": {
+              "const": true
+            },
+            "upgradeAuthority": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "feePathImmutable",
+            "routeCodehashBindingComplete",
+            "upgradeAuthority"
+          ],
+          "type": "object"
+        },
         "retryingEvidenceDisposition": {
           "const": "blocks_wallet_handoff"
         },
@@ -476,6 +496,7 @@
         "requiredPlatformFeeConformanceStatus",
         "requiredSettlementDataflowClosureAssertions",
         "requiredSettlementDataflowClosureReceiptBindings",
+        "requiredSettlementDataflowClosureReceiptClaims",
         "retryingEvidenceDisposition",
         "scenarioInputsAreExecutionEvidence",
         "serverOwnedActionAbiFrozenRequired",

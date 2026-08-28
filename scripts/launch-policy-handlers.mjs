@@ -111,6 +111,7 @@ function programmableVerifiedExecutedPlatformFeeHandler({ evidence, rule }) {
     "requiredFeeVectorIds",
     "requiredSettlementDataflowClosureAssertions",
     "requiredSettlementDataflowClosureReceiptBindings",
+    "requiredSettlementDataflowClosureReceiptClaims",
     "requiredSettlementDataflowReadback",
     "scenarioInputsAreExecutionEvidence",
     "settlementDataflowClosure",

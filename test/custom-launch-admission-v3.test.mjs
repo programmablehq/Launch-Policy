@@ -157,6 +157,11 @@ test("V3.4 fee authorization remains pending while current V3.3 keeps exact comp
     "authorizedRouteRuntimeCodeHash",
     "platformFeeObservationSha256"
   ]);
+  assert.deepEqual(descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureReceiptClaims, {
+    feePathImmutable: true,
+    routeCodehashBindingComplete: true,
+    upgradeAuthority: "none"
+  });
   assert.deepEqual(descriptor.feeAuthorizationGate.requiredAssertions, [
     "fee.programmable-ten-bps",
     "fee.no-bypass",

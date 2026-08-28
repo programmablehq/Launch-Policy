@@ -331,6 +331,7 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
     "requiredPlatformFeeConformanceStatus",
     "requiredSettlementDataflowClosureAssertions",
     "requiredSettlementDataflowClosureReceiptBindings",
+    "requiredSettlementDataflowClosureReceiptClaims",
     "retryingEvidenceDisposition",
     "scenarioInputsAreExecutionEvidence",
     "serverOwnedActionAbiFrozenRequired",
@@ -421,6 +422,11 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
     "nonempty-sorted-flow-and-path-closure", "exact-1000-per-1000000-treasury-observation",
     "closure-recomputed", "signed-trusted-authority"
   ])) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureAssertions is invalid.");
+  if (canonicalJson(descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureReceiptClaims) !== canonicalJson({
+    feePathImmutable: true,
+    routeCodehashBindingComplete: true,
+    upgradeAuthority: "none"
+  })) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureReceiptClaims is invalid.");
 
   assertObject(descriptor.feePolicyProjection, "descriptor.feePolicyProjection");
   assertExactKeys(descriptor.feePolicyProjection, [
@@ -493,6 +499,7 @@ export function buildCustomLaunchAdmissionBindingV3({ repositoryRoot }) {
     || canonicalJson(authorizationGateRule.parameters?.settlementDataflowClosure) !== canonicalJson(descriptor.settlementDataflowClosure)
     || canonicalJson(authorizationGateRule.parameters?.requiredSettlementDataflowClosureReceiptBindings) !== canonicalJson(descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureReceiptBindings)
     || canonicalJson(authorizationGateRule.parameters?.requiredSettlementDataflowClosureAssertions) !== canonicalJson(descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureAssertions)
+    || canonicalJson(authorizationGateRule.parameters?.requiredSettlementDataflowClosureReceiptClaims) !== canonicalJson(descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureReceiptClaims)
     || authorizationGateRule.parameters?.otherBehaviorAxesDisposition !== descriptor.feeAuthorizationGate.otherBehaviorAxesDisposition
     || authorizationGateRule.parameters?.oneTimeRouteCodehashBindingRequired !== descriptor.feeAuthorizationGate.oneTimeRouteCodehashBindingRequired
     || authorizationGateRule.parameters?.productionRuntimeReadbackRequired !== descriptor.feeAuthorizationGate.productionRuntimeReadbackRequired
