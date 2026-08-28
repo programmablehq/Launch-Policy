@@ -16,6 +16,7 @@ const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true, ignoreBOM: false })
 const CODE = /^[A-Z][A-Z0-9_]{2,127}$/u;
 const ID = /^[a-z0-9][a-z0-9.-]{1,127}$/u;
 const SHA256 = /^sha256:[0-9a-f]{64}$/u;
+const KECCAK256 = /^0x[0-9a-f]{64}$/u;
 
 const PROJECTION_CONTRACT = Object.freeze([
   Object.freeze({
@@ -25,6 +26,8 @@ const PROJECTION_CONTRACT = Object.freeze([
       pair("/profile/profileId", "/customLaunchApi/generalHookProfile/profileId"),
       pair("/profile/profileRevision", "/customLaunchApi/generalHookProfile/profileRevision"),
       pair("/profile/profileVersion", "/customLaunchApi/generalHookProfile/profileVersion"),
+      pair("/compatibility/legacyExactProfileVersions", "/customLaunchApi/generalHookProfile/compatibleProfileVersions"),
+      pair("/compatibility/legacySemantics", "/customLaunchApi/generalHookProfile/legacyProfileSemantics"),
       pair("/staticAdmission/manualProjectAllowlist", "/customLaunchApi/generalHookProfile/admissionPolicy/manualProjectAllowlist"),
       pair("/staticAdmission/hardBlockFindingRules", "/customLaunchApi/generalHookProfile/admissionPolicy/hardBlockFindingRules"),
       pair("/staticAdmission/needsEvidenceFindingCodes", "/customLaunchApi/generalHookProfile/admissionPolicy/needsEvidenceFindingCodes"),
@@ -43,6 +46,15 @@ const PROJECTION_CONTRACT = Object.freeze([
       pair("/hardSafetyInvariants", "/hardSafetyInvariants"),
       pair("/advancedFeaturesRequireEvidence", "/advancedFeaturesRequireEvidence"),
       pair("/feePolicyProjection/programmableHundredthsOfBip", "/feePolicy/programmableHundredthsOfBip"),
+      pair("/feePolicyProjection/denominator", "/feePolicy/denominator"),
+      pair("/behaviorAssurance/walletHandoffRequiresVerifiedFeeEvidence", "/behaviorEvidence/walletHandoffRequiresVerifiedEvidence"),
+      pair("/behaviorAssurance/missingRunnerResult", "/behaviorEvidence/notConfiguredDisposition"),
+      pair("/behaviorAssurance/unavailableRunnerResult", "/behaviorEvidence/unavailableDisposition"),
+      pair("/behaviorAssurance/failedRunnerResult", "/behaviorEvidence/executedFailureDisposition"),
+      pair("/behaviorAssurance/configurationIsExecutionEvidence", "/behaviorEvidence/configurationIsExecutionEvidence"),
+      pair("/behaviorAssurance/vectorSetVersion", "/behaviorEvidence/vectorSetVersion"),
+      pair("/behaviorAssurance/maximumConfiguredRunnerAttempts", "/behaviorEvidence/maximumConfiguredRunnerAttempts"),
+      pair("/claims/feeBehaviorClaim", "/behaviorEvidence/feeBehaviorClaim"),
       pair("/feePolicyProjection/genericClaimingLive", "/feePolicy/genericClaimingLive"),
       pair("/feePolicyProjection/buybackManagementLive", "/feePolicy/buybackManagementLive"),
       pair("/claims/safetyClaim", "/safetyClaim"),
@@ -57,6 +69,8 @@ const PROJECTION_CONTRACT = Object.freeze([
       pair("/profile/profileId", "/x-programmable-profile/profileId"),
       pair("/profile/profileRevision", "/x-programmable-profile/profileRevision"),
       pair("/profile/profileVersion", "/x-programmable-profile/profileVersion"),
+      pair("/compatibility/legacyExactProfileVersions", "/x-programmable-admission-policy/legacyExactProfileVersions"),
+      pair("/compatibility/legacySemantics", "/x-programmable-admission-policy/legacySemantics"),
       pair("/staticAdmission/manualProjectAllowlist", "/x-programmable-admission-policy/manualProjectAllowlist"),
       pair("/staticAdmission/hardBlockFindingRules", "/x-programmable-admission-policy/hardBlockFindingRules"),
       pair("/staticAdmission/needsEvidenceFindingCodes", "/x-programmable-admission-policy/needsEvidenceFindingCodes"),
@@ -93,8 +107,11 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
     "advancedFeaturesRequireEvidence",
     "authority",
     "behaviorAssurance",
+    "candidateProfile",
     "claims",
+    "compatibility",
     "descriptorVersion",
+    "feeAuthorizationGate",
     "feePolicyProjection",
     "hardSafetyInvariants",
     "profile",
@@ -103,14 +120,36 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
     "transport"
   ], "descriptor");
   assertEqual(descriptor.schemaVersion, "programmable.custom-launch-admission-descriptor.v3", "descriptor.schemaVersion");
-  assertEqual(descriptor.descriptorVersion, "1.0.0", "descriptor.descriptorVersion");
+  assertEqual(descriptor.descriptorVersion, "1.1.0", "descriptor.descriptorVersion");
 
   assertObject(descriptor.profile, "descriptor.profile");
   assertExactKeys(descriptor.profile, ["chainId", "profileId", "profileRevision", "profileVersion"], "descriptor.profile");
   assertEqual(descriptor.profile.profileId, "programmable.direct-native-hook-graph.v1", "descriptor.profile.profileId");
   assertEqual(descriptor.profile.profileRevision, 3, "descriptor.profile.profileRevision");
-  assertEqual(descriptor.profile.profileVersion, "3.2.0", "descriptor.profile.profileVersion");
+  assertEqual(descriptor.profile.profileVersion, "3.3.0", "descriptor.profile.profileVersion");
   assertEqual(descriptor.profile.chainId, "1", "descriptor.profile.chainId");
+
+  assertObject(descriptor.candidateProfile, "descriptor.candidateProfile");
+  assertExactKeys(descriptor.candidateProfile, [
+    "activationState",
+    "chainId",
+    "freshWritesEnabled",
+    "multiContractGraphSupported",
+    "profileId",
+    "profileRevision",
+    "profileVersion",
+    "projectOwnedHookSupported",
+    "projectOwnedTokenSupported"
+  ], "descriptor.candidateProfile");
+  assertEqual(descriptor.candidateProfile.profileId, descriptor.profile.profileId, "descriptor.candidateProfile.profileId");
+  assertEqual(descriptor.candidateProfile.profileRevision, descriptor.profile.profileRevision, "descriptor.candidateProfile.profileRevision");
+  assertEqual(descriptor.candidateProfile.profileVersion, "3.4.0", "descriptor.candidateProfile.profileVersion");
+  assertEqual(descriptor.candidateProfile.chainId, descriptor.profile.chainId, "descriptor.candidateProfile.chainId");
+  assertEqual(descriptor.candidateProfile.activationState, "pending-runtime-readback", "descriptor.candidateProfile.activationState");
+  assertEqual(descriptor.candidateProfile.freshWritesEnabled, false, "descriptor.candidateProfile.freshWritesEnabled");
+  for (const key of ["projectOwnedTokenSupported", "projectOwnedHookSupported", "multiContractGraphSupported"]) {
+    assertEqual(descriptor.candidateProfile[key], true, `descriptor.candidateProfile.${key}`);
+  }
 
   assertObject(descriptor.authority, "descriptor.authority");
   assertExactKeys(descriptor.authority, [
@@ -170,16 +209,36 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
   assertIdList(descriptor.hardSafetyInvariants, "descriptor.hardSafetyInvariants");
   assertIdList(descriptor.advancedFeaturesRequireEvidence, "descriptor.advancedFeaturesRequireEvidence");
 
+  assertObject(descriptor.compatibility, "descriptor.compatibility");
+  assertExactKeys(descriptor.compatibility, [
+    "legacyExactProfileVersions",
+    "legacyFeeBehaviorResult",
+    "legacySemantics",
+    "retroactiveAuthorizationGate"
+  ], "descriptor.compatibility");
+  if (canonicalJson(descriptor.compatibility.legacyExactProfileVersions) !== canonicalJson(["3.2.0", "3.1.0", "3.0.0", "2.0.0"])) {
+    fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.compatibility.legacyExactProfileVersions is invalid.");
+  }
+  assertEqual(descriptor.compatibility.legacySemantics, "readable-and-byte-identical-retryable-only", "descriptor.compatibility.legacySemantics");
+  assertEqual(descriptor.compatibility.legacyFeeBehaviorResult, "unverified", "descriptor.compatibility.legacyFeeBehaviorResult");
+  assertEqual(descriptor.compatibility.retroactiveAuthorizationGate, false, "descriptor.compatibility.retroactiveAuthorizationGate");
+
   assertObject(descriptor.behaviorAssurance, "descriptor.behaviorAssurance");
   assertExactKeys(descriptor.behaviorAssurance, [
     "advancedRequiredVectorIds",
     "authorizationScope",
+    "configurationIsExecutionEvidence",
+    "failedRunnerResult",
+    "maximumConfiguredRunnerAttempts",
     "missingRunnerEvidenceAuthority",
     "missingRunnerResult",
     "mutableSurfaceResult",
     "riskClassifierVersion",
+    "retryingRunnerResult",
     "safetyResult",
     "standardRequiredVectorIds",
+    "unavailableRunnerResult",
+    "walletHandoffRequiresVerifiedFeeEvidence",
     "vectorSetVersion"
   ], "descriptor.behaviorAssurance");
   assertEqual(descriptor.behaviorAssurance.vectorSetVersion, "1.1.0", "descriptor.behaviorAssurance.vectorSetVersion");
@@ -192,24 +251,147 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
     if (standardVectorIds.has(id)) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", `${id} is both a standard and advanced behavior vector.`);
   }
   assertEqual(descriptor.behaviorAssurance.missingRunnerEvidenceAuthority, "none", "descriptor.behaviorAssurance.missingRunnerEvidenceAuthority");
-  assertEqual(descriptor.behaviorAssurance.missingRunnerResult, "not_verified", "descriptor.behaviorAssurance.missingRunnerResult");
+  assertEqual(descriptor.behaviorAssurance.configurationIsExecutionEvidence, false, "descriptor.behaviorAssurance.configurationIsExecutionEvidence");
+  assertEqual(descriptor.behaviorAssurance.maximumConfiguredRunnerAttempts, 3, "descriptor.behaviorAssurance.maximumConfiguredRunnerAttempts");
+  for (const key of ["missingRunnerResult", "retryingRunnerResult", "unavailableRunnerResult"]) {
+    assertEqual(descriptor.behaviorAssurance[key], "claims_remain_unverified", `descriptor.behaviorAssurance.${key}`);
+  }
+  assertEqual(descriptor.behaviorAssurance.failedRunnerResult, "blocks_wallet_handoff", "descriptor.behaviorAssurance.failedRunnerResult");
+  assertEqual(descriptor.behaviorAssurance.walletHandoffRequiresVerifiedFeeEvidence, false, "descriptor.behaviorAssurance.walletHandoffRequiresVerifiedFeeEvidence");
   assertEqual(descriptor.behaviorAssurance.mutableSurfaceResult, "conditional", "descriptor.behaviorAssurance.mutableSurfaceResult");
   assertEqual(descriptor.behaviorAssurance.safetyResult, "not_verified", "descriptor.behaviorAssurance.safetyResult");
 
+  assertObject(descriptor.feeAuthorizationGate, "descriptor.feeAuthorizationGate");
+  assertExactKeys(descriptor.feeAuthorizationGate, [
+    "accountingMode",
+    "activationPrerequisites",
+    "activationState",
+    "appliesTo",
+    "behaviorEvidenceSchemaVersion",
+    "callerAssertionsAccepted",
+    "callerExemptionAllowed",
+    "callerVerdictsAccepted",
+    "configurationIsExecutionEvidence",
+    "evidenceAuthority",
+    "exactFeeVaultSourceRuntimeInterfaceRequired",
+    "executedHardInvariantFailureDisposition",
+    "executedFailureDisposition",
+    "feeObservationAbiFrozenRequired",
+    "feeVaultCompiler",
+    "feeVaultCreationCodeKeccak256",
+    "feeVaultReleaseBindingId",
+    "feeVaultReleaseBindingSha256",
+    "feeVaultRuntimeCodeKeccak256",
+    "feeVaultSourcePath",
+    "freshWritesEnabled",
+    "immutableFeePathRequired",
+    "missingEvidenceDisposition",
+    "mode",
+    "oneTimeRouteCodehashBindingRequired",
+    "otherBehaviorAxesDisposition",
+    "productionRuntimeReadbackRequired",
+    "requiredAssertions",
+    "requiredBindings",
+    "requiredObservations",
+    "requiredPlatformFeeConformanceStatus",
+    "retryingEvidenceDisposition",
+    "scenarioInputsAreExecutionEvidence",
+    "serverOwnedActionAbiFrozenRequired",
+    "serverSignatureRequired",
+    "signedRunnerIdentityConfiguredRequired",
+    "unavailableEvidenceDisposition",
+    "walletHandoffRequiresVerifiedEvidence"
+  ], "descriptor.feeAuthorizationGate");
+  assertEqual(descriptor.feeAuthorizationGate.mode, "verified-executed-platform-fee-evidence-required-before-authorization", "descriptor.feeAuthorizationGate.mode");
+  assertEqual(descriptor.feeAuthorizationGate.appliesTo, "new-v3.4.0-official-router-market-bearing-writes", "descriptor.feeAuthorizationGate.appliesTo");
+  assertEqual(descriptor.feeAuthorizationGate.accountingMode, "additive-platform-share", "descriptor.feeAuthorizationGate.accountingMode");
+  assertEqual(descriptor.feeAuthorizationGate.activationState, "pending-runtime-readback", "descriptor.feeAuthorizationGate.activationState");
+  assertEqual(descriptor.feeAuthorizationGate.freshWritesEnabled, false, "descriptor.feeAuthorizationGate.freshWritesEnabled");
+  if (canonicalJson(descriptor.feeAuthorizationGate.activationPrerequisites) !== canonicalJson([
+    "server-owned-action-abi-frozen",
+    "fee-observation-abi-frozen",
+    "signed-runner-identity-configured",
+    "fee-vault-exact-source-runtime-interface-bound",
+    "production-runtime-deployment-readback-matched"
+  ])) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.feeAuthorizationGate.activationPrerequisites is invalid.");
+  assertEqual(descriptor.feeAuthorizationGate.callerExemptionAllowed, false, "descriptor.feeAuthorizationGate.callerExemptionAllowed");
+  assertEqual(descriptor.feeAuthorizationGate.callerAssertionsAccepted, false, "descriptor.feeAuthorizationGate.callerAssertionsAccepted");
+  assertEqual(descriptor.feeAuthorizationGate.callerVerdictsAccepted, false, "descriptor.feeAuthorizationGate.callerVerdictsAccepted");
+  assertEqual(descriptor.feeAuthorizationGate.configurationIsExecutionEvidence, false, "descriptor.feeAuthorizationGate.configurationIsExecutionEvidence");
+  assertEqual(descriptor.feeAuthorizationGate.scenarioInputsAreExecutionEvidence, false, "descriptor.feeAuthorizationGate.scenarioInputsAreExecutionEvidence");
+  assertEqual(descriptor.feeAuthorizationGate.evidenceAuthority, "platform-runtime-executor", "descriptor.feeAuthorizationGate.evidenceAuthority");
+  assertEqual(descriptor.feeAuthorizationGate.behaviorEvidenceSchemaVersion, "programmable.custom-launch-behavior-summary.v1", "descriptor.feeAuthorizationGate.behaviorEvidenceSchemaVersion");
+  assertEqual(descriptor.feeAuthorizationGate.requiredPlatformFeeConformanceStatus, "verified", "descriptor.feeAuthorizationGate.requiredPlatformFeeConformanceStatus");
+  assertEqual(descriptor.feeAuthorizationGate.serverSignatureRequired, true, "descriptor.feeAuthorizationGate.serverSignatureRequired");
+  assertEqual(descriptor.feeAuthorizationGate.immutableFeePathRequired, true, "descriptor.feeAuthorizationGate.immutableFeePathRequired");
+  assertEqual(descriptor.feeAuthorizationGate.walletHandoffRequiresVerifiedEvidence, true, "descriptor.feeAuthorizationGate.walletHandoffRequiresVerifiedEvidence");
+  assertEqual(descriptor.feeAuthorizationGate.otherBehaviorAxesDisposition, "unclaimed-unless-separately-executed", "descriptor.feeAuthorizationGate.otherBehaviorAxesDisposition");
+  assertEqual(descriptor.feeAuthorizationGate.feeVaultReleaseBindingId, "programmable:settlement-fee-vault:v1", "descriptor.feeAuthorizationGate.feeVaultReleaseBindingId");
+  assertEqual(descriptor.feeAuthorizationGate.feeVaultReleaseBindingSha256, "sha256:39ccdfdf8cd61620bf5c62bf07fb8428adbd66d2608b1cf3ad583343116d7ed9", "descriptor.feeAuthorizationGate.feeVaultReleaseBindingSha256");
+  assertEqual(descriptor.feeAuthorizationGate.feeVaultCreationCodeKeccak256, "0xdbc32e835739b50f33a101a8927008fc46af4c11604f7a5da006e5c56288b21e", "descriptor.feeAuthorizationGate.feeVaultCreationCodeKeccak256");
+  assertEqual(descriptor.feeAuthorizationGate.feeVaultRuntimeCodeKeccak256, "0x92620fe3f83839334c9a264bea5bfcc819868ca5607cbd2260e5a9664dbd7554", "descriptor.feeAuthorizationGate.feeVaultRuntimeCodeKeccak256");
+  assertEqual(SHA256.test(descriptor.feeAuthorizationGate.feeVaultReleaseBindingSha256), true, "descriptor.feeAuthorizationGate.feeVaultReleaseBindingSha256");
+  assertEqual(KECCAK256.test(descriptor.feeAuthorizationGate.feeVaultCreationCodeKeccak256), true, "descriptor.feeAuthorizationGate.feeVaultCreationCodeKeccak256");
+  assertEqual(KECCAK256.test(descriptor.feeAuthorizationGate.feeVaultRuntimeCodeKeccak256), true, "descriptor.feeAuthorizationGate.feeVaultRuntimeCodeKeccak256");
+  assertEqual(descriptor.feeAuthorizationGate.feeVaultSourcePath, "src/ProgrammableSettlementFeeVaultV1.sol", "descriptor.feeAuthorizationGate.feeVaultSourcePath");
+  assertObject(descriptor.feeAuthorizationGate.feeVaultCompiler, "descriptor.feeAuthorizationGate.feeVaultCompiler");
+  assertExactKeys(descriptor.feeAuthorizationGate.feeVaultCompiler, ["appendCBOR", "evmVersion", "metadataBytecodeHash", "optimizerEnabled", "optimizerRuns", "solcVersion", "viaIR"], "descriptor.feeAuthorizationGate.feeVaultCompiler");
+  if (canonicalJson(descriptor.feeAuthorizationGate.feeVaultCompiler) !== canonicalJson({
+    appendCBOR: false,
+    evmVersion: "paris",
+    metadataBytecodeHash: "none",
+    optimizerEnabled: true,
+    optimizerRuns: 1000,
+    solcVersion: "0.8.26",
+    viaIR: false
+  })) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.feeAuthorizationGate.feeVaultCompiler is invalid.");
+  for (const key of [
+    "exactFeeVaultSourceRuntimeInterfaceRequired",
+    "feeObservationAbiFrozenRequired",
+    "immutableFeePathRequired",
+    "oneTimeRouteCodehashBindingRequired",
+    "productionRuntimeReadbackRequired",
+    "serverOwnedActionAbiFrozenRequired",
+    "serverSignatureRequired",
+    "signedRunnerIdentityConfiguredRequired",
+    "walletHandoffRequiresVerifiedEvidence"
+  ]) assertEqual(descriptor.feeAuthorizationGate[key], true, `descriptor.feeAuthorizationGate.${key}`);
+  for (const key of ["missingEvidenceDisposition", "retryingEvidenceDisposition", "unavailableEvidenceDisposition", "executedFailureDisposition"]) {
+    assertEqual(descriptor.feeAuthorizationGate[key], "blocks_wallet_handoff", `descriptor.feeAuthorizationGate.${key}`);
+  }
+  assertEqual(descriptor.feeAuthorizationGate.executedHardInvariantFailureDisposition, "blocks_wallet_handoff", "descriptor.feeAuthorizationGate.executedHardInvariantFailureDisposition");
+  if (canonicalJson(descriptor.feeAuthorizationGate.requiredBindings) !== canonicalJson([
+    "launch-intent-hash", "profile-hash", "artifact-hash", "graph-commitment",
+    "exact-target-runtimes", "pool-key", "pinned-fork-block", "fee-vault-release-binding",
+    "fee-vault-source-hash", "fee-vault-runtime-codehash", "fee-vault-interface-hash",
+    "one-time-route-codehash-binding", "server-owned-action-abi-hash", "fee-observation-abi-hash",
+    "signed-runner-identity"
+  ])) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.feeAuthorizationGate.requiredBindings is invalid.");
+  if (canonicalJson(descriptor.feeAuthorizationGate.requiredObservations) !== canonicalJson([
+    "SettlementFeeAccounted", "fee-vault-balance", "fee-vault-accrual", "fee-vault-claim"
+  ])) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.feeAuthorizationGate.requiredObservations is invalid.");
+  if (canonicalJson(descriptor.feeAuthorizationGate.requiredAssertions) !== canonicalJson([
+    "fee.programmable-ten-bps", "fee.no-bypass", "fee.no-overcharge", "fee.claim-isolation"
+  ])) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.feeAuthorizationGate.requiredAssertions is invalid.");
+
   assertObject(descriptor.feePolicyProjection, "descriptor.feePolicyProjection");
   assertExactKeys(descriptor.feePolicyProjection, [
+    "authorizationGateRuleId",
     "businessPolicyRuleId",
     "buybackManagementLive",
     "denominator",
     "feeBehaviorClaim",
     "genericClaimingLive",
     "programmableHundredthsOfBip",
-    "runtimeBehaviorClaim"
+    "runtimeBehaviorClaim",
+    "treasury"
   ], "descriptor.feePolicyProjection");
   assertEqual(descriptor.feePolicyProjection.businessPolicyRuleId, "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS", "descriptor.feePolicyProjection.businessPolicyRuleId");
+  assertEqual(descriptor.feePolicyProjection.authorizationGateRuleId, "LAUNCH.ETHEREUM_VERIFIED_EXECUTED_PLATFORM_FEE_BEFORE_AUTHORIZATION", "descriptor.feePolicyProjection.authorizationGateRuleId");
   assertEqual(descriptor.feePolicyProjection.programmableHundredthsOfBip, "1000", "descriptor.feePolicyProjection.programmableHundredthsOfBip");
   assertEqual(descriptor.feePolicyProjection.denominator, "1000000", "descriptor.feePolicyProjection.denominator");
-  assertEqual(descriptor.feePolicyProjection.runtimeBehaviorClaim, "not-established-by-admission", "descriptor.feePolicyProjection.runtimeBehaviorClaim");
+  assertEqual(descriptor.feePolicyProjection.treasury, "0x4957f49620AFf3Adbbe8195a4f633E49cc93376c", "descriptor.feePolicyProjection.treasury");
+  assertEqual(descriptor.feePolicyProjection.runtimeBehaviorClaim, "not-established-by-current-admission", "descriptor.feePolicyProjection.runtimeBehaviorClaim");
   for (const key of ["feeBehaviorClaim", "genericClaimingLive", "buybackManagementLive"]) {
     assertEqual(descriptor.feePolicyProjection[key], false, `descriptor.feePolicyProjection.${key}`);
   }
@@ -227,8 +409,51 @@ export function buildCustomLaunchAdmissionBindingV3({ repositoryRoot }) {
   const policySource = readRegularFile(root, POLICY_PATH);
   const policy = parseLaunchPolicyBytes(Buffer.from(policySource, "utf8"));
   const feeRule = policy.policy.rules.find(({ id }) => id === descriptor.feePolicyProjection.businessPolicyRuleId);
-  if (!feeRule || String(feeRule.parameters?.hundredthsOfBip) !== descriptor.feePolicyProjection.programmableHundredthsOfBip) {
+  if (!feeRule || feeRule.status !== "active" || String(feeRule.parameters?.hundredthsOfBip) !== descriptor.feePolicyProjection.programmableHundredthsOfBip) {
     fail("CUSTOM_LAUNCH_ADMISSION_BUSINESS_POLICY_MISMATCH", "The V3 admission fee projection differs from the canonical business policy.");
+  }
+  const authorizationGateRule = policy.policy.rules.find(({ id }) => id === descriptor.feePolicyProjection.authorizationGateRuleId);
+  if (
+    !authorizationGateRule
+    || authorizationGateRule.status !== "inactive"
+    || authorizationGateRule.retiredIn !== policy.policy.policyVersion
+    || authorizationGateRule.enforcement?.owner !== "platform"
+    || canonicalJson(authorizationGateRule.parameters?.activationPrerequisites) !== canonicalJson(descriptor.feeAuthorizationGate.activationPrerequisites)
+    || authorizationGateRule.parameters?.activationState !== descriptor.candidateProfile.activationState
+    || authorizationGateRule.parameters?.freshWritesEnabled !== descriptor.candidateProfile.freshWritesEnabled
+    || authorizationGateRule.parameters?.profileVersion !== descriptor.candidateProfile.profileVersion
+    || authorizationGateRule.parameters?.accountingMode !== descriptor.feeAuthorizationGate.accountingMode
+    || authorizationGateRule.parameters?.authorizationGateMode !== descriptor.feeAuthorizationGate.mode
+    || authorizationGateRule.parameters?.behaviorEvidenceSchemaVersion !== descriptor.feeAuthorizationGate.behaviorEvidenceSchemaVersion
+    || authorizationGateRule.parameters?.platformFeeConformanceStatus !== descriptor.feeAuthorizationGate.requiredPlatformFeeConformanceStatus
+    || authorizationGateRule.parameters?.immutableFeePathRequired !== descriptor.feeAuthorizationGate.immutableFeePathRequired
+    || authorizationGateRule.parameters?.feeVaultReleaseBindingId !== descriptor.feeAuthorizationGate.feeVaultReleaseBindingId
+    || authorizationGateRule.parameters?.feeVaultReleaseBindingSha256 !== descriptor.feeAuthorizationGate.feeVaultReleaseBindingSha256
+    || authorizationGateRule.parameters?.feeVaultCreationCodeKeccak256 !== descriptor.feeAuthorizationGate.feeVaultCreationCodeKeccak256
+    || authorizationGateRule.parameters?.feeVaultRuntimeCodeKeccak256 !== descriptor.feeAuthorizationGate.feeVaultRuntimeCodeKeccak256
+    || authorizationGateRule.parameters?.feeVaultSourcePath !== descriptor.feeAuthorizationGate.feeVaultSourcePath
+    || authorizationGateRule.parameters?.feeVaultCompilerVersion !== descriptor.feeAuthorizationGate.feeVaultCompiler.solcVersion
+    || authorizationGateRule.parameters?.feeVaultEvmVersion !== descriptor.feeAuthorizationGate.feeVaultCompiler.evmVersion
+    || authorizationGateRule.parameters?.feeVaultOptimizerEnabled !== descriptor.feeAuthorizationGate.feeVaultCompiler.optimizerEnabled
+    || authorizationGateRule.parameters?.feeVaultOptimizerRuns !== descriptor.feeAuthorizationGate.feeVaultCompiler.optimizerRuns
+    || authorizationGateRule.parameters?.feeVaultViaIR !== descriptor.feeAuthorizationGate.feeVaultCompiler.viaIR
+    || authorizationGateRule.parameters?.feeVaultMetadataBytecodeHash !== descriptor.feeAuthorizationGate.feeVaultCompiler.metadataBytecodeHash
+    || authorizationGateRule.parameters?.feeVaultAppendCBOR !== descriptor.feeAuthorizationGate.feeVaultCompiler.appendCBOR
+    || canonicalJson(authorizationGateRule.parameters?.requiredFeeVectorIds) !== canonicalJson(descriptor.feeAuthorizationGate.requiredAssertions)
+    || canonicalJson(authorizationGateRule.parameters?.requiredFeeObservationIds) !== canonicalJson(descriptor.feeAuthorizationGate.requiredObservations)
+    || authorizationGateRule.parameters?.otherBehaviorAxesDisposition !== descriptor.feeAuthorizationGate.otherBehaviorAxesDisposition
+    || authorizationGateRule.parameters?.oneTimeRouteCodehashBindingRequired !== descriptor.feeAuthorizationGate.oneTimeRouteCodehashBindingRequired
+    || authorizationGateRule.parameters?.productionRuntimeReadbackRequired !== descriptor.feeAuthorizationGate.productionRuntimeReadbackRequired
+    || authorizationGateRule.parameters?.callerAssertionsAccepted !== descriptor.feeAuthorizationGate.callerAssertionsAccepted
+    || authorizationGateRule.parameters?.callerVerdictsAccepted !== descriptor.feeAuthorizationGate.callerVerdictsAccepted
+    || authorizationGateRule.parameters?.configurationIsExecutionEvidence !== descriptor.feeAuthorizationGate.configurationIsExecutionEvidence
+    || authorizationGateRule.parameters?.scenarioInputsAreExecutionEvidence !== descriptor.feeAuthorizationGate.scenarioInputsAreExecutionEvidence
+    || authorizationGateRule.parameters?.executedHardInvariantFailureBlocksWalletHandoff !== true
+    || String(authorizationGateRule.parameters?.hundredthsOfBip) !== descriptor.feePolicyProjection.programmableHundredthsOfBip
+    || String(authorizationGateRule.parameters?.rateDenominator) !== descriptor.feePolicyProjection.denominator
+    || authorizationGateRule.parameters?.treasury !== descriptor.feePolicyProjection.treasury
+  ) {
+    fail("CUSTOM_LAUNCH_ADMISSION_BUSINESS_POLICY_MISMATCH", "The V3 admission fee authorization gate differs from the canonical business policy.");
   }
   return deepFreeze({
     schemaVersion: "programmable.custom-launch-admission-binding.v1",
@@ -251,6 +476,7 @@ export function buildCustomLaunchAdmissionBindingV3({ repositoryRoot }) {
       schemaPath: CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_V3_SCHEMA_PATH,
       sha256: descriptorSha256
     },
+    candidateProfile: structuredClone(descriptor.candidateProfile),
     profile: structuredClone(descriptor.profile),
     projections: PROJECTION_CONTRACT.map(({ checks, id, urlPointer }) => ({
       checks: checks.map(({ descriptorPointer, projectionPointer }) => ({

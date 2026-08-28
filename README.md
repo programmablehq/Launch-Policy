@@ -57,8 +57,8 @@ The separate public [V3 admission descriptor](policy/custom-launch-admission-v3.
 hard-block finding rules, evidence-bound codes, executable-evidence duties, and false claim boundaries. Its generated
 [digest and cross-projection contract](.programmable/custom-launch-admission.v3.json) binds those values to the JSON
 pointers exposed by discovery, capabilities, and V3 OpenAPI. This descriptor does not implement admission and does not
-add a second business-policy authority: the private Custom Launch API is the sole executable exact-source, static, and
-Router-simulation evidence authority. A CLI, agent, or client cannot mint an admission receipt.
+add a second business-policy authority: the private Custom Launch API is the sole executable exact-source, static,
+behavior-execution, and Router-simulation evidence authority. A CLI, agent, or client cannot mint an admission receipt.
 
 The [complete launch requirements guide](docs/COMPLETE_LAUNCH_REQUIREMENTS.md) maps stable Rule IDs to the current
 request, readiness, and promotion evidence. It explains the rules; it does not create additional requirements.
@@ -66,13 +66,16 @@ request, readiness, and promotion evidence. It explains the rules; it does not c
 For a selected Programmable Ethereum market, the current policy covers:
 
 - the request-bound policy obligation for the 10 bps Programmable share;
+- an inactive `3.4.0` exact-fee execution contract whose activation is separately gated on server runtime proof;
 - an exact plan for the manifest-resolved canonical Router;
 - finalized matching Router stamp evidence before public promotion; and
 - the evidence boundary required before any later fee-behavior claim.
 
 The 10 bps tuple is a business and request-binding obligation, not a blanket statement that every deployed runtime has
-already paid it. The public V3 profile keeps `feeBehaviorClaim: false`; only private exact executable evidence can prove
-no-bypass, no-overcharge, and claim isolation for a specific launch.
+already paid it. Profile `3.3.0` remains current; the public V3 profile keeps `feeBehaviorClaim: false`. Candidate `3.4.0` is explicitly
+inactive: it accepts no fresh writes until the frozen fee-vault release, server action and observation ABIs, configured
+signed runner identity, and production runtime readback match exactly. Its future gate covers only the four fee vectors;
+all other custom behavior remains unclaimed unless separately executed.
 
 Verified no-market and external-route states are not applicable to Router-specific rules. Incomplete or contradictory
 evidence remains `analysis-pending`. Unknown project types are not rejected merely because they are unfamiliar.
@@ -82,8 +85,8 @@ evidence remains `analysis-pending`. Unknown project types are not rejected mere
 Node.js 24.12 or newer is required.
 
 ```bash
-git clone --depth 1 https://github.com/0xprogrammable/Launch-Policy.git
-cd Launch-Policy
+git clone --depth 1 https://github.com/0xprogrammable/submit-launch.git
+cd submit-launch
 npm run policy -- validate-policy
 npm run policy -- requirements --profile build
 npm run policy -- requirements --profile launch-readiness

@@ -1,151 +1,642 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "idList": {
+      "items": {
+        "pattern": "^[a-z0-9][a-z0-9.-]{1,127}$",
+        "type": "string"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
   "$id": "https://github.com/0xprogrammable/Launch-Policy/blob/main/policy/schemas/custom-launch-admission-v3.schema.json",
-  "title": "Programmable Custom Launch Admission Descriptor V3",
-  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
+  "properties": {
+    "advancedFeaturesRequireEvidence": {
+      "$ref": "#/$defs/idList"
+    },
+    "authority": {
+      "additionalProperties": false,
+      "properties": {
+        "admissionDisclosurePath": {
+          "const": "policy/custom-launch-admission-v3.json"
+        },
+        "agentAdmissionAuthority": {
+          "const": false
+        },
+        "businessPolicyPath": {
+          "const": "policy/launch-policy.v1.json"
+        },
+        "businessPolicyScope": {
+          "const": "programmable-router-fee-and-promotion-obligations"
+        },
+        "cliAdmissionAuthority": {
+          "const": false
+        },
+        "clientAdmissionAuthority": {
+          "const": false
+        },
+        "executableEvidenceAuthority": {
+          "const": "private-custom-launch-api"
+        },
+        "platformAdmissionReceiptRequired": {
+          "const": true
+        }
+      },
+      "required": [
+        "businessPolicyPath",
+        "businessPolicyScope",
+        "admissionDisclosurePath",
+        "executableEvidenceAuthority",
+        "clientAdmissionAuthority",
+        "cliAdmissionAuthority",
+        "agentAdmissionAuthority",
+        "platformAdmissionReceiptRequired"
+      ],
+      "type": "object"
+    },
+    "behaviorAssurance": {
+      "additionalProperties": false,
+      "properties": {
+        "advancedRequiredVectorIds": {
+          "$ref": "#/$defs/idList"
+        },
+        "authorizationScope": {
+          "const": "exact-launch-provenance-only"
+        },
+        "configurationIsExecutionEvidence": {
+          "const": false
+        },
+        "failedRunnerResult": {
+          "const": "blocks_wallet_handoff"
+        },
+        "maximumConfiguredRunnerAttempts": {
+          "const": 3
+        },
+        "missingRunnerEvidenceAuthority": {
+          "const": "none"
+        },
+        "missingRunnerResult": {
+          "const": "claims_remain_unverified"
+        },
+        "mutableSurfaceResult": {
+          "const": "conditional"
+        },
+        "retryingRunnerResult": {
+          "const": "claims_remain_unverified"
+        },
+        "riskClassifierVersion": {
+          "const": "1.1.0"
+        },
+        "safetyResult": {
+          "const": "not_verified"
+        },
+        "standardRequiredVectorIds": {
+          "$ref": "#/$defs/idList"
+        },
+        "unavailableRunnerResult": {
+          "const": "claims_remain_unverified"
+        },
+        "vectorSetVersion": {
+          "const": "1.1.0"
+        },
+        "walletHandoffRequiresVerifiedFeeEvidence": {
+          "const": false
+        }
+      },
+      "required": [
+        "vectorSetVersion",
+        "riskClassifierVersion",
+        "authorizationScope",
+        "standardRequiredVectorIds",
+        "advancedRequiredVectorIds",
+        "configurationIsExecutionEvidence",
+        "maximumConfiguredRunnerAttempts",
+        "missingRunnerEvidenceAuthority",
+        "missingRunnerResult",
+        "retryingRunnerResult",
+        "unavailableRunnerResult",
+        "failedRunnerResult",
+        "walletHandoffRequiresVerifiedFeeEvidence",
+        "mutableSurfaceResult",
+        "safetyResult"
+      ],
+      "type": "object"
+    },
+    "candidateProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "activationState": {
+          "const": "pending-runtime-readback"
+        },
+        "chainId": {
+          "const": "1"
+        },
+        "freshWritesEnabled": {
+          "const": false
+        },
+        "multiContractGraphSupported": {
+          "const": true
+        },
+        "profileId": {
+          "const": "programmable.direct-native-hook-graph.v1"
+        },
+        "profileRevision": {
+          "const": 3
+        },
+        "profileVersion": {
+          "const": "3.4.0"
+        },
+        "projectOwnedHookSupported": {
+          "const": true
+        },
+        "projectOwnedTokenSupported": {
+          "const": true
+        }
+      },
+      "required": [
+        "activationState",
+        "chainId",
+        "freshWritesEnabled",
+        "multiContractGraphSupported",
+        "profileId",
+        "profileRevision",
+        "profileVersion",
+        "projectOwnedHookSupported",
+        "projectOwnedTokenSupported"
+      ],
+      "type": "object"
+    },
+    "claims": {
+      "additionalProperties": false,
+      "properties": {
+        "auditClaim": {
+          "const": false
+        },
+        "feeBehaviorClaim": {
+          "const": false
+        },
+        "safetyClaim": {
+          "const": false
+        },
+        "universalCompatibilityClaim": {
+          "const": false
+        }
+      },
+      "required": [
+        "safetyClaim",
+        "auditClaim",
+        "universalCompatibilityClaim",
+        "feeBehaviorClaim"
+      ],
+      "type": "object"
+    },
+    "compatibility": {
+      "additionalProperties": false,
+      "properties": {
+        "legacyExactProfileVersions": {
+          "const": [
+            "3.2.0",
+            "3.1.0",
+            "3.0.0",
+            "2.0.0"
+          ]
+        },
+        "legacyFeeBehaviorResult": {
+          "const": "unverified"
+        },
+        "legacySemantics": {
+          "const": "readable-and-byte-identical-retryable-only"
+        },
+        "retroactiveAuthorizationGate": {
+          "const": false
+        }
+      },
+      "required": [
+        "legacyExactProfileVersions",
+        "legacySemantics",
+        "legacyFeeBehaviorResult",
+        "retroactiveAuthorizationGate"
+      ],
+      "type": "object"
+    },
+    "descriptorVersion": {
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "type": "string"
+    },
+    "feeAuthorizationGate": {
+      "additionalProperties": false,
+      "properties": {
+        "accountingMode": {
+          "const": "additive-platform-share"
+        },
+        "activationPrerequisites": {
+          "const": [
+            "server-owned-action-abi-frozen",
+            "fee-observation-abi-frozen",
+            "signed-runner-identity-configured",
+            "fee-vault-exact-source-runtime-interface-bound",
+            "production-runtime-deployment-readback-matched"
+          ]
+        },
+        "activationState": {
+          "const": "pending-runtime-readback"
+        },
+        "appliesTo": {
+          "const": "new-v3.4.0-official-router-market-bearing-writes"
+        },
+        "behaviorEvidenceSchemaVersion": {
+          "const": "programmable.custom-launch-behavior-summary.v1"
+        },
+        "callerAssertionsAccepted": {
+          "const": false
+        },
+        "callerExemptionAllowed": {
+          "const": false
+        },
+        "callerVerdictsAccepted": {
+          "const": false
+        },
+        "configurationIsExecutionEvidence": {
+          "const": false
+        },
+        "evidenceAuthority": {
+          "const": "platform-runtime-executor"
+        },
+        "exactFeeVaultSourceRuntimeInterfaceRequired": {
+          "const": true
+        },
+        "executedFailureDisposition": {
+          "const": "blocks_wallet_handoff"
+        },
+        "executedHardInvariantFailureDisposition": {
+          "const": "blocks_wallet_handoff"
+        },
+        "feeObservationAbiFrozenRequired": {
+          "const": true
+        },
+        "feeVaultCompiler": {
+          "additionalProperties": false,
+          "properties": {
+            "appendCBOR": {
+              "const": false
+            },
+            "evmVersion": {
+              "const": "paris"
+            },
+            "metadataBytecodeHash": {
+              "const": "none"
+            },
+            "optimizerEnabled": {
+              "const": true
+            },
+            "optimizerRuns": {
+              "const": 1000
+            },
+            "solcVersion": {
+              "const": "0.8.26"
+            },
+            "viaIR": {
+              "const": false
+            }
+          },
+          "required": [
+            "appendCBOR",
+            "evmVersion",
+            "metadataBytecodeHash",
+            "optimizerEnabled",
+            "optimizerRuns",
+            "solcVersion",
+            "viaIR"
+          ],
+          "type": "object"
+        },
+        "feeVaultCreationCodeKeccak256": {
+          "const": "0xdbc32e835739b50f33a101a8927008fc46af4c11604f7a5da006e5c56288b21e"
+        },
+        "feeVaultReleaseBindingId": {
+          "const": "programmable:settlement-fee-vault:v1"
+        },
+        "feeVaultReleaseBindingSha256": {
+          "const": "sha256:39ccdfdf8cd61620bf5c62bf07fb8428adbd66d2608b1cf3ad583343116d7ed9"
+        },
+        "feeVaultRuntimeCodeKeccak256": {
+          "const": "0x92620fe3f83839334c9a264bea5bfcc819868ca5607cbd2260e5a9664dbd7554"
+        },
+        "feeVaultSourcePath": {
+          "const": "src/ProgrammableSettlementFeeVaultV1.sol"
+        },
+        "freshWritesEnabled": {
+          "const": false
+        },
+        "immutableFeePathRequired": {
+          "const": true
+        },
+        "missingEvidenceDisposition": {
+          "const": "blocks_wallet_handoff"
+        },
+        "mode": {
+          "const": "verified-executed-platform-fee-evidence-required-before-authorization"
+        },
+        "oneTimeRouteCodehashBindingRequired": {
+          "const": true
+        },
+        "otherBehaviorAxesDisposition": {
+          "const": "unclaimed-unless-separately-executed"
+        },
+        "productionRuntimeReadbackRequired": {
+          "const": true
+        },
+        "requiredAssertions": {
+          "const": [
+            "fee.programmable-ten-bps",
+            "fee.no-bypass",
+            "fee.no-overcharge",
+            "fee.claim-isolation"
+          ]
+        },
+        "requiredBindings": {
+          "const": [
+            "launch-intent-hash",
+            "profile-hash",
+            "artifact-hash",
+            "graph-commitment",
+            "exact-target-runtimes",
+            "pool-key",
+            "pinned-fork-block",
+            "fee-vault-release-binding",
+            "fee-vault-source-hash",
+            "fee-vault-runtime-codehash",
+            "fee-vault-interface-hash",
+            "one-time-route-codehash-binding",
+            "server-owned-action-abi-hash",
+            "fee-observation-abi-hash",
+            "signed-runner-identity"
+          ]
+        },
+        "requiredObservations": {
+          "const": [
+            "SettlementFeeAccounted",
+            "fee-vault-balance",
+            "fee-vault-accrual",
+            "fee-vault-claim"
+          ]
+        },
+        "requiredPlatformFeeConformanceStatus": {
+          "const": "verified"
+        },
+        "retryingEvidenceDisposition": {
+          "const": "blocks_wallet_handoff"
+        },
+        "scenarioInputsAreExecutionEvidence": {
+          "const": false
+        },
+        "serverOwnedActionAbiFrozenRequired": {
+          "const": true
+        },
+        "serverSignatureRequired": {
+          "const": true
+        },
+        "signedRunnerIdentityConfiguredRequired": {
+          "const": true
+        },
+        "unavailableEvidenceDisposition": {
+          "const": "blocks_wallet_handoff"
+        },
+        "walletHandoffRequiresVerifiedEvidence": {
+          "const": true
+        }
+      },
+      "required": [
+        "accountingMode",
+        "activationPrerequisites",
+        "activationState",
+        "appliesTo",
+        "behaviorEvidenceSchemaVersion",
+        "callerAssertionsAccepted",
+        "callerExemptionAllowed",
+        "callerVerdictsAccepted",
+        "configurationIsExecutionEvidence",
+        "evidenceAuthority",
+        "exactFeeVaultSourceRuntimeInterfaceRequired",
+        "executedFailureDisposition",
+        "executedHardInvariantFailureDisposition",
+        "feeObservationAbiFrozenRequired",
+        "feeVaultCompiler",
+        "feeVaultCreationCodeKeccak256",
+        "feeVaultReleaseBindingId",
+        "feeVaultReleaseBindingSha256",
+        "feeVaultRuntimeCodeKeccak256",
+        "feeVaultSourcePath",
+        "freshWritesEnabled",
+        "immutableFeePathRequired",
+        "missingEvidenceDisposition",
+        "mode",
+        "oneTimeRouteCodehashBindingRequired",
+        "otherBehaviorAxesDisposition",
+        "productionRuntimeReadbackRequired",
+        "requiredAssertions",
+        "requiredBindings",
+        "requiredObservations",
+        "requiredPlatformFeeConformanceStatus",
+        "retryingEvidenceDisposition",
+        "scenarioInputsAreExecutionEvidence",
+        "serverOwnedActionAbiFrozenRequired",
+        "serverSignatureRequired",
+        "signedRunnerIdentityConfiguredRequired",
+        "unavailableEvidenceDisposition",
+        "walletHandoffRequiresVerifiedEvidence"
+      ],
+      "type": "object"
+    },
+    "feePolicyProjection": {
+      "additionalProperties": false,
+      "properties": {
+        "authorizationGateRuleId": {
+          "const": "LAUNCH.ETHEREUM_VERIFIED_EXECUTED_PLATFORM_FEE_BEFORE_AUTHORIZATION"
+        },
+        "businessPolicyRuleId": {
+          "const": "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS"
+        },
+        "buybackManagementLive": {
+          "const": false
+        },
+        "denominator": {
+          "const": "1000000"
+        },
+        "feeBehaviorClaim": {
+          "const": false
+        },
+        "genericClaimingLive": {
+          "const": false
+        },
+        "programmableHundredthsOfBip": {
+          "const": "1000"
+        },
+        "runtimeBehaviorClaim": {
+          "const": "not-established-by-current-admission"
+        },
+        "treasury": {
+          "const": "0x4957f49620AFf3Adbbe8195a4f633E49cc93376c"
+        }
+      },
+      "required": [
+        "businessPolicyRuleId",
+        "authorizationGateRuleId",
+        "programmableHundredthsOfBip",
+        "denominator",
+        "treasury",
+        "runtimeBehaviorClaim",
+        "feeBehaviorClaim",
+        "genericClaimingLive",
+        "buybackManagementLive"
+      ],
+      "type": "object"
+    },
+    "hardSafetyInvariants": {
+      "$ref": "#/$defs/idList"
+    },
+    "profile": {
+      "additionalProperties": false,
+      "properties": {
+        "chainId": {
+          "const": "1"
+        },
+        "profileId": {
+          "const": "programmable.direct-native-hook-graph.v1"
+        },
+        "profileRevision": {
+          "const": 3
+        },
+        "profileVersion": {
+          "const": "3.3.0"
+        }
+      },
+      "required": [
+        "profileId",
+        "profileRevision",
+        "profileVersion",
+        "chainId"
+      ],
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "programmable.custom-launch-admission-descriptor.v3"
+    },
+    "staticAdmission": {
+      "additionalProperties": false,
+      "properties": {
+        "hardBlockFindingRules": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "pattern": "^[A-Z][A-Z0-9_]{2,127}$",
+                "type": "string"
+              },
+              "targetRoles": {
+                "items": {
+                  "enum": [
+                    "any",
+                    "token",
+                    "hook",
+                    "initializer",
+                    "platform_fee_binding"
+                  ]
+                },
+                "maxItems": 5,
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "code",
+              "targetRoles"
+            ],
+            "type": "object"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "type": "array"
+        },
+        "manualProjectAllowlist": {
+          "const": false
+        },
+        "needsEvidenceFindingCodes": {
+          "items": {
+            "pattern": "^[A-Z][A-Z0-9_]{2,127}$",
+            "type": "string"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "routerSimulationRequiredBeforeAuthorization": {
+          "const": true
+        },
+        "unknownFindingDisposition": {
+          "const": "needs-evidence"
+        }
+      },
+      "required": [
+        "manualProjectAllowlist",
+        "hardBlockFindingRules",
+        "needsEvidenceFindingCodes",
+        "unknownFindingDisposition",
+        "routerSimulationRequiredBeforeAuthorization"
+      ],
+      "type": "object"
+    },
+    "transport": {
+      "additionalProperties": false,
+      "properties": {
+        "capabilitiesUrl": {
+          "const": "https://api.programmable.market/v3/capabilities"
+        },
+        "createPath": {
+          "const": "/v3/custom-launches"
+        },
+        "discoveryUrl": {
+          "const": "https://programmable.market/.well-known/programmable.json"
+        },
+        "openApiUrl": {
+          "const": "https://programmable.market/openapi/custom-launch-v3.json"
+        },
+        "preflightPath": {
+          "const": "/v3/custom-launches/preflight"
+        }
+      },
+      "required": [
+        "discoveryUrl",
+        "capabilitiesUrl",
+        "openApiUrl",
+        "createPath",
+        "preflightPath"
+      ],
+      "type": "object"
+    }
+  },
   "required": [
     "schemaVersion",
     "descriptorVersion",
     "profile",
+    "candidateProfile",
     "authority",
     "transport",
     "staticAdmission",
     "hardSafetyInvariants",
     "behaviorAssurance",
     "advancedFeaturesRequireEvidence",
+    "compatibility",
+    "feeAuthorizationGate",
     "feePolicyProjection",
     "claims"
   ],
-  "properties": {
-    "schemaVersion": { "const": "programmable.custom-launch-admission-descriptor.v3" },
-    "descriptorVersion": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$" },
-    "profile": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["profileId", "profileRevision", "profileVersion", "chainId"],
-      "properties": {
-        "profileId": { "const": "programmable.direct-native-hook-graph.v1" },
-        "profileRevision": { "const": 3 },
-        "profileVersion": { "const": "3.2.0" },
-        "chainId": { "const": "1" }
-      }
-    },
-    "authority": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["businessPolicyPath", "businessPolicyScope", "admissionDisclosurePath", "executableEvidenceAuthority", "clientAdmissionAuthority", "cliAdmissionAuthority", "agentAdmissionAuthority", "platformAdmissionReceiptRequired"],
-      "properties": {
-        "businessPolicyPath": { "const": "policy/launch-policy.v1.json" },
-        "businessPolicyScope": { "const": "programmable-router-fee-and-promotion-obligations" },
-        "admissionDisclosurePath": { "const": "policy/custom-launch-admission-v3.json" },
-        "executableEvidenceAuthority": { "const": "private-custom-launch-api" },
-        "clientAdmissionAuthority": { "const": false },
-        "cliAdmissionAuthority": { "const": false },
-        "agentAdmissionAuthority": { "const": false },
-        "platformAdmissionReceiptRequired": { "const": true }
-      }
-    },
-    "transport": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["discoveryUrl", "capabilitiesUrl", "openApiUrl", "createPath", "preflightPath"],
-      "properties": {
-        "discoveryUrl": { "const": "https://programmable.market/.well-known/programmable.json" },
-        "capabilitiesUrl": { "const": "https://api.programmable.market/v3/capabilities" },
-        "openApiUrl": { "const": "https://programmable.market/openapi/custom-launch-v3.json" },
-        "createPath": { "const": "/v3/custom-launches" },
-        "preflightPath": { "const": "/v3/custom-launches/preflight" }
-      }
-    },
-    "staticAdmission": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["manualProjectAllowlist", "hardBlockFindingRules", "needsEvidenceFindingCodes", "unknownFindingDisposition", "routerSimulationRequiredBeforeAuthorization"],
-      "properties": {
-        "manualProjectAllowlist": { "const": false },
-        "hardBlockFindingRules": {
-          "type": "array",
-          "minItems": 1,
-          "maxItems": 64,
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["code", "targetRoles"],
-            "properties": {
-              "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,127}$" },
-              "targetRoles": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 5,
-                "uniqueItems": true,
-                "items": { "enum": ["any", "token", "hook", "initializer", "platform_fee_binding"] }
-              }
-            }
-          }
-        },
-        "needsEvidenceFindingCodes": {
-          "type": "array",
-          "minItems": 1,
-          "maxItems": 128,
-          "uniqueItems": true,
-          "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,127}$" }
-        },
-        "unknownFindingDisposition": { "const": "needs-evidence" },
-        "routerSimulationRequiredBeforeAuthorization": { "const": true }
-      }
-    },
-    "hardSafetyInvariants": { "$ref": "#/$defs/idList" },
-    "behaviorAssurance": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["vectorSetVersion", "riskClassifierVersion", "authorizationScope", "standardRequiredVectorIds", "advancedRequiredVectorIds", "missingRunnerEvidenceAuthority", "missingRunnerResult", "mutableSurfaceResult", "safetyResult"],
-      "properties": {
-        "vectorSetVersion": { "const": "1.1.0" },
-        "riskClassifierVersion": { "const": "1.1.0" },
-        "authorizationScope": { "const": "exact-launch-provenance-only" },
-        "standardRequiredVectorIds": { "$ref": "#/$defs/idList" },
-        "advancedRequiredVectorIds": { "$ref": "#/$defs/idList" },
-        "missingRunnerEvidenceAuthority": { "const": "none" },
-        "missingRunnerResult": { "const": "not_verified" },
-        "mutableSurfaceResult": { "const": "conditional" },
-        "safetyResult": { "const": "not_verified" }
-      }
-    },
-    "advancedFeaturesRequireEvidence": { "$ref": "#/$defs/idList" },
-    "feePolicyProjection": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["businessPolicyRuleId", "programmableHundredthsOfBip", "denominator", "runtimeBehaviorClaim", "feeBehaviorClaim", "genericClaimingLive", "buybackManagementLive"],
-      "properties": {
-        "businessPolicyRuleId": { "const": "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS" },
-        "programmableHundredthsOfBip": { "const": "1000" },
-        "denominator": { "const": "1000000" },
-        "runtimeBehaviorClaim": { "const": "not-established-by-admission" },
-        "feeBehaviorClaim": { "const": false },
-        "genericClaimingLive": { "const": false },
-        "buybackManagementLive": { "const": false }
-      }
-    },
-    "claims": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["safetyClaim", "auditClaim", "universalCompatibilityClaim", "feeBehaviorClaim"],
-      "properties": {
-        "safetyClaim": { "const": false },
-        "auditClaim": { "const": false },
-        "universalCompatibilityClaim": { "const": false },
-        "feeBehaviorClaim": { "const": false }
-      }
-    }
-  },
-  "$defs": {
-    "idList": {
-      "type": "array",
-      "minItems": 1,
-      "maxItems": 128,
-      "uniqueItems": true,
-      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9.-]{1,127}$" }
-    }
-  }
+  "title": "Programmable Custom Launch Admission Descriptor V3",
+  "type": "object"
 }

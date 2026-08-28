@@ -156,7 +156,7 @@ function trustedPolicyFixture(t, policy = canonicalPolicyRecord().policy) {
 
 test("canonical policy exposes enabled production requirements without authority", () => {
   const record = canonicalPolicyRecord();
-  assert.equal(record.policy.policyVersion, "2.2.0");
+  assert.equal(record.policy.policyVersion, "2.3.0");
   assert.deepEqual(record.policy.profiles.map(({ id }) => id), ["build", "launch-readiness", "production-launch", "workflow-canary"]);
   assert.equal(selectLaunchPolicyProfile(record.policy, "build").enabled, true);
   assert.equal(selectLaunchPolicyProfile(record.policy, "launch-readiness").enabled, true);
@@ -177,13 +177,14 @@ test("canonical policy exposes enabled production requirements without authority
 
 test("market-bearing readiness is closed while no-market stays admissible and unsupported integration stays pending", (t) => {
   const { policy } = canonicalPolicyRecord();
-  assert.equal(policy.policyVersion, "2.2.0");
+  assert.equal(policy.policyVersion, "2.3.0");
   assert.deepEqual(policy.rules.map(({ id }) => id), [
     "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS",
     "LAUNCH.ETHEREUM_EXACT_FEE_TEMPLATE_BEFORE_AUTHORIZATION",
     "LAUNCH.ETHEREUM_FINALIZED_ROUTER_STAMP_BEFORE_PROMOTION",
     "LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION",
-    "LAUNCH.ETHEREUM_ROUTER_PROVENANCE_READINESS"
+    "LAUNCH.ETHEREUM_ROUTER_PROVENANCE_READINESS",
+    "LAUNCH.ETHEREUM_VERIFIED_EXECUTED_PLATFORM_FEE_BEFORE_AUTHORIZATION"
   ]);
   assert.deepEqual(rulesForProfile(policy, "build"), []);
   assert.deepEqual(rulesForProfile(policy, "launch-readiness").map(({ id }) => id), [
@@ -199,7 +200,10 @@ test("market-bearing readiness is closed while no-market stays admissible and un
   assert.deepEqual(rulesForProfile(policy, "workflow-canary"), []);
   assert.deepEqual(
     policy.rules.filter(({ status }) => status !== "active").map(({ id }) => id),
-    ["LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION"],
+    [
+      "LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION",
+      "LAUNCH.ETHEREUM_VERIFIED_EXECUTED_PLATFORM_FEE_BEFORE_AUTHORIZATION"
+    ],
   );
 
   const { record } = trustedPolicyFixture(t);
@@ -249,6 +253,30 @@ test("market-bearing readiness is closed while no-market stays admissible and un
     () => evaluateLaunchPolicyRules({ policyRecord: record, profileId: "launch-readiness", subject: {}, evidence: {} }),
     hasCode("LAUNCH_POLICY_EVALUATION_INPUT_INVALID")
   );
+});
+
+test("V3.4 exact executed fee gate is a frozen inactive candidate, never a caller-evaluable current rule", () => {
+  const { policy } = canonicalPolicyRecord();
+  const candidate = policy.rules.find(({ id }) => id === "LAUNCH.ETHEREUM_VERIFIED_EXECUTED_PLATFORM_FEE_BEFORE_AUTHORIZATION");
+  assert.equal(candidate.status, "inactive");
+  assert.equal(candidate.retiredIn, "2.3.0");
+  assert.equal(candidate.parameters.activationState, "pending-runtime-readback");
+  assert.equal(candidate.parameters.freshWritesEnabled, false);
+  assert.equal(candidate.parameters.callerAssertionsAccepted, false);
+  assert.equal(candidate.parameters.callerVerdictsAccepted, false);
+  assert.equal(candidate.parameters.configurationIsExecutionEvidence, false);
+  assert.equal(candidate.parameters.scenarioInputsAreExecutionEvidence, false);
+  assert.equal(candidate.parameters.platformFeeConformanceStatus, "verified");
+  assert.equal(candidate.parameters.otherBehaviorAxesDisposition, "unclaimed-unless-separately-executed");
+  assert.equal(candidate.parameters.feeVaultReleaseBindingSha256, "sha256:39ccdfdf8cd61620bf5c62bf07fb8428adbd66d2608b1cf3ad583343116d7ed9");
+  assert.equal(candidate.parameters.feeVaultRuntimeCodeKeccak256, "0x92620fe3f83839334c9a264bea5bfcc819868ca5607cbd2260e5a9664dbd7554");
+  assert.deepEqual(candidate.parameters.requiredFeeVectorIds, [
+    "fee.programmable-ten-bps",
+    "fee.no-bypass",
+    "fee.no-overcharge",
+    "fee.claim-isolation"
+  ]);
+  assert.equal(rulesForProfile(policy, "production-launch").some(({ id }) => id === candidate.id), false);
 });
 
 test("finalized Router promotion handler validates the full closed projection instead of a status claim", (t) => {

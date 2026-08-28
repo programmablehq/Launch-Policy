@@ -7,7 +7,7 @@ Programmable Router, fee, and promotion obligations. The separate public
 identity, hard-block codes, evidence duties, and claim limitations. Bind both at one exact protected
 `launch-policy:main` commit and tree.
 
-The current machine identity in this tree is policy ID `programmable-central-launch-policy`, version `2.2.0`. Do not
+The current machine identity in this tree is policy ID `programmable-central-launch-policy`, version `2.3.0`. Do not
 infer future requirements from that label alone; always bind the exact policy bytes and Git identity.
 
 > [!IMPORTANT]
@@ -68,8 +68,9 @@ This is one separated authority chain, not two competing policy engines:
 
 1. `launch-policy.v1.json` owns Programmable Router, fee, and promotion business obligations.
 2. `custom-launch-admission-v3.json` publicly declares the current generic admission envelope and stable finding IDs.
-3. The private Custom Launch API exact-source/runtime scanner and platform-owned Router simulation are the sole
-   executable evidence authorities. The backend must issue the bound admission receipt before wallet authorization.
+3. The private Custom Launch API exact-source/runtime scanner, platform-owned behavior executor, and Router simulation
+   are the sole executable evidence authorities. Current profile `3.3.0` remains live. Candidate `3.4.0` is inactive
+   until its server runner, ABI, frozen fee-vault, and production-readback prerequisites are independently satisfied.
 4. CLI checks, local LLM output, agent attestations, and caller claims are inputs only. They cannot approve a request,
    hide a hard finding, establish safety, or establish fee behavior.
 
@@ -78,6 +79,13 @@ PoolManager callback guard, a callback guard bound to the wrong PoolManager, or 
 v4 callback. Proxy/delegatecall, child creation, mutable admin/mint/tax/pause/transfer controls, external dependencies,
 transfer fees, liquidity custody, and other advanced surfaces are evidence duties rather than automatic rejections.
 Unknown future findings remain evidence-bound instead of disappearing or becoming a surprise categorical block.
+
+The current create profile is `3.3.0`. Candidate `3.4.0` accepts no fresh writes. Its future gate has no caller
+exemption and cannot accept caller assertions, verdicts, configuration, or scenario inputs as execution evidence.
+Activation requires the exact `programmable:settlement-fee-vault:v1` frozen Paris/optimizer-1000/no-CBOR release,
+server-owned action and fee-observation ABIs, configured signed runner identity, and matching production readback. Only
+`platformFeeConformance: verified` for exact 10 bps, no bypass, no overcharge, and claim isolation can satisfy that gate;
+other custom behavior remains unclaimed unless separately executed.
 
 Run a local cross-projection check against separately downloaded production JSON without sending credentials:
 
@@ -125,9 +133,10 @@ membership come from the canonical policy bytes.
 | --- | --- | --- |
 | `LAUNCH.ETHEREUM_AND_TREASURY_10_BPS` | The selected Programmable Ethereum request binds the 10 bps business obligation; this is not runtime behavior proof | `programmable-launch-requirement` |
 | `LAUNCH.ETHEREUM_ROUTER_PROVENANCE_READINESS` | Before launch, the exact route plan binds the manifest-resolved canonical Router and required commitments | `programmable-router-readiness` |
-| `LAUNCH.ETHEREUM_EXACT_FEE_TEMPLATE_BEFORE_AUTHORIZATION` | Static/source composition must bind the selected fee template before authorization; `feeBehaviorClaim` remains false without executable evidence | `programmable-exact-fee-template` |
+| `LAUNCH.ETHEREUM_EXACT_FEE_TEMPLATE_BEFORE_AUTHORIZATION` | Current `3.3.0` source/build/runtime composition rule; it is not executed behavior proof | `programmable-exact-fee-template` |
 | `LAUNCH.ETHEREUM_FINALIZED_ROUTER_STAMP_BEFORE_PROMOTION` | Before Registry, API, or terminal promotion, the launched market has one finalized, internally consistent canonical Router stamp and proof | `programmable-router-promotion` |
 | `LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION` | Inactive historical settlement rule retained for reproduction; it is not a current runtime guarantee | `programmable-runtime-fee-settlement` |
+| `LAUNCH.ETHEREUM_VERIFIED_EXECUTED_PLATFORM_FEE_BEFORE_AUTHORIZATION` | Inactive `3.4.0` candidate; activation requires frozen fee-vault/ABI/runner/readback evidence before its exact fee gate can govern fresh writes | `programmable-verified-executed-platform-fee` |
 
 The exact fee tuple is:
 
@@ -141,9 +150,10 @@ The exact fee tuple is:
 This table is a human map of
 [`LAUNCH.ETHEREUM_AND_TREASURY_10_BPS`](../policy/launch-policy.v1.json), not a second source. Do not reinterpret the
 rule as 10% or as an optional creator fee. Do not apply it to a no-market or unresolved draft merely because the project
-uses v4. The tuple is an admission/business obligation. It does not mean the API has already observed real swaps,
-excluded every bypass, excluded overcharge, or proved claim isolation. Those claims require private exact executable
-evidence for the specific launch, and the public profile therefore exposes `feeBehaviorClaim: false` by default.
+uses v4. The tuple is an admission/business obligation. The inactive `3.4.0` contract describes a future private exact
+fee-path gate, not a current result. If separately activated after runtime proof, its receipt is exact-launch-only; it
+does not prove unrelated hook behavior, a later mainnet trade, future payment, generic claiming, or universal safety.
+The current public profile therefore keeps `feeBehaviorClaim: false`.
 
 ## Prepare the current API request
 
@@ -208,11 +218,11 @@ policy-review result; the protected compiler combines the exact verified API bun
 record.
 
 A readiness pass proves only that the exact checked launch plan binds the canonical Router and mandatory fee
-configuration. It does not prove an executed or settled runtime money flow. Before a later production or promotion
-decision, the platform needs separate protected, finalized deployment, runtime, and settlement evidence for the
-specific observed blocks, logs, and assets. That evidence does not promise future payment; ongoing monitoring remains
-separate. The repository-side V1 settlement assertion is deliberately `analysis-pending`: only a future independently
-anchored observer verifier may mint a passed settlement proof.
+configuration. The candidate `3.4.0` execution gate is inactive and cannot govern wallet handoff until its explicit
+activation prerequisites pass. Neither current prelaunch result proves a later mainnet trade or settled money flow. Finalized deployment,
+runtime, and settlement evidence for specific observed blocks, logs, and assets remains separate; no receipt promises
+future payment or ongoing monitoring. The repository-side V1 settlement assertion remains historical and
+`analysis-pending`: only an independently anchored observer verifier may mint a passed settlement proof.
 
 The checker is offline: it performs no RPC or network access, executes no caller code, writes no files, signs
 nothing, and sends no transaction. It verifies the exact supplied manifest snapshot bytes against the pinned official

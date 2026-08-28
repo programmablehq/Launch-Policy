@@ -359,10 +359,10 @@ test("every semantic finding and handler maps bijectively to a central Rule ID",
   }
 
   const expectedConsumers = {
-      "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS": [
-        "review/launch-policy-review-core.mjs",
-        "scripts/custom-launch-admission-v3-core.mjs",
-        "scripts/launch-policy-core.mjs",
+    "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS": [
+      "review/launch-policy-review-core.mjs",
+      "scripts/custom-launch-admission-v3-core.mjs",
+      "scripts/launch-policy-core.mjs",
       "scripts/launch-policy-handlers.mjs",
       "scripts/programmable-launch-router-readiness-core.mjs",
       "scripts/registry-core.mjs",
@@ -393,6 +393,12 @@ test("every semantic finding and handler maps bijectively to a central Rule ID",
       "scripts/programmable-launch-router-readiness-core.mjs",
       "scripts/registry-core.mjs",
       "scripts/verify-public-application-v3-core.mjs"
+    ],
+    "LAUNCH.ETHEREUM_VERIFIED_EXECUTED_PLATFORM_FEE_BEFORE_AUTHORIZATION": [
+      "review/launch-policy-review-core.mjs",
+      "scripts/custom-launch-admission-v3-core.mjs",
+      "scripts/launch-policy-core.mjs",
+      "scripts/launch-policy-handlers.mjs"
     ]
   };
   assert.deepEqual(
@@ -515,7 +521,7 @@ test("public docs separate the current API flow from historical GitHub eligibili
   assert.match(beta, /No contract in that list opens GitHub intake/u);
   assert.match(agents, /only authored source of current Programmable Router, fee, and promotion business\s+obligations/u);
   assert.match(agents, /separate public declarative contract for the current V3 profile/u);
-  assert.match(agents, /private Custom Launch API exact-source\/runtime scanner and platform-owned Router simulation are the sole\s+executable admission-evidence authorities/u);
+  assert.match(agents, /private Custom Launch API exact-source\/runtime scanner, platform-owned behavior executor, and Router simulation\s+are the sole executable admission-evidence authorities/u);
   assert.match(readme, /request-bound policy obligation for the 10 bps Programmable share/u);
   assert.match(readme, /public V3 profile keeps `feeBehaviorClaim: false`/u);
   assert.match(readme, /launch-readiness.*checker-only/su);

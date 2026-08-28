@@ -16,14 +16,17 @@ owns Router, fee, and promotion business obligations. The public
 finding rules, evidence-bound codes, and false claim boundaries. Its generated
 [digest/cross-projection contract](../.programmable/custom-launch-admission.v3.json) binds the descriptor and business
 policy digests plus the exact discovery, capabilities, and OpenAPI JSON pointers. The private Custom Launch API is the
-sole executable exact-source and Router-simulation evidence authority; a CLI, client, or agent cannot issue admission.
+sole executable exact-source, behavior, and Router-simulation evidence authority; a CLI, client, or agent cannot issue
+admission. Discovery must continue to identify `3.3.0` as current. Candidate `3.4.0` stays inactive and must not appear
+as a fresh-write profile until its frozen fee-vault, server runner, ABI, and production-readback prerequisites pass.
 
 ## Required current-launch discovery behavior
 
 1. Fetch `https://programmable.market/.well-known/programmable.json` without authentication.
 2. Require `customLaunchApi.status: "live"`, select `customLaunchApi.generalHookProfile`, and follow its advertised
    `capabilitiesUrl`, CLI release/checksum, guide, pack-config schema, and V3 OpenAPI URL.
-3. Require the live capabilities profile identity and admission boundaries to match the selected discovery profile.
+3. Require the live capabilities profile identity and admission boundaries to match the selected current discovery
+   profile. Do not infer candidate `3.4.0` activation from this repository or from caller-supplied configuration.
 4. Install only the advertised checksum-bound CLI release and run `pack` then `validate --remote`.
 5. Submit the same byte-identical request to `POST https://api.programmable.market/v3/custom-launches`; preserve its
    journal, request bytes, and idempotency key.
