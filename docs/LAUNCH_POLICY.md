@@ -1,6 +1,6 @@
 # Programmable Launch Policy
 
-Generated from the canonical policy at `policy/launch-policy.v1.json`. Digest: `sha256:8ec75c79d37535d9c9469f7662f9bf760387de34df55157df0203c6dd1b8b808`.
+Generated from the canonical policy at `policy/launch-policy.v1.json`. Digest: `sha256:25ebc23fa3751d868efb08238e8a8cacfee31e9e736f11ebb0dd9b9c0b7250bd`.
 
 This document is a generated projection. The canonical JSON is authoritative.
 

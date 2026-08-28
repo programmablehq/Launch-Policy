@@ -82,9 +82,87 @@ test("V3 admission descriptor is closed, canonical, and matches the public risk 
   assert.deepEqual(descriptor.behaviorAssurance.advancedRequiredVectorIds, ADVANCED_VECTOR_IDS);
   assert.equal(descriptor.behaviorAssurance.authorizationScope, "exact-launch-provenance-only");
   assert.equal(descriptor.behaviorAssurance.missingRunnerEvidenceAuthority, "none");
-  assert.equal(descriptor.behaviorAssurance.missingRunnerResult, "not_verified");
+  assert.equal(descriptor.behaviorAssurance.configurationIsExecutionEvidence, false);
+  assert.equal(descriptor.behaviorAssurance.maximumConfiguredRunnerAttempts, 3);
+  for (const key of ["missingRunnerResult", "retryingRunnerResult", "unavailableRunnerResult"]) {
+    assert.equal(descriptor.behaviorAssurance[key], "claims_remain_unverified", key);
+  }
+  assert.equal(descriptor.behaviorAssurance.failedRunnerResult, "blocks_wallet_handoff");
+  assert.equal(descriptor.behaviorAssurance.walletHandoffRequiresVerifiedFeeEvidence, false);
   assert.equal(descriptor.behaviorAssurance.mutableSurfaceResult, "conditional");
   assert.equal(descriptor.behaviorAssurance.safetyResult, "not_verified");
+});
+
+test("V3.4 fee authorization remains pending while current V3.3 keeps exact compatibility", () => {
+  assert.equal(descriptor.profile.profileVersion, "3.3.0");
+  assert.deepEqual(descriptor.candidateProfile, {
+    activationState: "pending-runtime-readback",
+    chainId: "1",
+    freshWritesEnabled: false,
+    multiContractGraphSupported: true,
+    profileId: "programmable.direct-native-hook-graph.v1",
+    profileRevision: 3,
+    profileVersion: "3.4.0",
+    projectOwnedHookSupported: true,
+    projectOwnedTokenSupported: true,
+    requiredSettlementDataflowReadback: "configured-autonomous-approval-exact-route-closure-receipt"
+  });
+  assert.deepEqual(descriptor.compatibility, {
+    legacyExactProfileVersions: ["3.2.0", "3.1.0", "3.0.0", "2.0.0"],
+    legacyFeeBehaviorResult: "unverified",
+    legacySemantics: "readable-and-byte-identical-retryable-only",
+    retroactiveAuthorizationGate: false
+  });
+  assert.equal(descriptor.feeAuthorizationGate.mode, "verified-executed-platform-fee-evidence-required-before-authorization");
+  assert.equal(descriptor.feeAuthorizationGate.activationState, "pending-runtime-readback");
+  assert.equal(descriptor.feeAuthorizationGate.freshWritesEnabled, false);
+  assert.equal(descriptor.feeAuthorizationGate.appliesTo, "new-v3.4.0-official-router-market-bearing-writes");
+  assert.equal(descriptor.feeAuthorizationGate.accountingMode, "additive-platform-share");
+  assert.equal(descriptor.feeAuthorizationGate.callerExemptionAllowed, false);
+  assert.equal(descriptor.feeAuthorizationGate.behaviorEvidenceSchemaVersion, "programmable.custom-launch-behavior-summary.v1");
+  assert.equal(descriptor.feeAuthorizationGate.requiredPlatformFeeConformanceStatus, "verified");
+  assert.equal(descriptor.feeAuthorizationGate.serverSignatureRequired, true);
+  assert.equal(descriptor.feeAuthorizationGate.immutableFeePathRequired, true);
+  assert.equal(descriptor.feeAuthorizationGate.walletHandoffRequiresVerifiedEvidence, true);
+  assert.equal(descriptor.feeAuthorizationGate.callerAssertionsAccepted, false);
+  assert.equal(descriptor.feeAuthorizationGate.callerVerdictsAccepted, false);
+  assert.equal(descriptor.feeAuthorizationGate.otherBehaviorAxesDisposition, "unclaimed-unless-separately-executed");
+  assert.equal(descriptor.feeAuthorizationGate.feeVaultReleaseBindingId, "programmable:settlement-fee-vault:v1");
+  assert.equal(descriptor.feeAuthorizationGate.feeVaultReleaseBindingSha256, "sha256:39ccdfdf8cd61620bf5c62bf07fb8428adbd66d2608b1cf3ad583343116d7ed9");
+  assert.equal(descriptor.feeAuthorizationGate.feeVaultRuntimeCodeKeccak256, "0x92620fe3f83839334c9a264bea5bfcc819868ca5607cbd2260e5a9664dbd7554");
+  assert.deepEqual(descriptor.settlementDataflowClosure, {
+    candidateRouteCoverageComesFromRunner: false,
+    clientAssertionsAccepted: false,
+    completeValueFlowInventoryRequired: true,
+    configured: false,
+    evidenceAuthority: "programmable-autonomous-approval",
+    exactLaunchGraphAndRouteBindingRequired: true,
+    receiptSchemaVersion: "programmable.autonomous-settlement-dataflow-receipt.v1",
+    runnerNoBypassScope: "canonical-vault-entrypoints-only",
+    sourceDecisionReceiptRequired: true,
+    walletHandoffRequiresClosure: true
+  });
+  assert.equal(descriptor.feeAuthorizationGate.activationPrerequisites.includes("exact-settlement-dataflow-closure"), true);
+  assert.deepEqual(descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureReceiptBindings, [
+    "profileHash",
+    "launchIntentHash",
+    "artifactHash",
+    "graphBundleHash",
+    "verificationBundleHash",
+    "graphCommitment",
+    "expectedPoolId",
+    "vaultTargetId",
+    "vaultRuntimeCodeHash",
+    "authorizedRouteTargetId",
+    "authorizedRouteRuntimeCodeHash",
+    "platformFeeObservationSha256"
+  ]);
+  assert.deepEqual(descriptor.feeAuthorizationGate.requiredAssertions, [
+    "fee.programmable-ten-bps",
+    "fee.no-bypass",
+    "fee.no-overcharge",
+    "fee.claim-isolation"
+  ]);
 });
 
 test("V3 admission authority never delegates admission or behavior claims to a client, CLI, or agent", () => {
@@ -104,7 +182,7 @@ test("V3 admission authority never delegates admission or behavior claims to a c
     safetyClaim: false,
     universalCompatibilityClaim: false
   });
-  assert.equal(descriptor.feePolicyProjection.runtimeBehaviorClaim, "not-established-by-admission");
+  assert.equal(descriptor.feePolicyProjection.runtimeBehaviorClaim, "not-established-by-current-admission");
   assert.equal(descriptor.feePolicyProjection.feeBehaviorClaim, false);
 });
 
@@ -113,8 +191,9 @@ test("generated V3 binding pins the business policy, descriptor, and every publi
   const expectedDescriptorDigest = `sha256:${crypto.createHash("sha256").update(descriptorSource).digest("hex")}`;
   assert.equal(binding.descriptor.sha256, expectedDescriptorDigest);
   assert.match(binding.businessPolicy.sha256, /^sha256:[0-9a-f]{64}$/u);
-  assert.equal(binding.businessPolicy.policyVersion, "2.2.0");
+  assert.equal(binding.businessPolicy.policyVersion, "2.3.0");
   assert.deepEqual(binding.profile, descriptor.profile);
+  assert.deepEqual(binding.candidateProfile, descriptor.candidateProfile);
   assert.equal(binding.projections.length, 3);
   for (const projection of binding.projections) {
     assert.match(projection.url, /^https:\/\//u);
@@ -133,7 +212,9 @@ test("V3 projection reconciliation accepts exact values and rejects one drifted 
         },
         profileId: descriptor.profile.profileId,
         profileRevision: descriptor.profile.profileRevision,
-        profileVersion: descriptor.profile.profileVersion
+        profileVersion: descriptor.profile.profileVersion,
+        compatibleProfileVersions: descriptor.compatibility.legacyExactProfileVersions,
+        legacyProfileSemantics: descriptor.compatibility.legacySemantics
       },
       integrationPreview: {
         feeBehaviorClaim: descriptor.claims.feeBehaviorClaim,
@@ -147,8 +228,20 @@ test("V3 projection reconciliation accepts exact values and rejects one drifted 
     auditClaim: descriptor.claims.auditClaim,
     feePolicy: {
       buybackManagementLive: descriptor.feePolicyProjection.buybackManagementLive,
+      denominator: descriptor.feePolicyProjection.denominator,
       genericClaimingLive: descriptor.feePolicyProjection.genericClaimingLive,
+      immutableFeePathRequired: descriptor.feeAuthorizationGate.immutableFeePathRequired,
       programmableHundredthsOfBip: descriptor.feePolicyProjection.programmableHundredthsOfBip
+    },
+    behaviorEvidence: {
+      configurationIsExecutionEvidence: descriptor.behaviorAssurance.configurationIsExecutionEvidence,
+      executedFailureDisposition: descriptor.behaviorAssurance.failedRunnerResult,
+      feeBehaviorClaim: descriptor.claims.feeBehaviorClaim,
+      maximumConfiguredRunnerAttempts: descriptor.behaviorAssurance.maximumConfiguredRunnerAttempts,
+      notConfiguredDisposition: descriptor.behaviorAssurance.missingRunnerResult,
+      unavailableDisposition: descriptor.behaviorAssurance.unavailableRunnerResult,
+      vectorSetVersion: descriptor.behaviorAssurance.vectorSetVersion,
+      walletHandoffRequiresVerifiedEvidence: descriptor.behaviorAssurance.walletHandoffRequiresVerifiedFeeEvidence
     },
     hardSafetyInvariants: descriptor.hardSafetyInvariants,
     profile: descriptor.profile,
@@ -158,6 +251,8 @@ test("V3 projection reconciliation accepts exact values and rejects one drifted 
   const openApi = {
     "x-programmable-admission-policy": {
       hardBlockFindingRules: descriptor.staticAdmission.hardBlockFindingRules,
+      legacyExactProfileVersions: descriptor.compatibility.legacyExactProfileVersions,
+      legacySemantics: descriptor.compatibility.legacySemantics,
       manualProjectAllowlist: descriptor.staticAdmission.manualProjectAllowlist,
       needsEvidenceFindingCodes: descriptor.staticAdmission.needsEvidenceFindingCodes
     },

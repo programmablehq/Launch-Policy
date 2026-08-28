@@ -63,6 +63,98 @@ function programmableExactFeeTemplateHandler(context) {
   ]);
 }
 
+function programmableVerifiedExecutedPlatformFeeHandler({ evidence, rule }) {
+  const [evidenceId] = rule.evidence;
+  const value = evidence?.[evidenceId];
+  const parameterKeys = [
+    "accountingMode",
+    "activationPrerequisites",
+    "activationState",
+    "assetMode",
+    "authorizationGateMode",
+    "basis",
+    "behaviorEvidenceSchemaVersion",
+    "callerAssertionsAccepted",
+    "callerExemptionAllowed",
+    "callerVerdictsAccepted",
+    "chainId",
+    "claimIsolationRequired",
+    "configurationIsExecutionEvidence",
+    "evidenceAuthority",
+    "executedHardInvariantFailureBlocksWalletHandoff",
+    "feeVaultAppendCBOR",
+    "feeVaultCompilerVersion",
+    "feeVaultCreationCodeKeccak256",
+    "feeVaultEvmVersion",
+    "feeVaultMetadataBytecodeHash",
+    "feeVaultOptimizerEnabled",
+    "feeVaultOptimizerRuns",
+    "feeVaultReleaseBindingId",
+    "feeVaultReleaseBindingSha256",
+    "feeVaultRuntimeCodeKeccak256",
+    "feeVaultSourcePath",
+    "feeVaultViaIR",
+    "freshWritesEnabled",
+    "hundredthsOfBip",
+    "immutableFeePathRequired",
+    "network",
+    "noBypassRequired",
+    "noOverchargeRequired",
+    "oneTimeRouteCodehashBindingRequired",
+    "otherBehaviorAxesDisposition",
+    "platformFeeConformanceStatus",
+    "productionRuntimeReadbackRequired",
+    "profileVersion",
+    "rateDenominator",
+    "requestScope",
+    "requiredFeeObservationIds",
+    "requiredFeeVectorIds",
+    "requiredSettlementDataflowClosureAssertions",
+    "requiredSettlementDataflowClosureReceiptBindings",
+    "requiredSettlementDataflowReadback",
+    "scenarioInputsAreExecutionEvidence",
+    "settlementDataflowClosure",
+    "serverSignatureRequired",
+    "successfulSwapsOnly",
+    "treasury"
+  ];
+  if (value === undefined) {
+    return Object.freeze({
+      passed: false,
+      status: "analysis-pending",
+      missingEvidence: Object.freeze([evidenceId]),
+      message: "The private Custom Launch API has not supplied authoritative executed platform-fee evidence."
+    });
+  }
+  const expectedKeys = [...parameterKeys, "status"].sort();
+  const observedKeys = value && typeof value === "object" && !Array.isArray(value)
+    ? Object.keys(value).sort()
+    : [];
+  const exactConfiguration = observedKeys.length === expectedKeys.length
+    && observedKeys.every((key, index) => key === expectedKeys[index])
+    && parameterKeys.every((key) => canonicalValue(value[key]) === canonicalValue(rule.parameters?.[key]));
+  if (!exactConfiguration) {
+    return Object.freeze({
+      passed: false,
+      status: "failed",
+      missingEvidence: Object.freeze([evidenceId]),
+      message: "The claimed platform-fee configuration does not match the immutable V3.4 rule."
+    });
+  }
+  return Object.freeze({
+    passed: false,
+    status: "analysis-pending",
+    missingEvidence: Object.freeze([evidenceId]),
+    message: "Matching configuration is not execution evidence; only the private API can verify both its server-signed fee receipt and separate trusted exact-route settlement-dataflow closure before wallet handoff."
+  });
+}
+
+function canonicalValue(value) {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonicalValue).join(",")}]`;
+  return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalValue(value[key])}`).join(",")}}`;
+}
+
 const SHA256 = /^sha256:[0-9a-f]{64}$/u;
 const OBJECT_ID = /^[0-9a-f]{40}$/u;
 const ADDRESS = /^0x[0-9A-Fa-f]{40}$/u;
@@ -414,6 +506,12 @@ const RULE_HANDLERS_BY_POLICY_VERSION = Object.freeze({
     "programmable-runtime-fee-settlement-v1": programmableRuntimeFeeSettlementHandler
   }),
   "2.2.0": Object.freeze({
+    "ethereum-treasury-10-bps-v1": ethereumTreasuryTenBpsHandler,
+    "programmable-exact-fee-template-v1": programmableExactFeeTemplateHandler,
+    "programmable-router-promotion-v1": programmableRouterPromotionHandler,
+    "programmable-router-readiness-v1": programmableRouterReadinessHandler
+  }),
+  "2.3.0": Object.freeze({
     "ethereum-treasury-10-bps-v1": ethereumTreasuryTenBpsHandler,
     "programmable-exact-fee-template-v1": programmableExactFeeTemplateHandler,
     "programmable-router-promotion-v1": programmableRouterPromotionHandler,

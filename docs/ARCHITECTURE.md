@@ -18,9 +18,13 @@ production facts as separate authorities.
    declarative V3 profile contract. It publishes hard-block finding rules, needs-evidence codes, executable-evidence
    duties, and false claim boundaries. Its generated `.programmable/custom-launch-admission.v3.json` contract binds
    the exact descriptor and business-policy digests to discovery, capabilities, and OpenAPI JSON pointers.
-4. The private Custom Launch API exact-source/runtime scanner and platform-owned Router simulation are the sole
-   executable admission-evidence authorities. They must issue the exact bound platform receipt before wallet
-   authorization. Client, CLI, local model, and agent results are never admission, safety, or fee-behavior authority.
+4. The private Custom Launch API exact-source/runtime scanner, platform-owned behavior executor, and Router simulation
+   are the sole executable admission-evidence authorities. Profile `3.3.0` remains current. Candidate `3.4.0` is
+   inactive pending exact server action/observation ABIs, signed runner identity, frozen fee-vault binding, production
+   readback, and a separate autonomous exact-route settlement-dataflow closure receipt. Runner no-bypass evidence is
+   scoped to canonical vault entrypoints and cannot establish candidate-route coverage. If activated later, only
+   verified fee vectors plus independently recomputed closure satisfy its wallet gate; unrelated custom behavior
+   remains unclaimed. Client, CLI, local model, and agent results are never admission, safety, or fee authority.
 5. [`policy/launch-policy-authority-ownership.v1.json`](../policy/launch-policy-authority-ownership.v1.json) carries no
    requirement values. It closes every repository path and hash, admission entrypoint and local import closure,
    Rule-ID-to-handler owner, public projection, and the exact receipt-bound vendor exclusion. New YAML, code, config,

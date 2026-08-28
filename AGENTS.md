@@ -13,10 +13,15 @@ Launch requests use the Custom Launch API; repository pull requests are maintena
   hard-block finding rules, evidence-bound codes, evidence duties, and false claim boundaries. It does not execute
   admission, authorize a launch, or own Router/fee business rules. `.programmable/custom-launch-admission.v3.json` is
   its generated digest and cross-projection contract.
-- The private Custom Launch API exact-source/runtime scanner and platform-owned Router simulation are the sole
-  executable admission-evidence authorities. Their public hard-block IDs and evidence duties must remain projected by
-  the V3 descriptor, discovery, capabilities, and OpenAPI. A CLI, client, local LLM, or agent cannot mint an admission
-  receipt or a safety/fee-behavior claim.
+- The private Custom Launch API exact-source/runtime scanner, platform-owned behavior executor, and Router simulation
+  are the sole executable admission-evidence authorities. Their public hard-block IDs and evidence duties must remain
+  projected by the V3 descriptor, discovery, capabilities, and OpenAPI. Profile `3.3.0` remains current. Candidate
+  `3.4.0` is inactive and accepts no fresh writes until the frozen fee-vault release and observation/action ABIs, signed
+  runner identity, production runtime readback, and a separate autonomous exact-route settlement-dataflow closure
+  receipt are exact. Runner no-bypass evidence covers canonical vault entrypoints only; it cannot establish candidate
+  route coverage. After activation, only its four executed fee vectors plus that independently recomputed closure may
+  satisfy the wallet gate; non-fee behavior remains unclaimed unless separately executed. A CLI, client, local LLM, or
+  agent cannot supply assertions or verdicts, mint an admission receipt, or establish a safety/fee-behavior claim.
 - `policy/launch-policy-authority-ownership.v1.json` contains no requirement values. It closes the repository file
   inventory, admission entrypoints and import graph, Rule-ID-to-handler ownership, public projections, and the exact
   frozen vendor exclusion so an unregistered rule source or gate fails repository verification.
