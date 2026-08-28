@@ -18,7 +18,9 @@ finding rules, evidence-bound codes, and false claim boundaries. Its generated
 policy digests plus the exact discovery, capabilities, and OpenAPI JSON pointers. The private Custom Launch API is the
 sole executable exact-source, behavior, and Router-simulation evidence authority; a CLI, client, or agent cannot issue
 admission. Discovery must continue to identify `3.3.0` as current. Candidate `3.4.0` stays inactive and must not appear
-as a fresh-write profile until its frozen fee-vault, server runner, ABI, and production-readback prerequisites pass.
+as a fresh-write profile until its frozen fee-vault, server runner, ABI, production-readback, and separate autonomous
+exact-route settlement-dataflow closure prerequisites pass. Runner no-bypass evidence covers canonical vault
+entrypoints only and is not candidate-route coverage.
 
 ## Required current-launch discovery behavior
 

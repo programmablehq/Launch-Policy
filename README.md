@@ -66,7 +66,8 @@ request, readiness, and promotion evidence. It explains the rules; it does not c
 For a selected Programmable Ethereum market, the current policy covers:
 
 - the request-bound policy obligation for the 10 bps Programmable share;
-- an inactive `3.4.0` exact-fee execution contract whose activation is separately gated on server runtime proof;
+- an inactive `3.4.0` exact-fee execution contract whose activation is separately gated on server runtime proof and
+  an autonomous exact-route settlement-dataflow closure receipt;
 - an exact plan for the manifest-resolved canonical Router;
 - finalized matching Router stamp evidence before public promotion; and
 - the evidence boundary required before any later fee-behavior claim.
@@ -74,8 +75,10 @@ For a selected Programmable Ethereum market, the current policy covers:
 The 10 bps tuple is a business and request-binding obligation, not a blanket statement that every deployed runtime has
 already paid it. Profile `3.3.0` remains current; the public V3 profile keeps `feeBehaviorClaim: false`. Candidate `3.4.0` is explicitly
 inactive: it accepts no fresh writes until the frozen fee-vault release, server action and observation ABIs, configured
-signed runner identity, and production runtime readback match exactly. Its future gate covers only the four fee vectors;
-all other custom behavior remains unclaimed unless separately executed.
+signed runner identity, production runtime readback, and separate trusted closure receipt match exactly. Runner
+no-bypass evidence covers only canonical vault entrypoints, so candidate-route coverage must come from the closure
+authority. Its future gate covers only the four fee vectors; all other custom behavior remains unclaimed unless
+separately executed.
 
 Verified no-market and external-route states are not applicable to Router-specific rules. Incomplete or contradictory
 evidence remains `analysis-pending`. Unknown project types are not rejected merely because they are unfamiliar.

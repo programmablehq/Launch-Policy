@@ -109,7 +109,11 @@ function programmableVerifiedExecutedPlatformFeeHandler({ evidence, rule }) {
     "requestScope",
     "requiredFeeObservationIds",
     "requiredFeeVectorIds",
+    "requiredSettlementDataflowClosureAssertions",
+    "requiredSettlementDataflowClosureReceiptBindings",
+    "requiredSettlementDataflowReadback",
     "scenarioInputsAreExecutionEvidence",
+    "settlementDataflowClosure",
     "serverSignatureRequired",
     "successfulSwapsOnly",
     "treasury"
@@ -141,7 +145,7 @@ function programmableVerifiedExecutedPlatformFeeHandler({ evidence, rule }) {
     passed: false,
     status: "analysis-pending",
     missingEvidence: Object.freeze([evidenceId]),
-    message: "Matching configuration is not execution evidence; only the private API can verify its server-signed exact-launch receipt before wallet handoff."
+    message: "Matching configuration is not execution evidence; only the private API can verify both its server-signed fee receipt and separate trusted exact-route settlement-dataflow closure before wallet handoff."
   });
 }
 

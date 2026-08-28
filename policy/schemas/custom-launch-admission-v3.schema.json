@@ -155,6 +155,9 @@
         },
         "projectOwnedTokenSupported": {
           "const": true
+        },
+        "requiredSettlementDataflowReadback": {
+          "const": "configured-autonomous-approval-exact-route-closure-receipt"
         }
       },
       "required": [
@@ -166,7 +169,8 @@
         "profileRevision",
         "profileVersion",
         "projectOwnedHookSupported",
-        "projectOwnedTokenSupported"
+        "projectOwnedTokenSupported",
+        "requiredSettlementDataflowReadback"
       ],
       "type": "object"
     },
@@ -239,7 +243,8 @@
             "fee-observation-abi-frozen",
             "signed-runner-identity-configured",
             "fee-vault-exact-source-runtime-interface-bound",
-            "production-runtime-deployment-readback-matched"
+            "production-runtime-deployment-readback-matched",
+            "exact-settlement-dataflow-closure"
           ]
         },
         "activationState": {
@@ -388,6 +393,33 @@
         "requiredPlatformFeeConformanceStatus": {
           "const": "verified"
         },
+        "requiredSettlementDataflowClosureAssertions": {
+          "const": [
+            "autonomous-source-receipt-hashes-bound",
+            "applicable-and-satisfied",
+            "complete-value-flow-inventory",
+            "nonempty-sorted-flow-and-path-closure",
+            "exact-1000-per-1000000-treasury-observation",
+            "closure-recomputed",
+            "signed-trusted-authority"
+          ]
+        },
+        "requiredSettlementDataflowClosureReceiptBindings": {
+          "const": [
+            "profileHash",
+            "launchIntentHash",
+            "artifactHash",
+            "graphBundleHash",
+            "verificationBundleHash",
+            "graphCommitment",
+            "expectedPoolId",
+            "vaultTargetId",
+            "vaultRuntimeCodeHash",
+            "authorizedRouteTargetId",
+            "authorizedRouteRuntimeCodeHash",
+            "platformFeeObservationSha256"
+          ]
+        },
         "retryingEvidenceDisposition": {
           "const": "blocks_wallet_handoff"
         },
@@ -442,6 +474,8 @@
         "requiredBindings",
         "requiredObservations",
         "requiredPlatformFeeConformanceStatus",
+        "requiredSettlementDataflowClosureAssertions",
+        "requiredSettlementDataflowClosureReceiptBindings",
         "retryingEvidenceDisposition",
         "scenarioInputsAreExecutionEvidence",
         "serverOwnedActionAbiFrozenRequired",
@@ -449,6 +483,54 @@
         "signedRunnerIdentityConfiguredRequired",
         "unavailableEvidenceDisposition",
         "walletHandoffRequiresVerifiedEvidence"
+      ],
+      "type": "object"
+    },
+    "settlementDataflowClosure": {
+      "additionalProperties": false,
+      "properties": {
+        "candidateRouteCoverageComesFromRunner": {
+          "const": false
+        },
+        "clientAssertionsAccepted": {
+          "const": false
+        },
+        "completeValueFlowInventoryRequired": {
+          "const": true
+        },
+        "configured": {
+          "const": false
+        },
+        "evidenceAuthority": {
+          "const": "programmable-autonomous-approval"
+        },
+        "exactLaunchGraphAndRouteBindingRequired": {
+          "const": true
+        },
+        "receiptSchemaVersion": {
+          "const": "programmable.autonomous-settlement-dataflow-receipt.v1"
+        },
+        "runnerNoBypassScope": {
+          "const": "canonical-vault-entrypoints-only"
+        },
+        "sourceDecisionReceiptRequired": {
+          "const": true
+        },
+        "walletHandoffRequiresClosure": {
+          "const": true
+        }
+      },
+      "required": [
+        "candidateRouteCoverageComesFromRunner",
+        "clientAssertionsAccepted",
+        "completeValueFlowInventoryRequired",
+        "configured",
+        "evidenceAuthority",
+        "exactLaunchGraphAndRouteBindingRequired",
+        "receiptSchemaVersion",
+        "runnerNoBypassScope",
+        "sourceDecisionReceiptRequired",
+        "walletHandoffRequiresClosure"
       ],
       "type": "object"
     },
@@ -635,7 +717,8 @@
     "compatibility",
     "feeAuthorizationGate",
     "feePolicyProjection",
-    "claims"
+    "claims",
+    "settlementDataflowClosure"
   ],
   "title": "Programmable Custom Launch Admission Descriptor V3",
   "type": "object"

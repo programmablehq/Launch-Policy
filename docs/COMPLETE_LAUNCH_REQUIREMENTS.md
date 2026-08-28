@@ -219,7 +219,9 @@ record.
 
 A readiness pass proves only that the exact checked launch plan binds the canonical Router and mandatory fee
 configuration. The candidate `3.4.0` execution gate is inactive and cannot govern wallet handoff until its explicit
-activation prerequisites pass. Neither current prelaunch result proves a later mainnet trade or settled money flow. Finalized deployment,
+activation prerequisites pass, including the separate autonomous exact-route settlement-dataflow closure receipt.
+Runner no-bypass evidence covers canonical vault entrypoints only and cannot prove candidate-route coverage. Neither
+current prelaunch result proves a later mainnet trade or settled money flow. Finalized deployment,
 runtime, and settlement evidence for specific observed blocks, logs, and assets remains separate; no receipt promises
 future payment or ongoing monitoring. The repository-side V1 settlement assertion remains historical and
 `analysis-pending`: only an independently anchored observer verifier may mint a passed settlement proof.

@@ -116,6 +116,7 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
     "hardSafetyInvariants",
     "profile",
     "schemaVersion",
+    "settlementDataflowClosure",
     "staticAdmission",
     "transport"
   ], "descriptor");
@@ -139,7 +140,8 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
     "profileRevision",
     "profileVersion",
     "projectOwnedHookSupported",
-    "projectOwnedTokenSupported"
+    "projectOwnedTokenSupported",
+    "requiredSettlementDataflowReadback"
   ], "descriptor.candidateProfile");
   assertEqual(descriptor.candidateProfile.profileId, descriptor.profile.profileId, "descriptor.candidateProfile.profileId");
   assertEqual(descriptor.candidateProfile.profileRevision, descriptor.profile.profileRevision, "descriptor.candidateProfile.profileRevision");
@@ -147,9 +149,42 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
   assertEqual(descriptor.candidateProfile.chainId, descriptor.profile.chainId, "descriptor.candidateProfile.chainId");
   assertEqual(descriptor.candidateProfile.activationState, "pending-runtime-readback", "descriptor.candidateProfile.activationState");
   assertEqual(descriptor.candidateProfile.freshWritesEnabled, false, "descriptor.candidateProfile.freshWritesEnabled");
+  assertEqual(
+    descriptor.candidateProfile.requiredSettlementDataflowReadback,
+    "configured-autonomous-approval-exact-route-closure-receipt",
+    "descriptor.candidateProfile.requiredSettlementDataflowReadback"
+  );
   for (const key of ["projectOwnedTokenSupported", "projectOwnedHookSupported", "multiContractGraphSupported"]) {
     assertEqual(descriptor.candidateProfile[key], true, `descriptor.candidateProfile.${key}`);
   }
+
+  assertObject(descriptor.settlementDataflowClosure, "descriptor.settlementDataflowClosure");
+  assertExactKeys(descriptor.settlementDataflowClosure, [
+    "candidateRouteCoverageComesFromRunner",
+    "clientAssertionsAccepted",
+    "completeValueFlowInventoryRequired",
+    "configured",
+    "evidenceAuthority",
+    "exactLaunchGraphAndRouteBindingRequired",
+    "receiptSchemaVersion",
+    "runnerNoBypassScope",
+    "sourceDecisionReceiptRequired",
+    "walletHandoffRequiresClosure"
+  ], "descriptor.settlementDataflowClosure");
+  assertEqual(descriptor.settlementDataflowClosure.configured, false, "descriptor.settlementDataflowClosure.configured");
+  assertEqual(descriptor.settlementDataflowClosure.evidenceAuthority, "programmable-autonomous-approval", "descriptor.settlementDataflowClosure.evidenceAuthority");
+  assertEqual(descriptor.settlementDataflowClosure.receiptSchemaVersion, "programmable.autonomous-settlement-dataflow-receipt.v1", "descriptor.settlementDataflowClosure.receiptSchemaVersion");
+  assertEqual(descriptor.settlementDataflowClosure.runnerNoBypassScope, "canonical-vault-entrypoints-only", "descriptor.settlementDataflowClosure.runnerNoBypassScope");
+  for (const key of [
+    "clientAssertionsAccepted",
+    "candidateRouteCoverageComesFromRunner"
+  ]) assertEqual(descriptor.settlementDataflowClosure[key], false, `descriptor.settlementDataflowClosure.${key}`);
+  for (const key of [
+    "completeValueFlowInventoryRequired",
+    "exactLaunchGraphAndRouteBindingRequired",
+    "sourceDecisionReceiptRequired",
+    "walletHandoffRequiresClosure"
+  ]) assertEqual(descriptor.settlementDataflowClosure[key], true, `descriptor.settlementDataflowClosure.${key}`);
 
   assertObject(descriptor.authority, "descriptor.authority");
   assertExactKeys(descriptor.authority, [
@@ -294,6 +329,8 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
     "requiredBindings",
     "requiredObservations",
     "requiredPlatformFeeConformanceStatus",
+    "requiredSettlementDataflowClosureAssertions",
+    "requiredSettlementDataflowClosureReceiptBindings",
     "retryingEvidenceDisposition",
     "scenarioInputsAreExecutionEvidence",
     "serverOwnedActionAbiFrozenRequired",
@@ -312,7 +349,8 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
     "fee-observation-abi-frozen",
     "signed-runner-identity-configured",
     "fee-vault-exact-source-runtime-interface-bound",
-    "production-runtime-deployment-readback-matched"
+    "production-runtime-deployment-readback-matched",
+    "exact-settlement-dataflow-closure"
   ])) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.feeAuthorizationGate.activationPrerequisites is invalid.");
   assertEqual(descriptor.feeAuthorizationGate.callerExemptionAllowed, false, "descriptor.feeAuthorizationGate.callerExemptionAllowed");
   assertEqual(descriptor.feeAuthorizationGate.callerAssertionsAccepted, false, "descriptor.feeAuthorizationGate.callerAssertionsAccepted");
@@ -373,6 +411,16 @@ export function validateCustomLaunchAdmissionDescriptorV3(descriptor) {
   if (canonicalJson(descriptor.feeAuthorizationGate.requiredAssertions) !== canonicalJson([
     "fee.programmable-ten-bps", "fee.no-bypass", "fee.no-overcharge", "fee.claim-isolation"
   ])) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.feeAuthorizationGate.requiredAssertions is invalid.");
+  if (canonicalJson(descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureReceiptBindings) !== canonicalJson([
+    "profileHash", "launchIntentHash", "artifactHash", "graphBundleHash", "verificationBundleHash",
+    "graphCommitment", "expectedPoolId", "vaultTargetId", "vaultRuntimeCodeHash", "authorizedRouteTargetId",
+    "authorizedRouteRuntimeCodeHash", "platformFeeObservationSha256"
+  ])) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureReceiptBindings is invalid.");
+  if (canonicalJson(descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureAssertions) !== canonicalJson([
+    "autonomous-source-receipt-hashes-bound", "applicable-and-satisfied", "complete-value-flow-inventory",
+    "nonempty-sorted-flow-and-path-closure", "exact-1000-per-1000000-treasury-observation",
+    "closure-recomputed", "signed-trusted-authority"
+  ])) fail("CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_INVALID", "descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureAssertions is invalid.");
 
   assertObject(descriptor.feePolicyProjection, "descriptor.feePolicyProjection");
   assertExactKeys(descriptor.feePolicyProjection, [
@@ -422,6 +470,7 @@ export function buildCustomLaunchAdmissionBindingV3({ repositoryRoot }) {
     || authorizationGateRule.parameters?.activationState !== descriptor.candidateProfile.activationState
     || authorizationGateRule.parameters?.freshWritesEnabled !== descriptor.candidateProfile.freshWritesEnabled
     || authorizationGateRule.parameters?.profileVersion !== descriptor.candidateProfile.profileVersion
+    || authorizationGateRule.parameters?.requiredSettlementDataflowReadback !== descriptor.candidateProfile.requiredSettlementDataflowReadback
     || authorizationGateRule.parameters?.accountingMode !== descriptor.feeAuthorizationGate.accountingMode
     || authorizationGateRule.parameters?.authorizationGateMode !== descriptor.feeAuthorizationGate.mode
     || authorizationGateRule.parameters?.behaviorEvidenceSchemaVersion !== descriptor.feeAuthorizationGate.behaviorEvidenceSchemaVersion
@@ -441,6 +490,9 @@ export function buildCustomLaunchAdmissionBindingV3({ repositoryRoot }) {
     || authorizationGateRule.parameters?.feeVaultAppendCBOR !== descriptor.feeAuthorizationGate.feeVaultCompiler.appendCBOR
     || canonicalJson(authorizationGateRule.parameters?.requiredFeeVectorIds) !== canonicalJson(descriptor.feeAuthorizationGate.requiredAssertions)
     || canonicalJson(authorizationGateRule.parameters?.requiredFeeObservationIds) !== canonicalJson(descriptor.feeAuthorizationGate.requiredObservations)
+    || canonicalJson(authorizationGateRule.parameters?.settlementDataflowClosure) !== canonicalJson(descriptor.settlementDataflowClosure)
+    || canonicalJson(authorizationGateRule.parameters?.requiredSettlementDataflowClosureReceiptBindings) !== canonicalJson(descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureReceiptBindings)
+    || canonicalJson(authorizationGateRule.parameters?.requiredSettlementDataflowClosureAssertions) !== canonicalJson(descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureAssertions)
     || authorizationGateRule.parameters?.otherBehaviorAxesDisposition !== descriptor.feeAuthorizationGate.otherBehaviorAxesDisposition
     || authorizationGateRule.parameters?.oneTimeRouteCodehashBindingRequired !== descriptor.feeAuthorizationGate.oneTimeRouteCodehashBindingRequired
     || authorizationGateRule.parameters?.productionRuntimeReadbackRequired !== descriptor.feeAuthorizationGate.productionRuntimeReadbackRequired

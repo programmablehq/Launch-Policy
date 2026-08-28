@@ -104,7 +104,8 @@ test("V3.4 fee authorization remains pending while current V3.3 keeps exact comp
     profileRevision: 3,
     profileVersion: "3.4.0",
     projectOwnedHookSupported: true,
-    projectOwnedTokenSupported: true
+    projectOwnedTokenSupported: true,
+    requiredSettlementDataflowReadback: "configured-autonomous-approval-exact-route-closure-receipt"
   });
   assert.deepEqual(descriptor.compatibility, {
     legacyExactProfileVersions: ["3.2.0", "3.1.0", "3.0.0", "2.0.0"],
@@ -129,6 +130,33 @@ test("V3.4 fee authorization remains pending while current V3.3 keeps exact comp
   assert.equal(descriptor.feeAuthorizationGate.feeVaultReleaseBindingId, "programmable:settlement-fee-vault:v1");
   assert.equal(descriptor.feeAuthorizationGate.feeVaultReleaseBindingSha256, "sha256:39ccdfdf8cd61620bf5c62bf07fb8428adbd66d2608b1cf3ad583343116d7ed9");
   assert.equal(descriptor.feeAuthorizationGate.feeVaultRuntimeCodeKeccak256, "0x92620fe3f83839334c9a264bea5bfcc819868ca5607cbd2260e5a9664dbd7554");
+  assert.deepEqual(descriptor.settlementDataflowClosure, {
+    candidateRouteCoverageComesFromRunner: false,
+    clientAssertionsAccepted: false,
+    completeValueFlowInventoryRequired: true,
+    configured: false,
+    evidenceAuthority: "programmable-autonomous-approval",
+    exactLaunchGraphAndRouteBindingRequired: true,
+    receiptSchemaVersion: "programmable.autonomous-settlement-dataflow-receipt.v1",
+    runnerNoBypassScope: "canonical-vault-entrypoints-only",
+    sourceDecisionReceiptRequired: true,
+    walletHandoffRequiresClosure: true
+  });
+  assert.equal(descriptor.feeAuthorizationGate.activationPrerequisites.includes("exact-settlement-dataflow-closure"), true);
+  assert.deepEqual(descriptor.feeAuthorizationGate.requiredSettlementDataflowClosureReceiptBindings, [
+    "profileHash",
+    "launchIntentHash",
+    "artifactHash",
+    "graphBundleHash",
+    "verificationBundleHash",
+    "graphCommitment",
+    "expectedPoolId",
+    "vaultTargetId",
+    "vaultRuntimeCodeHash",
+    "authorizedRouteTargetId",
+    "authorizedRouteRuntimeCodeHash",
+    "platformFeeObservationSha256"
+  ]);
   assert.deepEqual(descriptor.feeAuthorizationGate.requiredAssertions, [
     "fee.programmable-ten-bps",
     "fee.no-bypass",

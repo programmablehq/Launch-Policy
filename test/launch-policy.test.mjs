@@ -266,6 +266,20 @@ test("V3.4 exact executed fee gate is a frozen inactive candidate, never a calle
   assert.equal(candidate.parameters.callerVerdictsAccepted, false);
   assert.equal(candidate.parameters.configurationIsExecutionEvidence, false);
   assert.equal(candidate.parameters.scenarioInputsAreExecutionEvidence, false);
+  assert.equal(candidate.parameters.activationPrerequisites.includes("exact-settlement-dataflow-closure"), true);
+  assert.equal(candidate.parameters.requiredSettlementDataflowReadback, "configured-autonomous-approval-exact-route-closure-receipt");
+  assert.deepEqual(candidate.parameters.settlementDataflowClosure, {
+    candidateRouteCoverageComesFromRunner: false,
+    clientAssertionsAccepted: false,
+    completeValueFlowInventoryRequired: true,
+    configured: false,
+    evidenceAuthority: "programmable-autonomous-approval",
+    exactLaunchGraphAndRouteBindingRequired: true,
+    receiptSchemaVersion: "programmable.autonomous-settlement-dataflow-receipt.v1",
+    runnerNoBypassScope: "canonical-vault-entrypoints-only",
+    sourceDecisionReceiptRequired: true,
+    walletHandoffRequiresClosure: true
+  });
   assert.equal(candidate.parameters.platformFeeConformanceStatus, "verified");
   assert.equal(candidate.parameters.otherBehaviorAxesDisposition, "unclaimed-unless-separately-executed");
   assert.equal(candidate.parameters.feeVaultReleaseBindingSha256, "sha256:39ccdfdf8cd61620bf5c62bf07fb8428adbd66d2608b1cf3ad583343116d7ed9");
