@@ -18,7 +18,13 @@ const descriptorPath = "policy/custom-launch-admission-v4.json";
 const descriptorSource = fs.readFileSync(path.join(root, descriptorPath), "utf8");
 const descriptor = JSON.parse(descriptorSource);
 const schema = JSON.parse(fs.readFileSync(path.join(root, "policy/schemas/custom-launch-admission-v4.schema.json"), "utf8"));
-const validate = new Ajv2020({ allErrors: true, strict: true }).compile(schema);
+const ajv = new Ajv2020({ allErrors: true, strict: true });
+const validate = ajv.compile(schema);
+const validateCompletePromotionAnchor = ajv.compile({ $ref: `${schema.$id}#/$defs/completePromotionAnchor` });
+const validateCompletePromotionRoots = ajv.compile({ $ref: `${schema.$id}#/$defs/completePromotionRoots` });
+const validateGenesisDeploymentRoot = ajv.compile({ $ref: `${schema.$id}#/$defs/genesisDeploymentRoot` });
+const validatePlannedPromotionRoots = ajv.compile({ $ref: `${schema.$id}#/$defs/plannedPromotionRoots` });
+const validateTransactionDeploymentRoot = ajv.compile({ $ref: `${schema.$id}#/$defs/transactionDeploymentRoot` });
 const FROZEN_V3_BYTES = Object.freeze({
   cli: "5d5e2604bcdaecaf2fc0c0605671a5fdb198ea4a3cac15b76e77e9ba1017ef34",
   descriptor: "b3a88009f081f653a8eadf87d4f199a2837704bae5edb752da70882ca994325c",
@@ -31,6 +37,69 @@ function sha256(bytes) {
 
 function changedHex(value) {
   return `${value.slice(0, -1)}${value.endsWith("0") ? "1" : "0"}`;
+}
+
+function collectLeaves(value, pathSegments = []) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return [[pathSegments, value]];
+  return Object.entries(value).flatMap(([key, child]) => collectLeaves(child, [...pathSegments, key]));
+}
+
+function collectNullPaths(value, pathSegments = []) {
+  return collectLeaves(value, pathSegments)
+    .filter(([, child]) => child === null)
+    .map(([segments]) => segments.join("."));
+}
+
+function genericTransactionFilledAnchor() {
+  const anchor = structuredClone(descriptor.chain.deploymentEvidence);
+  anchor.chainDeploymentDescriptorDigest = `sha256:${"1".repeat(64)}`;
+  anchor.finalizedBlock = "50000000";
+  anchor.finalizedEvidenceRef = {
+    commit: "a".repeat(40),
+    path: "contracts/deployments/evidence/robinhood-custom-launch-v1.json",
+    repository: "https://github.com/programmablehq/PROGRAMMABLE",
+    sha256: `sha256:${"2".repeat(64)}`
+  };
+  const transactionProvenance = descriptor.chain.deploymentEvidence.roots.poolManager.provenance;
+  for (const binding of Object.values(anchor.roots)) {
+    if (binding.provenance === null) binding.provenance = structuredClone(transactionProvenance);
+    if (binding.startBlock === null) binding.startBlock = "1";
+  }
+  return anchor;
+}
+
+function changedPromotionLeaf(pathSegments, value) {
+  const label = pathSegments.join(".");
+  if (value === null) {
+    if (label === "chainDeploymentDescriptorDigest") return `sha256:${"1".repeat(64)}`;
+    if (label === "finalizedBlock") return "50000000";
+    if (label === "finalizedEvidenceRef") {
+      return {
+        commit: "a".repeat(40),
+        path: "contracts/deployments/evidence/robinhood-custom-launch-v1.json",
+        repository: "https://github.com/programmablehq/PROGRAMMABLE",
+        sha256: `sha256:${"2".repeat(64)}`
+      };
+    }
+    if (label.endsWith(".provenance")) {
+      return structuredClone(descriptor.chain.deploymentEvidence.roots.permit2.provenance);
+    }
+    if (label.endsWith(".startBlock")) return "1";
+    throw new Error(`Unsupported null promotion leaf ${label}`);
+  }
+  if (typeof value === "number") return value + 1;
+  if (value === "genesis-allocation") return "deployment-transaction";
+  if (value === "deployment-transaction") return "genesis-allocation";
+  if (value.startsWith("https://")) return `${value}#mutated`;
+  if (value.startsWith("0x") || value.startsWith("sha256:")) return changedHex(value);
+  if (/^[0-9]+$/u.test(value)) return (BigInt(value) + 1n).toString();
+  return `${value}-mutated`;
+}
+
+function setPath(value, pathSegments, replacement) {
+  let cursor = value;
+  for (const segment of pathSegments.slice(0, -1)) cursor = cursor[segment];
+  cursor[pathSegments.at(-1)] = replacement;
 }
 
 function assertRejectedDescriptor(candidate, label) {
@@ -56,23 +125,31 @@ test("V4 Robinhood admission is closed, canonical and server-selected", () => {
   assert.equal(descriptor.chain.promotionStatus, "planned");
   assert.deepEqual(descriptor.chain.deploymentEvidence, ROBINHOOD_PROMOTION_ANCHOR_V4);
   assert.deepEqual(
-    [
-      ...Object.entries(descriptor.chain.deploymentEvidence)
-        .filter(([, value]) => value === null)
-        .map(([field]) => `chain.deploymentEvidence.${field}`),
-      ...Object.entries(descriptor.chain.deploymentEvidence.roots)
-        .filter(([, binding]) => binding.startBlock === null)
-        .map(([rootId]) => `chain.deploymentEvidence.roots.${rootId}.startBlock`)
-    ],
+    collectNullPaths(descriptor.chain.deploymentEvidence, ["chain", "deploymentEvidence"]),
     [
       "chain.deploymentEvidence.chainDeploymentDescriptorDigest",
       "chain.deploymentEvidence.finalizedBlock",
       "chain.deploymentEvidence.finalizedEvidenceRef",
+      "chain.deploymentEvidence.roots.graphFactory.provenance",
       "chain.deploymentEvidence.roots.graphFactory.startBlock",
-      "chain.deploymentEvidence.roots.permit2.startBlock",
+      "chain.deploymentEvidence.roots.permitAuthoritySafe.provenance",
       "chain.deploymentEvidence.roots.permitAuthoritySafe.startBlock",
+      "chain.deploymentEvidence.roots.programmableLaunchStampRouter.provenance",
       "chain.deploymentEvidence.roots.programmableLaunchStampRouter.startBlock"
     ]
+  );
+  assert.deepEqual(descriptor.chain.deploymentEvidence.roots.permit2.provenance, {
+    allocatedCodeBytes: 9152,
+    kind: "genesis-allocation",
+    sourceSha256: "sha256:353e6f6441b47695b41cee0c3645cde8dd7492d2f7f574bfb6aa4371e41bb6ba",
+    sourceUrl: "https://cdn.robinhood.com/assets/generated_assets/hoodchain_docsite/chain-node-configs/robinhood-genesis.json"
+  });
+  assert.equal(descriptor.chain.deploymentEvidence.roots.permit2.startBlock, "0");
+  assert.deepEqual(
+    Object.entries(descriptor.chain.deploymentEvidence.roots)
+      .filter(([, binding]) => binding.provenance?.kind === "deployment-transaction")
+      .map(([rootId]) => rootId),
+    ["poolManager", "positionManager", "stateView", "universalRouter", "v4Quoter"]
   );
   assert.equal(
     descriptor.repository.foundationSourceCommitment,
@@ -94,6 +171,59 @@ test("V4 Robinhood admission is closed, canonical and server-selected", () => {
     universalCompatibilityClaim: false,
     universalFeeBehaviorClaim: false
   });
+});
+
+test("V4 provenance schema couples genesis, transaction and unbroadcast roots to exact start-block classes", () => {
+  const plannedRoots = structuredClone(descriptor.chain.deploymentEvidence.roots);
+  assert.equal(validatePlannedPromotionRoots(plannedRoots), true, JSON.stringify(validatePlannedPromotionRoots.errors));
+  assert.equal(validateCompletePromotionRoots(plannedRoots), false);
+
+  assert.equal(validateGenesisDeploymentRoot(plannedRoots.permit2), true);
+  for (const rootId of ["poolManager", "positionManager", "stateView", "universalRouter", "v4Quoter"]) {
+    assert.equal(validateTransactionDeploymentRoot(plannedRoots[rootId]), true, rootId);
+  }
+
+  const transactionAtBlockZero = structuredClone(plannedRoots.poolManager);
+  transactionAtBlockZero.startBlock = "0";
+  assert.equal(validateTransactionDeploymentRoot(transactionAtBlockZero), false);
+
+  const transactionClaimingGenesis = structuredClone(plannedRoots.poolManager);
+  transactionClaimingGenesis.provenance = structuredClone(plannedRoots.permit2.provenance);
+  transactionClaimingGenesis.startBlock = "0";
+  assert.equal(validateTransactionDeploymentRoot(transactionClaimingGenesis), false);
+
+  const genesisClaimingTransaction = structuredClone(plannedRoots.permit2);
+  genesisClaimingTransaction.provenance = structuredClone(plannedRoots.poolManager.provenance);
+  genesisClaimingTransaction.startBlock = "9070";
+  assert.equal(validateGenesisDeploymentRoot(genesisClaimingTransaction), false);
+
+  const genesisAtPositiveBlock = structuredClone(plannedRoots.permit2);
+  genesisAtPositiveBlock.startBlock = "1";
+  assert.equal(validateGenesisDeploymentRoot(genesisAtPositiveBlock), false);
+
+  const transactionWithoutHash = structuredClone(plannedRoots.stateView);
+  delete transactionWithoutHash.provenance.transactionHash;
+  assert.equal(validateTransactionDeploymentRoot(transactionWithoutHash), false);
+
+  const genesisWithTransactionHash = structuredClone(plannedRoots.permit2);
+  genesisWithTransactionHash.provenance.transactionHash = `0x${"1".repeat(64)}`;
+  assert.equal(validateGenesisDeploymentRoot(genesisWithTransactionHash), false);
+
+  const splitUnbroadcastProvenance = structuredClone(plannedRoots);
+  splitUnbroadcastProvenance.graphFactory.provenance = structuredClone(plannedRoots.poolManager.provenance);
+  assert.equal(validatePlannedPromotionRoots(splitUnbroadcastProvenance), false);
+
+  const splitUnbroadcastBlock = structuredClone(plannedRoots);
+  splitUnbroadcastBlock.graphFactory.startBlock = "1";
+  assert.equal(validatePlannedPromotionRoots(splitUnbroadcastBlock), false);
+
+  const genericFilledRoots = genericTransactionFilledAnchor().roots;
+  assert.equal(validateCompletePromotionRoots(genericFilledRoots), false);
+  for (const rootId of ["graphFactory", "permitAuthoritySafe", "programmableLaunchStampRouter"]) {
+    const candidate = structuredClone(genericFilledRoots);
+    candidate[rootId] = structuredClone(plannedRoots.poolManager);
+    assert.equal(validateCompletePromotionRoots(candidate), false, `${rootId} cannot use generic Uniswap provenance`);
+  }
 });
 
 test("V4 leaves the frozen V3 descriptor, schema, CLI and default npm entrypoint unchanged", () => {
@@ -182,73 +312,23 @@ test("V4 rejects caller-selected profiles and keeps promotion closed until the e
     (error) => error?.code === "CUSTOM_LAUNCH_ADMISSION_V4_PROMOTION_ANCHOR_INCOMPLETE"
   );
 
-  const syntacticallyValidButUnreviewed = structuredClone(descriptor);
-  syntacticallyValidButUnreviewed.chain.promotionStatus = "canary";
-  syntacticallyValidButUnreviewed.chain.deploymentEvidence.chainDeploymentDescriptorDigest = `sha256:${"1".repeat(64)}`;
-  syntacticallyValidButUnreviewed.chain.deploymentEvidence.finalizedBlock = "50000000";
-  syntacticallyValidButUnreviewed.chain.deploymentEvidence.finalizedEvidenceRef = {
-    commit: "a".repeat(40),
-    path: "contracts/deployments/evidence/robinhood-custom-launch-v1.json",
-    repository: "https://github.com/programmablehq/PROGRAMMABLE",
-    sha256: `sha256:${"2".repeat(64)}`
-  };
-  for (const binding of Object.values(syntacticallyValidButUnreviewed.chain.deploymentEvidence.roots)) {
-    if (binding.startBlock === null) binding.startBlock = "1";
-  }
-  assertRejectedDescriptor(syntacticallyValidButUnreviewed);
+  const genericFilledButUnreviewed = structuredClone(descriptor);
+  genericFilledButUnreviewed.chain.promotionStatus = "canary";
+  genericFilledButUnreviewed.chain.deploymentEvidence = genericTransactionFilledAnchor();
+  assert.equal(validateCompletePromotionAnchor(genericFilledButUnreviewed.chain.deploymentEvidence), false);
+  assertRejectedDescriptor(genericFilledButUnreviewed);
 });
 
-test("V4 rejects every promotion-anchor address, runtime hash, start block, digest and evidence mutation", () => {
-  const mutations = [
-    ["chain deployment descriptor digest", (candidate) => {
-      candidate.chain.deploymentEvidence.chainDeploymentDescriptorDigest = `sha256:${"1".repeat(64)}`;
-    }],
-    ["chain deployment id", (candidate) => {
-      candidate.chain.deploymentEvidence.chainDeploymentId = "robinhood-mainnet-custom-launch-v2";
-    }],
-    ["finality policy digest", (candidate) => {
-      candidate.chain.deploymentEvidence.finalityPolicyDigest = `sha256:${"3".repeat(64)}`;
-    }],
-    ["finalized block", (candidate) => {
-      candidate.chain.deploymentEvidence.finalizedBlock = "50000000";
-    }],
-    ["finalized evidence reference", (candidate) => {
-      candidate.chain.deploymentEvidence.finalizedEvidenceRef = {
-        commit: "a".repeat(40),
-        path: "contracts/deployments/evidence/robinhood-custom-launch-v1.json",
-        repository: "https://github.com/programmablehq/PROGRAMMABLE",
-        sha256: `sha256:${"2".repeat(64)}`
-      };
-    }],
-    ["foundation source commitment", (candidate) => {
-      candidate.chain.deploymentEvidence.foundationSourceCommitment = changedHex(
-        candidate.chain.deploymentEvidence.foundationSourceCommitment
-      );
-    }]
-  ];
-  for (const rootId of Object.keys(descriptor.chain.deploymentEvidence.roots)) {
-    mutations.push(
-      [`${rootId} address`, (candidate) => {
-        const binding = candidate.chain.deploymentEvidence.roots[rootId];
-        binding.address = changedHex(binding.address);
-      }],
-      [`${rootId} runtime hash`, (candidate) => {
-        const binding = candidate.chain.deploymentEvidence.roots[rootId];
-        binding.runtimeCodeHash = changedHex(binding.runtimeCodeHash);
-      }],
-      [`${rootId} start block`, (candidate) => {
-        const binding = candidate.chain.deploymentEvidence.roots[rootId];
-        binding.startBlock = binding.startBlock === null
-          ? "1"
-          : (BigInt(binding.startBlock) + 1n).toString();
-      }]
-    );
-  }
-
-  assert.equal(mutations.length, 33);
-  for (const [label, mutate] of mutations) {
+test("V4 rejects every promotion-anchor identity, provenance, hash, transaction and start-block leaf mutation", () => {
+  const mutations = collectLeaves(descriptor.chain.deploymentEvidence);
+  assert.equal(mutations.length, 60);
+  for (const [pathSegments, observed] of mutations) {
     const candidate = structuredClone(descriptor);
-    mutate(candidate);
-    assertRejectedDescriptor(candidate, label);
+    setPath(
+      candidate.chain.deploymentEvidence,
+      pathSegments,
+      changedPromotionLeaf(pathSegments, observed)
+    );
+    assertRejectedDescriptor(candidate, pathSegments.join("."));
   }
 });

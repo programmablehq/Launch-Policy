@@ -14,6 +14,10 @@ const POLICY_PATH = "policy/launch-policy.v1.json";
 const MAXIMUM_JSON_BYTES = 2 * 1024 * 1024;
 const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true, ignoreBOM: false });
 const FOUNDATION_SOURCE_COMMITMENT = "0xe87f5edc2dc839bd87a26a80cb53f14b021e603a1753d27aae3a02862058d730";
+const ROBINHOOD_GENESIS_SHA256 = "sha256:353e6f6441b47695b41cee0c3645cde8dd7492d2f7f574bfb6aa4371e41bb6ba";
+const ROBINHOOD_GENESIS_URL = "https://cdn.robinhood.com/assets/generated_assets/hoodchain_docsite/chain-node-configs/robinhood-genesis.json";
+const UNISWAP_DEPLOYMENT_REGISTRY_SHA256 = "sha256:21964cefbfc24b0ee89e7427acf74d223ce5a50aeb4216a9bac361a6148dea15";
+const UNISWAP_DEPLOYMENT_REGISTRY_URL = "https://raw.githubusercontent.com/Uniswap/contracts/4cfc406c8e34da3ce04e60657a7825075b64fd22/deployments/json/4663.json";
 export const ROBINHOOD_PROMOTION_ANCHOR_V4 = deepFreeze({
   chainDeploymentDescriptorDigest: null,
   chainDeploymentId: "robinhood-mainnet-custom-launch-v1",
@@ -24,46 +28,85 @@ export const ROBINHOOD_PROMOTION_ANCHOR_V4 = deepFreeze({
   roots: {
     graphFactory: {
       address: "0x0B6b3F40f84Df25D3bd69238f937096177DD09Bd",
+      provenance: null,
       runtimeCodeHash: "0xd23692fae59331592048e71a96d4963e170ee56e449683dc9f7fa3f9470018b8",
       startBlock: null
     },
     permit2: {
       address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      provenance: {
+        allocatedCodeBytes: 9152,
+        kind: "genesis-allocation",
+        sourceSha256: ROBINHOOD_GENESIS_SHA256,
+        sourceUrl: ROBINHOOD_GENESIS_URL
+      },
       runtimeCodeHash: "0x5208783f52488f7d3493e5e38311ab707c1d75457fe472a19b0b4d57d66a7fca",
-      startBlock: null
+      startBlock: "0"
     },
     permitAuthoritySafe: {
       address: "0xeD617CE7f82e2AB589aDeFFD319D1D872Bc8De06",
+      provenance: null,
       runtimeCodeHash: "0xd7d408ebcd99b2b70be43e20253d6d92a8ea8fab29bd3be7f55b10032331fb4c",
       startBlock: null
     },
     poolManager: {
       address: "0x8366a39CC670B4001A1121B8F6A443A643e40951",
+      provenance: {
+        kind: "deployment-transaction",
+        sourceSha256: UNISWAP_DEPLOYMENT_REGISTRY_SHA256,
+        sourceUrl: UNISWAP_DEPLOYMENT_REGISTRY_URL,
+        transactionHash: "0x4fb28d4935866f462582c6c931c6f2705e55f5be5eb178c7d8d9329a95c44c41"
+      },
       runtimeCodeHash: "0xbd3881180b547f5fe817545743cfb4343e96b1bc6640dcd70c106b0066e95626",
       startBlock: "9070"
     },
     positionManager: {
       address: "0x58daec3116aae6D93017bAAea7749052E8a04fA7",
+      provenance: {
+        kind: "deployment-transaction",
+        sourceSha256: UNISWAP_DEPLOYMENT_REGISTRY_SHA256,
+        sourceUrl: UNISWAP_DEPLOYMENT_REGISTRY_URL,
+        transactionHash: "0x228c18ada6cb46b4fbcc18f4ec1519953415393e256fa8349aafbd5a2db037c8"
+      },
       runtimeCodeHash: "0xc873e135dc9aaec88489cfbad146b4cb49d6a32e0d80326377784b7ba17670b2",
       startBlock: "9073"
     },
     programmableLaunchStampRouter: {
       address: "0x34965F2A2ee9254522232C32F02056E92BE0C98a",
+      provenance: null,
       runtimeCodeHash: "0x1dbbdaaad901ea3c6134dca0d4872a4789b3c071bf8ccfb44edd65d26d817388",
       startBlock: null
     },
     stateView: {
       address: "0xF3334192D15450CdD385c8B70e03f9A6bD9E673b",
+      provenance: {
+        kind: "deployment-transaction",
+        sourceSha256: UNISWAP_DEPLOYMENT_REGISTRY_SHA256,
+        sourceUrl: UNISWAP_DEPLOYMENT_REGISTRY_URL,
+        transactionHash: "0x3d61e2c9eeb482385b1aa436b9e8f812167ea579cc390e4f93bc5abde00582f4"
+      },
       runtimeCodeHash: "0x7d9c591e0956fd89d98feb4ffcfe8bf1f7a62bd485edd979fa21d104b49878a6",
       startBlock: "9075"
     },
     universalRouter: {
       address: "0x06AfBA43Fd06227fA663b0DAecF536f6EaA6bf99",
+      provenance: {
+        kind: "deployment-transaction",
+        sourceSha256: UNISWAP_DEPLOYMENT_REGISTRY_SHA256,
+        sourceUrl: UNISWAP_DEPLOYMENT_REGISTRY_URL,
+        transactionHash: "0xdfb76494e158d8dea4376160315239271636a18515207fd4526e574bc7eeb456"
+      },
       runtimeCodeHash: "0xbe8e8191bb42d843c2e948a5a55772eaab864ce01e54dcd47c9d089170b302d5",
       startBlock: "3347899"
     },
     v4Quoter: {
       address: "0x8Dc178eFB8111BB0973Dd9d722ebeFF267c98F94",
+      provenance: {
+        kind: "deployment-transaction",
+        sourceSha256: UNISWAP_DEPLOYMENT_REGISTRY_SHA256,
+        sourceUrl: UNISWAP_DEPLOYMENT_REGISTRY_URL,
+        transactionHash: "0x6bf436d72a17f87284ddcab43094689bd320dfb39b535213b9a0b669fabc4ab4"
+      },
       runtimeCodeHash: "0xd707b1da8cb165e5ea35a3b4450d971eb562ec171e23492aa117036b78a868f6",
       startBlock: "9074"
     }
@@ -227,6 +270,12 @@ export function validateCustomLaunchAdmissionDescriptorV4(descriptor) {
 }
 
 function validateDeploymentEvidence(evidence, promotionStatus) {
+  if (!promotionAnchorProvenanceIsCoherent(ROBINHOOD_PROMOTION_ANCHOR_V4)) {
+    fail(
+      "CUSTOM_LAUNCH_ADMISSION_V4_PROMOTION_ANCHOR_INVALID",
+      "The code-owned Robinhood promotion anchor has an invalid provenance and start-block combination."
+    );
+  }
   if (canonicalJson(evidence) !== canonicalJson(ROBINHOOD_PROMOTION_ANCHOR_V4)) {
     fail(
       "CUSTOM_LAUNCH_ADMISSION_V4_PROMOTION_ANCHOR_MISMATCH",
@@ -236,16 +285,49 @@ function validateDeploymentEvidence(evidence, promotionStatus) {
   if (promotionStatus === "canary" && !promotionAnchorIsComplete(ROBINHOOD_PROMOTION_ANCHOR_V4)) {
     fail(
       "CUSTOM_LAUNCH_ADMISSION_V4_PROMOTION_ANCHOR_INCOMPLETE",
-      "Robinhood canary promotion remains closed until a reviewed code update pins the descriptor digest, every start block, finalized block and exact evidence reference."
+      "Robinhood canary promotion remains closed until a reviewed code update pins the descriptor digest, every deployment provenance and start block, finalized block and exact evidence reference."
     );
   }
 }
 
 function promotionAnchorIsComplete(anchor) {
-  return anchor.chainDeploymentDescriptorDigest !== null
-    && anchor.finalizedBlock !== null
-    && anchor.finalizedEvidenceRef !== null
-    && Object.values(anchor.roots).every(({ startBlock }) => startBlock !== null);
+  if (
+    anchor.chainDeploymentDescriptorDigest === null
+    || anchor.finalizedBlock === null
+    || anchor.finalizedEvidenceRef === null
+    || !promotionAnchorProvenanceIsCoherent(anchor)
+    || Object.values(anchor.roots).some(({ provenance, startBlock }) => provenance === null || startBlock === null)
+  ) return false;
+  return Object.values(anchor.roots).every(({ startBlock }) => BigInt(startBlock) <= BigInt(anchor.finalizedBlock));
+}
+
+function promotionAnchorProvenanceIsCoherent(anchor) {
+  const unbroadcastRoots = new Set(["graphFactory", "permitAuthoritySafe", "programmableLaunchStampRouter"]);
+  for (const [rootId, root] of Object.entries(anchor.roots)) {
+    if (unbroadcastRoots.has(rootId)) {
+      if (root.provenance !== null || root.startBlock !== null) return false;
+      continue;
+    }
+    if (root.provenance === null || root.startBlock === null) return false;
+    if (root.provenance.kind === "genesis-allocation") {
+      if (
+        rootId !== "permit2"
+        || root.startBlock !== "0"
+        || root.provenance.allocatedCodeBytes !== 9152
+        || root.provenance.sourceSha256 !== ROBINHOOD_GENESIS_SHA256
+        || root.provenance.sourceUrl !== ROBINHOOD_GENESIS_URL
+      ) return false;
+      continue;
+    }
+    if (
+      root.provenance.kind !== "deployment-transaction"
+      || !/^[1-9][0-9]*$/u.test(root.startBlock)
+      || root.provenance.sourceSha256 !== UNISWAP_DEPLOYMENT_REGISTRY_SHA256
+      || root.provenance.sourceUrl !== UNISWAP_DEPLOYMENT_REGISTRY_URL
+      || !/^0x[0-9a-f]{64}$/u.test(root.provenance.transactionHash ?? "")
+    ) return false;
+  }
+  return true;
 }
 
 export function buildCustomLaunchAdmissionBindingV4({ repositoryRoot }) {

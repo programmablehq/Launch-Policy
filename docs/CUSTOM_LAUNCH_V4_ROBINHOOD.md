@@ -76,31 +76,48 @@ The descriptor publishes one reviewed, code-owned promotion anchor even while st
 or replace its fields. It fixes deployment ID `robinhood-mainnet-custom-launch-v1`, finality-policy digest
 `sha256:537d531423d1285a3808556a57303ec68f1e6bdeea3c9aaf6320f9e5a0e47153`, the foundation source commitment and every
 currently known address and runtime code hash. The machine descriptor is authoritative for the hashes; the deployment
-roots and currently reviewed start blocks are:
+roots, provenance and currently reviewed start blocks are:
 
-| Root | Address | Start block |
-| --- | --- | ---: |
-| GraphFactory | `0x0B6b3F40f84Df25D3bd69238f937096177DD09Bd` | `null`, pending reviewed broadcast evidence |
-| Permit2 | `0x000000000022D473030F116dDEE9F6B43aC78BA3` | `null`, provenance unresolved |
-| PermitAuthority Safe | `0xeD617CE7f82e2AB589aDeFFD319D1D872Bc8De06` | `null`, pending reviewed broadcast evidence |
-| PoolManager | `0x8366a39CC670B4001A1121B8F6A443A643e40951` | `9070` |
-| PositionManager | `0x58daec3116aae6D93017bAAea7749052E8a04fA7` | `9073` |
-| Programmable Launch Stamp Router | `0x34965F2A2ee9254522232C32F02056E92BE0C98a` | `null`, pending reviewed broadcast evidence |
-| StateView | `0xF3334192D15450CdD385c8B70e03f9A6bD9E673b` | `9075` |
-| Universal Router | `0x06AfBA43Fd06227fA663b0DAecF536f6EaA6bf99` | `3347899` |
-| V4 Quoter | `0x8Dc178eFB8111BB0973Dd9d722ebeFF267c98F94` | `9074` |
+| Root | Address | Provenance | Start block |
+| --- | --- | --- | ---: |
+| GraphFactory | `0x0B6b3F40f84Df25D3bd69238f937096177DD09Bd` | `null`, unbroadcast | `null` |
+| Permit2 | `0x000000000022D473030F116dDEE9F6B43aC78BA3` | `genesis-allocation` | `0` |
+| PermitAuthority Safe | `0xeD617CE7f82e2AB589aDeFFD319D1D872Bc8De06` | `null`, unbroadcast | `null` |
+| PoolManager | `0x8366a39CC670B4001A1121B8F6A443A643e40951` | `deployment-transaction` `0x4fb28d4935866f462582c6c931c6f2705e55f5be5eb178c7d8d9329a95c44c41` | `9070` |
+| PositionManager | `0x58daec3116aae6D93017bAAea7749052E8a04fA7` | `deployment-transaction` `0x228c18ada6cb46b4fbcc18f4ec1519953415393e256fa8349aafbd5a2db037c8` | `9073` |
+| Programmable Launch Stamp Router | `0x34965F2A2ee9254522232C32F02056E92BE0C98a` | `null`, unbroadcast | `null` |
+| StateView | `0xF3334192D15450CdD385c8B70e03f9A6bD9E673b` | `deployment-transaction` `0x3d61e2c9eeb482385b1aa436b9e8f812167ea579cc390e4f93bc5abde00582f4` | `9075` |
+| Universal Router | `0x06AfBA43Fd06227fA663b0DAecF536f6EaA6bf99` | `deployment-transaction` `0xdfb76494e158d8dea4376160315239271636a18515207fd4526e574bc7eeb456` | `3347899` |
+| V4 Quoter | `0x8Dc178eFB8111BB0973Dd9d722ebeFF267c98F94` | `deployment-transaction` `0x6bf436d72a17f87284ddcab43094689bd320dfb39b535213b9a0b669fabc4ab4` | `9074` |
 
-Permit2 is deliberately not assigned a deployment block. Official Uniswap material establishes its canonical address
-and the pinned Uniswap registry calls it a pre-existing deployment, but neither supplies its deployment transaction or
-date. One archive provider returned code at block `0`; a second independent provider was unavailable. That cannot
-establish deployment provenance, so the anchor preserves the reviewed address and runtime hash while keeping its start
-block `null`.
+Robinhood's official [full-node instructions](https://docs.robinhood.com/chain/run-a-full-node/) require the Mainnet
+[genesis file](https://cdn.robinhood.com/assets/generated_assets/hoodchain_docsite/chain-node-configs/robinhood-genesis.json).
+The exact file is bound as
+`sha256:353e6f6441b47695b41cee0c3645cde8dd7492d2f7f574bfb6aa4371e41bb6ba`. Its allocation at the
+canonical Permit2 address contains 9,152 runtime-code bytes whose Keccak-256 is the pinned
+`0x5208783f52488f7d3493e5e38311ab707c1d75457fe472a19b0b4d57d66a7fca`. Permit2 therefore has exact
+`genesis-allocation` provenance and start block `0`; it is not an inferred transaction deployment.
 
-Only seven evidence fields remain `null`: the chain-deployment descriptor digest, finalized block, finalized evidence
-reference and the four start blocks identified above. The first three and the three Programmable start blocks are
-post-broadcast evidence. Permit2 is the bounded provenance exception. The schema requires all of them before `canary`,
-does not permit `live`, and the checker rejects every caller mutation. Promotion therefore remains fail-closed until a
-reviewed code update replaces the legitimate nulls with exact evidence and advances the status.
+The five positive start blocks use `deployment-transaction` provenance from the commit-pinned official
+[Uniswap registry](https://raw.githubusercontent.com/Uniswap/contracts/4cfc406c8e34da3ce04e60657a7825075b64fd22/deployments/json/4663.json),
+bound as `sha256:21964cefbfc24b0ee89e7427acf74d223ce5a50aeb4216a9bac361a6148dea15`. The schema permits block `0`
+only with the exact genesis allocation, requires a positive block and transaction hash for a transaction deployment,
+and requires provenance and start block to be jointly `null` for an unbroadcast root.
+
+Only nine evidence leaves remain `null`: the chain-deployment descriptor digest, finalized block, finalized evidence
+reference, and both provenance and start block for the three unbroadcast Programmable roots. The schema requires all of
+them before `canary`, does not permit `live`, and the checker rejects every caller mutation. Its current completion
+schema also marks each unbroadcast root unsatisfiable, so copying a generic deployment transaction, the Uniswap
+registry, block `0` or another root's source proof can never certify it. Promotion therefore remains fail-closed until
+a reviewed code update replaces the legitimate nulls, introduces exact per-root evidence contracts and advances the
+status.
+
+That future update must bind GraphFactory and the Programmable Router to their own finalized deployment transaction,
+positive start block and per-address Sourcify v2 exact match. PermitAuthority Safe needs a distinct finalized proxy and
+configuration receipt, not generic transaction or Sourcify evidence: two independent provider readbacks must bind the
+proxy runtime, singleton/master-copy address and runtime/version, handler, owners, threshold, nonce, modules, guard and
+the relevant handler slots. The receipt must also pin the reviewed Safe deployment source. None of those future shapes
+is accepted by the current schema; defining them is part of the reviewed promotion code change.
 
 ## Promotion truth
 
