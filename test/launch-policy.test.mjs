@@ -519,6 +519,15 @@ test("trusted Git reader accepts canonical GitHub URL casing without changing au
   assert.equal(record.numericRepositoryId, "1320171831");
 });
 
+test("trusted Git reader accepts the organization-owned repository without changing frozen policy identity", (t) => {
+  const { baseCommit, repositoryRoot } = trustedPolicyFixture(t);
+  runGit(repositoryRoot, ["remote", "set-url", "origin", "https://github.com/programmablehq/Launch-Policy.git"]);
+
+  const record = readTrustedLaunchPolicyFromGit({ repositoryRoot, expectedBaseCommit: baseCommit });
+  assert.equal(record.repository, "0xprogrammable/launch-policy");
+  assert.equal(record.numericRepositoryId, "1320171831");
+});
+
 test("trusted Git reader rejects a different GitHub owner or repository", (t) => {
   for (const remote of [
     "https://github.com/not-programmable/Launch-Policy.git",

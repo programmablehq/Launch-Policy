@@ -491,6 +491,20 @@ test("protected Git reader binds the pending assertion without minting settlemen
   );
 });
 
+test("protected Git reader accepts the organization-owned policy repository", (t) => {
+  const fixture = writeFixtureRepository(t);
+  runGit(fixture.repositoryRoot, [
+    "remote",
+    "set-url",
+    "origin",
+    "https://github.com/programmablehq/Launch-Policy.git"
+  ]);
+
+  const record = readTrusted(fixture);
+  assert.equal(record.baseCommit, fixture.expectedBaseCommit);
+  assert.equal(record.path, fixture.proofPath);
+});
+
 test("policy handler never passes repository-only accounting assertions and keeps missing evidence pending", (t) => {
   const fixture = writeFixtureRepository(t);
   const policyRecord = readTrustedLaunchPolicyFromGit({

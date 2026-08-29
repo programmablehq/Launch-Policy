@@ -13,6 +13,7 @@ const REPOSITORY = "0xprogrammable/launch-policy";
 const LEGACY_REPOSITORY = "0xprogrammable/submit-launch";
 const NUMERIC_REPOSITORY_ID = "1320171831";
 const REPOSITORY_REMOTE = "https://github.com/0xprogrammable/launch-policy.git";
+const CURRENT_REPOSITORY_REMOTE = "https://github.com/programmablehq/Launch-Policy.git";
 const POLICY_SCHEMA_VERSION = "programmable.launch-policy.v1";
 const BINDING_SCHEMA_VERSION = "programmable.launch-policy-binding.v1";
 const OBJECT_ID = /^[0-9a-f]{40}$/u;
@@ -130,7 +131,7 @@ export function readTrustedLaunchPolicyFromGit(options) {
 
   const observedRemote = runGitText(repositoryRoot, ["remote", "get-url", "origin"], 4096);
   if (normalizeRemote(observedRemote) !== REPOSITORY_REMOTE) {
-    fail("LAUNCH_POLICY_GIT_IDENTITY_INVALID", "Trusted policy repository origin is not 0xprogrammable/launch-policy.");
+    fail("LAUNCH_POLICY_GIT_IDENTITY_INVALID", "Trusted policy repository origin does not resolve to repository id 1320171831.");
   }
   const baseCommit = runGitText(repositoryRoot, ["rev-parse", "--verify", `${expectedBaseCommit}^{commit}`], 128);
   if (baseCommit !== expectedBaseCommit) {
@@ -517,6 +518,9 @@ function validTimestamp(value) {
 function normalizeRemote(remote) {
   const trimmed = remote.trim().replace(/\/$/u, "");
   const canonicalCandidate = trimmed.toLowerCase();
+  if (canonicalCandidate === "git@github.com:programmablehq/launch-policy.git") return REPOSITORY_REMOTE;
+  if (canonicalCandidate === CURRENT_REPOSITORY_REMOTE.toLowerCase()) return REPOSITORY_REMOTE;
+  if (canonicalCandidate === "https://github.com/programmablehq/launch-policy") return REPOSITORY_REMOTE;
   if (canonicalCandidate === "git@github.com:0xprogrammable/launch-policy.git") return REPOSITORY_REMOTE;
   if (canonicalCandidate === REPOSITORY_REMOTE) return REPOSITORY_REMOTE;
   if (canonicalCandidate === "https://github.com/0xprogrammable/launch-policy") return REPOSITORY_REMOTE;
