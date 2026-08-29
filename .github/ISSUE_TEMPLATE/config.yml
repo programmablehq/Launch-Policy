@@ -1,13 +1,13 @@
 blank_issues_enabled: false
 contact_links:
   - name: Report a vulnerability privately
-    url: https://github.com/0xprogrammable/Launch-Policy/security/advisories/new
+    url: https://github.com/programmablehq/Launch-Policy/security/advisories/new
     about: Report security-sensitive findings privately. Do not open a public issue.
   - name: Ask a Launch Policy question
-    url: https://github.com/0xprogrammable/Launch-Policy/discussions/new?category=q-a
+    url: https://github.com/programmablehq/Launch-Policy/discussions/new?category=q-a
     about: Ask about requirements, review records, registry data, or integrations.
   - name: Propose a Launch Policy idea
-    url: https://github.com/0xprogrammable/Launch-Policy/discussions/new?category=ideas
+    url: https://github.com/programmablehq/Launch-Policy/discussions/new?category=ideas
     about: Discuss a policy, registry, or checker improvement before opening a pull request.
   - name: Start a V3 Custom Launch
     url: https://programmable.market/.well-known/programmable.json
