@@ -35,7 +35,7 @@ test("public support routes are canonical and have issue forms", () => {
   const config = read(".github/ISSUE_TEMPLATE/config.yml");
   const support = read("SUPPORT.md");
   const readme = read("README.md");
-  assert.match(config, /https:\/\/github\.com\/0xprogrammable\/Launch-Policy\/security\/advisories\/new/u);
+  assert.match(config, /https:\/\/github\.com\/programmablehq\/Launch-Policy\/security\/advisories\/new/u);
   assert.match(config, /https:\/\/programmable\.market\/\.well-known\/programmable\.json/u);
   assert.doesNotMatch(config, /programmable-registry|programmable-v4-builder|hookbuilder\/discussions/u);
   for (const source of [config, support, readme]) {

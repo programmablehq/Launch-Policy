@@ -33,10 +33,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/0xprogrammable/launch-policy.git"
+    "url": "git+https://github.com/programmablehq/Launch-Policy.git"
   },
   "bugs": {
-    "url": "https://github.com/0xprogrammable/launch-policy/issues"
+    "url": "https://github.com/programmablehq/Launch-Policy/issues"
   },
-  "homepage": "https://github.com/0xprogrammable/launch-policy#readme"
+  "homepage": "https://github.com/programmablehq/Launch-Policy#readme"
 }
