@@ -14,19 +14,61 @@ const POLICY_PATH = "policy/launch-policy.v1.json";
 const MAXIMUM_JSON_BYTES = 2 * 1024 * 1024;
 const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true, ignoreBOM: false });
 const FOUNDATION_SOURCE_COMMITMENT = "0xe87f5edc2dc839bd87a26a80cb53f14b021e603a1753d27aae3a02862058d730";
-const FINALITY_POLICY_DIGEST = "sha256:537d531423d1285a3808556a57303ec68f1e6bdeea3c9aaf6320f9e5a0e47153";
-const POOL_MANAGER = "0x8366a39cc670b4001a1121b8f6a443a643e40951";
-const DEPLOYMENT_ROOT_IDS = Object.freeze([
-  "graphFactory",
-  "permit2",
-  "permitAuthoritySafe",
-  "poolManager",
-  "positionManager",
-  "programmableLaunchStampRouter",
-  "stateView",
-  "universalRouter",
-  "v4Quoter"
-]);
+export const ROBINHOOD_PROMOTION_ANCHOR_V4 = deepFreeze({
+  chainDeploymentDescriptorDigest: null,
+  chainDeploymentId: "robinhood-mainnet-custom-launch-v1",
+  finalityPolicyDigest: "sha256:537d531423d1285a3808556a57303ec68f1e6bdeea3c9aaf6320f9e5a0e47153",
+  finalizedBlock: null,
+  finalizedEvidenceRef: null,
+  foundationSourceCommitment: FOUNDATION_SOURCE_COMMITMENT,
+  roots: {
+    graphFactory: {
+      address: "0x0B6b3F40f84Df25D3bd69238f937096177DD09Bd",
+      runtimeCodeHash: "0xd23692fae59331592048e71a96d4963e170ee56e449683dc9f7fa3f9470018b8",
+      startBlock: null
+    },
+    permit2: {
+      address: "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+      runtimeCodeHash: "0x5208783f52488f7d3493e5e38311ab707c1d75457fe472a19b0b4d57d66a7fca",
+      startBlock: null
+    },
+    permitAuthoritySafe: {
+      address: "0xeD617CE7f82e2AB589aDeFFD319D1D872Bc8De06",
+      runtimeCodeHash: "0xd7d408ebcd99b2b70be43e20253d6d92a8ea8fab29bd3be7f55b10032331fb4c",
+      startBlock: null
+    },
+    poolManager: {
+      address: "0x8366a39CC670B4001A1121B8F6A443A643e40951",
+      runtimeCodeHash: "0xbd3881180b547f5fe817545743cfb4343e96b1bc6640dcd70c106b0066e95626",
+      startBlock: "9070"
+    },
+    positionManager: {
+      address: "0x58daec3116aae6D93017bAAea7749052E8a04fA7",
+      runtimeCodeHash: "0xc873e135dc9aaec88489cfbad146b4cb49d6a32e0d80326377784b7ba17670b2",
+      startBlock: "9073"
+    },
+    programmableLaunchStampRouter: {
+      address: "0x34965F2A2ee9254522232C32F02056E92BE0C98a",
+      runtimeCodeHash: "0x1dbbdaaad901ea3c6134dca0d4872a4789b3c071bf8ccfb44edd65d26d817388",
+      startBlock: null
+    },
+    stateView: {
+      address: "0xF3334192D15450CdD385c8B70e03f9A6bD9E673b",
+      runtimeCodeHash: "0x7d9c591e0956fd89d98feb4ffcfe8bf1f7a62bd485edd979fa21d104b49878a6",
+      startBlock: "9075"
+    },
+    universalRouter: {
+      address: "0x06AfBA43Fd06227fA663b0DAecF536f6EaA6bf99",
+      runtimeCodeHash: "0xbe8e8191bb42d843c2e948a5a55772eaab864ce01e54dcd47c9d089170b302d5",
+      startBlock: "3347899"
+    },
+    v4Quoter: {
+      address: "0x8Dc178eFB8111BB0973Dd9d722ebeFF267c98F94",
+      runtimeCodeHash: "0xd707b1da8cb165e5ea35a3b4450d971eb562ec171e23492aa117036b78a868f6",
+      startBlock: "9074"
+    }
+  }
+});
 const ROBINHOOD_RULE_IDS = Object.freeze([
   "LAUNCH.ROBINHOOD_FINALIZED_ROUTER_EVIDENCE_BEFORE_PROMOTION",
   "LAUNCH.ROBINHOOD_FUNDING_AND_SETTLEMENT_READINESS",
@@ -185,77 +227,25 @@ export function validateCustomLaunchAdmissionDescriptorV4(descriptor) {
 }
 
 function validateDeploymentEvidence(evidence, promotionStatus) {
-  const nullRoots = Object.fromEntries(DEPLOYMENT_ROOT_IDS.map((id) => [id, null]));
-  if (promotionStatus === "planned") {
-    assertExactObject(evidence, {
-      chainDeploymentDescriptorDigest: null,
-      chainDeploymentId: null,
-      finalityPolicyDigest: null,
-      finalizedBlock: null,
-      finalizedEvidenceRef: null,
-      foundationSourceCommitment: null,
-      roots: nullRoots
-    }, "chain.deploymentEvidence");
-    return;
+  if (canonicalJson(evidence) !== canonicalJson(ROBINHOOD_PROMOTION_ANCHOR_V4)) {
+    fail(
+      "CUSTOM_LAUNCH_ADMISSION_V4_PROMOTION_ANCHOR_MISMATCH",
+      "Robinhood deployment evidence must exactly match the reviewed code-owned promotion anchor."
+    );
   }
-
-  assertObject(evidence, "chain.deploymentEvidence");
-  assertExactKeys(evidence, [
-    "chainDeploymentDescriptorDigest",
-    "chainDeploymentId",
-    "finalityPolicyDigest",
-    "finalizedBlock",
-    "finalizedEvidenceRef",
-    "foundationSourceCommitment",
-    "roots"
-  ], "chain.deploymentEvidence");
-  assertEqual(evidence.chainDeploymentId, "robinhood-mainnet-custom-launch-v1", "chain.deploymentEvidence.chainDeploymentId");
-  assertEqual(evidence.foundationSourceCommitment, FOUNDATION_SOURCE_COMMITMENT, "chain.deploymentEvidence.foundationSourceCommitment");
-  assertEqual(evidence.finalityPolicyDigest, FINALITY_POLICY_DIGEST, "chain.deploymentEvidence.finalityPolicyDigest");
-  if (!/^sha256:[0-9a-f]{64}$/u.test(evidence.chainDeploymentDescriptorDigest ?? "")) {
-    fail("CUSTOM_LAUNCH_ADMISSION_V4_INVALID", "Canary promotion requires the exact chain deployment descriptor digest.");
-  }
-  requirePositiveDecimal(evidence.finalizedBlock, "chain.deploymentEvidence.finalizedBlock");
-  validateFinalizedEvidenceRef(evidence.finalizedEvidenceRef);
-  assertObject(evidence.roots, "chain.deploymentEvidence.roots");
-  assertExactKeys(evidence.roots, DEPLOYMENT_ROOT_IDS, "chain.deploymentEvidence.roots");
-  const addresses = new Set();
-  for (const rootId of DEPLOYMENT_ROOT_IDS) {
-    const root = evidence.roots[rootId];
-    assertObject(root, `chain.deploymentEvidence.roots.${rootId}`);
-    assertExactKeys(root, ["address", "runtimeCodeHash", "startBlock"], `chain.deploymentEvidence.roots.${rootId}`);
-    if (!/^0x[0-9a-f]{40}$/iu.test(root.address ?? "") || /^0x0{40}$/iu.test(root.address)) {
-      fail("CUSTOM_LAUNCH_ADMISSION_V4_INVALID", `Canary ${rootId} address is invalid.`);
-    }
-    if (!/^0x[0-9a-f]{64}$/u.test(root.runtimeCodeHash ?? "") || /^0x0{64}$/u.test(root.runtimeCodeHash)) {
-      fail("CUSTOM_LAUNCH_ADMISSION_V4_INVALID", `Canary ${rootId} runtime hash is invalid.`);
-    }
-    requirePositiveDecimal(root.startBlock, `chain.deploymentEvidence.roots.${rootId}.startBlock`);
-    if (BigInt(root.startBlock) > BigInt(evidence.finalizedBlock)) {
-      fail("CUSTOM_LAUNCH_ADMISSION_V4_INVALID", `Canary ${rootId} start block is later than the finalized evidence block.`);
-    }
-    const address = root.address.toLowerCase();
-    if (addresses.has(address)) fail("CUSTOM_LAUNCH_ADMISSION_V4_INVALID", "Canary deployment roots must use distinct addresses.");
-    addresses.add(address);
-  }
-  if (evidence.roots.poolManager.address.toLowerCase() !== POOL_MANAGER) {
-    fail("CUSTOM_LAUNCH_ADMISSION_V4_INVALID", "Canary PoolManager does not match the pinned Robinhood Uniswap deployment.");
+  if (promotionStatus === "canary" && !promotionAnchorIsComplete(ROBINHOOD_PROMOTION_ANCHOR_V4)) {
+    fail(
+      "CUSTOM_LAUNCH_ADMISSION_V4_PROMOTION_ANCHOR_INCOMPLETE",
+      "Robinhood canary promotion remains closed until a reviewed code update pins the descriptor digest, every start block, finalized block and exact evidence reference."
+    );
   }
 }
 
-function validateFinalizedEvidenceRef(reference) {
-  assertObject(reference, "chain.deploymentEvidence.finalizedEvidenceRef");
-  assertExactKeys(reference, ["commit", "path", "repository", "sha256"], "chain.deploymentEvidence.finalizedEvidenceRef");
-  if (
-    reference.repository !== "https://github.com/programmablehq/PROGRAMMABLE"
-    || !/^[0-9a-f]{40}$/u.test(reference.commit ?? "")
-    || !/^contracts\/deployments\/(?:evidence\/)?[A-Za-z0-9._/-]+\.json$/u.test(reference.path ?? "")
-    || !/^sha256:[0-9a-f]{64}$/u.test(reference.sha256 ?? "")
-  ) fail("CUSTOM_LAUNCH_ADMISSION_V4_INVALID", "Canary finalized deployment evidence reference is invalid or unpinned.");
-}
-
-function requirePositiveDecimal(value, label) {
-  if (!/^[1-9][0-9]*$/u.test(value ?? "")) fail("CUSTOM_LAUNCH_ADMISSION_V4_INVALID", `${label} must be a positive decimal string.`);
+function promotionAnchorIsComplete(anchor) {
+  return anchor.chainDeploymentDescriptorDigest !== null
+    && anchor.finalizedBlock !== null
+    && anchor.finalizedEvidenceRef !== null
+    && Object.values(anchor.roots).every(({ startBlock }) => startBlock !== null);
 }
 
 export function buildCustomLaunchAdmissionBindingV4({ repositoryRoot }) {

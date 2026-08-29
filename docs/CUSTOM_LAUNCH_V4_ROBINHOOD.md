@@ -72,13 +72,35 @@ after the deployment gate has passed:
 These pointers describe the V4 contract. Clients must still check the chain status in live discovery and must not send
 Robinhood writes while it is `planned`.
 
-The descriptor's `chain.deploymentEvidence` object is an exact all-null record while status is `planned`. The checker
-rejects any partial planned claim. A future `canary` record must instead bind deployment ID
-`robinhood-mainnet-custom-launch-v1`, the chain-deployment descriptor digest, the foundation source commitment, exact
-finality-policy digest, finalized block and a commit-, path- and SHA-256-pinned evidence file. It must also bind distinct
-address, runtime-hash and start-block tuples for the Programmable Router, GraphFactory, PermitAuthority Safe,
-PoolManager, PositionManager, Permit2, StateView, Universal Router and V4 Quoter. Every start block must be at or before
-the finalized evidence block. Until every field is present and valid, promotion remains fail-closed.
+The descriptor publishes one reviewed, code-owned promotion anchor even while status is `planned`. Callers cannot fill
+or replace its fields. It fixes deployment ID `robinhood-mainnet-custom-launch-v1`, finality-policy digest
+`sha256:537d531423d1285a3808556a57303ec68f1e6bdeea3c9aaf6320f9e5a0e47153`, the foundation source commitment and every
+currently known address and runtime code hash. The machine descriptor is authoritative for the hashes; the deployment
+roots and currently reviewed start blocks are:
+
+| Root | Address | Start block |
+| --- | --- | ---: |
+| GraphFactory | `0x0B6b3F40f84Df25D3bd69238f937096177DD09Bd` | `null`, pending reviewed broadcast evidence |
+| Permit2 | `0x000000000022D473030F116dDEE9F6B43aC78BA3` | `null`, provenance unresolved |
+| PermitAuthority Safe | `0xeD617CE7f82e2AB589aDeFFD319D1D872Bc8De06` | `null`, pending reviewed broadcast evidence |
+| PoolManager | `0x8366a39CC670B4001A1121B8F6A443A643e40951` | `9070` |
+| PositionManager | `0x58daec3116aae6D93017bAAea7749052E8a04fA7` | `9073` |
+| Programmable Launch Stamp Router | `0x34965F2A2ee9254522232C32F02056E92BE0C98a` | `null`, pending reviewed broadcast evidence |
+| StateView | `0xF3334192D15450CdD385c8B70e03f9A6bD9E673b` | `9075` |
+| Universal Router | `0x06AfBA43Fd06227fA663b0DAecF536f6EaA6bf99` | `3347899` |
+| V4 Quoter | `0x8Dc178eFB8111BB0973Dd9d722ebeFF267c98F94` | `9074` |
+
+Permit2 is deliberately not assigned a deployment block. Official Uniswap material establishes its canonical address
+and the pinned Uniswap registry calls it a pre-existing deployment, but neither supplies its deployment transaction or
+date. One archive provider returned code at block `0`; a second independent provider was unavailable. That cannot
+establish deployment provenance, so the anchor preserves the reviewed address and runtime hash while keeping its start
+block `null`.
+
+Only seven evidence fields remain `null`: the chain-deployment descriptor digest, finalized block, finalized evidence
+reference and the four start blocks identified above. The first three and the three Programmable start blocks are
+post-broadcast evidence. Permit2 is the bounded provenance exception. The schema requires all of them before `canary`,
+does not permit `live`, and the checker rejects every caller mutation. Promotion therefore remains fail-closed until a
+reviewed code update replaces the legitimate nulls with exact evidence and advances the status.
 
 ## Promotion truth
 
