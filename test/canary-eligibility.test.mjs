@@ -561,7 +561,7 @@ async function createEligibilityFixture(t, { applicationRevision = 1, source = S
     pullRequestNumber: "7",
     expectedBuilderLogin: "Alice",
     expectedBuilderUserId: "9007199254740993",
-    expectedBaseRepository: "0xprogrammable/launch-policy",
+    expectedBaseRepository: "programmablehq/Launch-Policy",
     expectedBaseRepositoryId: "1320171831",
     expectedHeadRepository: "alice/submit-launch-fork",
     expectedHeadRepositoryId: "88001"

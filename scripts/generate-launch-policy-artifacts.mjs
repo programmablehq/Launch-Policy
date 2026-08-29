@@ -21,6 +21,11 @@ import {
   verifyCustomLaunchAdmissionBindingV3
 } from "./custom-launch-admission-v3-core.mjs";
 import {
+  CUSTOM_LAUNCH_ADMISSION_BINDING_V4_PATH,
+  buildCustomLaunchAdmissionBindingV4,
+  verifyCustomLaunchAdmissionBindingV4
+} from "./custom-launch-admission-v4-core.mjs";
+import {
   canonicalJson,
   parseLaunchPolicyBytes,
   renderLaunchPolicyMarkdown
@@ -91,6 +96,7 @@ export const ACTIVE_CONTRACT_ROLE_PATHS_V1 = Object.freeze({
 const GENERATED_PATHS = Object.freeze([
   APPLICANT_COMPATIBILITY_V2_PATH,
   CUSTOM_LAUNCH_ADMISSION_BINDING_V3_PATH,
+  CUSTOM_LAUNCH_ADMISSION_BINDING_V4_PATH,
   RENDERED_POLICY_PATH,
   ACTIVE_CONTRACT_PATH,
   ACTIVE_CONTRACT_V2_PATH
@@ -118,6 +124,7 @@ function buildArtifactState(repositoryRoot) {
   const policyRecord = readRepositoryLaunchPolicy({ repositoryRoot });
   const applicantCompatibilityV2Source = `${canonicalApplicantJson(buildApplicantCompatibilityContractV2({ repositoryRoot }))}\n`;
   const customLaunchAdmissionBindingV3Source = `${canonicalJson(buildCustomLaunchAdmissionBindingV3({ repositoryRoot }))}\n`;
+  const customLaunchAdmissionBindingV4Source = `${canonicalJson(buildCustomLaunchAdmissionBindingV4({ repositoryRoot }))}\n`;
   const activeContractV2 = validateActiveContractManifestV2({
     $schema: "urn:programmable:active-contract-manifest:2.0.0",
     schemaVersion: "2.0.0",
@@ -156,6 +163,7 @@ function buildArtifactState(repositoryRoot) {
     artifacts: new Map([
       [APPLICANT_COMPATIBILITY_V2_PATH, applicantCompatibilityV2Source],
       [CUSTOM_LAUNCH_ADMISSION_BINDING_V3_PATH, customLaunchAdmissionBindingV3Source],
+      [CUSTOM_LAUNCH_ADMISSION_BINDING_V4_PATH, customLaunchAdmissionBindingV4Source],
       [RENDERED_POLICY_PATH, renderLaunchPolicyMarkdown(policyRecord)],
       [ACTIVE_CONTRACT_V2_PATH, activeContractV2Source],
       [ACTIVE_CONTRACT_PATH, `${canonicalJson(activeContractV1)}\n`]
@@ -191,6 +199,7 @@ export function verifyLaunchPolicyArtifacts(options) {
   return Object.freeze({
     activeContractPath: ACTIVE_CONTRACT_PATH,
     customLaunchAdmission: verifyCustomLaunchAdmissionBindingV3({ repositoryRoot }),
+    customLaunchAdmissionV4: verifyCustomLaunchAdmissionBindingV4({ repositoryRoot }),
     policyPath: POLICY_PATH,
     policySha256: policyRecord.sha256,
     renderedPolicyPath: RENDERED_POLICY_PATH

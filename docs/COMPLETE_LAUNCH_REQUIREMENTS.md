@@ -3,11 +3,13 @@
 This page is the shortest complete map for an agent or Builder preparing a Programmable launch. It is not a second
 policy. [`policy/launch-policy.v1.json`](../policy/launch-policy.v1.json) is the canonical business policy for
 Programmable Router, fee, and promotion obligations. The separate public
-[V3 admission descriptor](../policy/custom-launch-admission-v3.json) is the canonical disclosure of current profile
-identity, hard-block codes, evidence duties, and claim limitations. Bind both at one exact protected
+[V3 admission descriptor](../policy/custom-launch-admission-v3.json) is the canonical disclosure of the live Ethereum
+profile. The separate [V4 Robinhood descriptor](../policy/custom-launch-admission-v4.json) discloses the planned
+chain-4663 lane, its server-selected profiles, hard-block codes, evidence duties and claim limitations. Bind the
+applicable descriptor and policy at one exact protected
 `launch-policy:main` commit and tree.
 
-The current machine identity in this tree is policy ID `programmable-central-launch-policy`, version `2.3.0`. Do not
+The current machine identity in this tree is policy ID `programmable-central-launch-policy`, version `2.4.0`. Do not
 infer future requirements from that label alone; always bind the exact policy bytes and Git identity.
 
 > [!IMPORTANT]
@@ -46,12 +48,34 @@ npm run policy -- requirements --profile launch-readiness
 npm run policy -- binding --profile launch-readiness
 npm run policy -- requirements --profile production-launch
 npm run admission:v3 -- --check
+npm run policy -- requirements --profile robinhood-launch-readiness
+npm run policy -- requirements --profile robinhood-production-launch
+npm run admission:v4
 ```
 
 The `launch-readiness` profile is enabled and checker-only. Its successful outcome is
 `LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED`. It does not authorize an audit, launch, deployment, Registry entry, public
 routing, production discovery, or real-user funds. The `production-launch` profile is also enabled only as a
 non-authorizing checker. It emits `PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED`, never `LAUNCH_APPROVED`.
+
+The two Robinhood profiles are also non-authorizing checkers. They are selected by the authenticated API server from
+the chain-bound V4 request, never by a client field. Robinhood remains `planned`; these checks do not establish a
+deployment, production route, wallet authorization, finality, indexing or source verification.
+
+## Public Robinhood V4 admission contract
+
+The V4 descriptor, schema and generated binding are:
+
+- [`policy/custom-launch-admission-v4.json`](../policy/custom-launch-admission-v4.json);
+- [`policy/schemas/custom-launch-admission-v4.schema.json`](../policy/schemas/custom-launch-admission-v4.schema.json);
+  and
+- [`.programmable/custom-launch-admission.v4.json`](../.programmable/custom-launch-admission.v4.json).
+
+V4 preserves every Ethereum rule and V3 request contract. Its `LAUNCH.ROBINHOOD_*` rules cover exact chain and
+PoolManager provenance, Programmable Router/GraphFactory/PermitAuthority runtime bindings, wallet chain binding,
+server validation and simulation, funding and settlement readiness, finalized Router evidence, source verification,
+chain-scoped indexing and honest fee capabilities. Read the
+[Robinhood V4 policy guide](CUSTOM_LAUNCH_V4_ROBINHOOD.md) for the complete boundary.
 
 ## Public V3 admission contract
 
@@ -368,7 +392,7 @@ stamp proves only the documented atomic Router provenance and recorded identitie
 
 Publishing the verification contract makes integration possible; it does not guarantee that GMGN, Axiom, FOMO, or any
 other terminal has adopted the Programmable labels. Each terminal controls its own indexing and product UI. Read the
-[pinned terminal and scanner integration guide](https://github.com/0xprogrammable/developers/blob/79f14e9c57cb6668bb33f66ef636c1c8c5ff2c56/docs/guides/terminals-and-scanners.md)
+[pinned terminal and scanner integration guide](https://github.com/programmablehq/Developers/blob/79f14e9c57cb6668bb33f66ef636c1c8c5ff2c56/docs/guides/terminals-and-scanners.md)
 before integrating, then resolve the current Developer manifest rather than assuming adoption or a permanent Router.
 
 The authenticated Universal Admission queue remains `reference-only-disabled`. It has no public endpoint, audience,

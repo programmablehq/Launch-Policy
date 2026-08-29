@@ -473,7 +473,7 @@ function validateTrustedPolicyProjection(value, profileId) {
   requirePlainObject(value, "trustedPolicy", "REVIEW_DECISION_POLICY_INVALID");
   exactKeys(value, ["baseCommit", "baseTree", "gitBlobOid", "numericRepositoryId", "path", "policyId", "policyVersion", "profileId", "repository", "sha256"], "REVIEW_DECISION_POLICY_INVALID", "Trusted policy projection");
   if (
-    value.repository !== "0xprogrammable/launch-policy"
+    value.repository !== "programmablehq/Launch-Policy"
     || value.numericRepositoryId !== "1320171831"
     || value.path !== "policy/launch-policy.v1.json"
     || value.profileId !== profileId
@@ -687,7 +687,7 @@ function validatePolicyBinding(binding) {
   exactKeys(binding, ["baseCommit", "baseTree", "gitBlobOid", "numericRepositoryId", "path", "policyId", "policyVersion", "profileId", "repository", "schemaVersion", "sha256"], "REVIEW_POLICY_BINDING_INVALID", "Expected policy binding");
   if (
     binding.schemaVersion !== BINDING_SCHEMA_VERSION
-    || binding.repository !== "0xprogrammable/launch-policy"
+    || binding.repository !== "programmablehq/Launch-Policy"
     || binding.numericRepositoryId !== "1320171831"
     || binding.path !== "policy/launch-policy.v1.json"
     || !OBJECT_ID.test(binding.baseCommit ?? "")

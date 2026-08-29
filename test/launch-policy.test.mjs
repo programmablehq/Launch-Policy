@@ -141,7 +141,7 @@ function trustedPolicyFixture(t, policy = canonicalPolicyRecord().policy) {
     "utf8"
   );
   runGit(repositoryRoot, ["init", "--initial-branch=main"]);
-  runGit(repositoryRoot, ["remote", "add", "origin", "https://github.com/0xprogrammable/launch-policy.git"]);
+  runGit(repositoryRoot, ["remote", "add", "origin", "https://github.com/programmablehq/Launch-Policy.git"]);
   runGit(repositoryRoot, ["add", "policy/launch-policy.v1.json"]);
   runGit(repositoryRoot, ["commit", "-m", "fixture policy"]);
   const baseCommit = runGit(repositoryRoot, ["rev-parse", "HEAD^{commit}"]);
@@ -156,15 +156,26 @@ function trustedPolicyFixture(t, policy = canonicalPolicyRecord().policy) {
 
 test("canonical policy exposes enabled production requirements without authority", () => {
   const record = canonicalPolicyRecord();
-  assert.equal(record.policy.policyVersion, "2.3.0");
-  assert.deepEqual(record.policy.profiles.map(({ id }) => id), ["build", "launch-readiness", "production-launch", "workflow-canary"]);
+  assert.equal(record.policy.policyVersion, "2.4.0");
+  assert.deepEqual(record.policy.profiles.map(({ id }) => id), [
+    "build",
+    "launch-readiness",
+    "production-launch",
+    "robinhood-launch-readiness",
+    "robinhood-production-launch",
+    "workflow-canary"
+  ]);
   assert.equal(selectLaunchPolicyProfile(record.policy, "build").enabled, true);
   assert.equal(selectLaunchPolicyProfile(record.policy, "launch-readiness").enabled, true);
   assert.equal(selectLaunchPolicyProfile(record.policy, "production-launch").enabled, true);
+  assert.equal(selectLaunchPolicyProfile(record.policy, "robinhood-launch-readiness").enabled, true);
+  assert.equal(selectLaunchPolicyProfile(record.policy, "robinhood-production-launch").enabled, true);
   assert.equal(selectLaunchPolicyProfile(record.policy, "workflow-canary").enabled, true);
   assert.equal(selectLaunchPolicyProfile(record.policy, "build").outcome, "BUILT_NOT_REVIEWED");
   assert.equal(selectLaunchPolicyProfile(record.policy, "launch-readiness").outcome, "LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED");
   assert.equal(selectLaunchPolicyProfile(record.policy, "production-launch").outcome, "PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED");
+  assert.equal(selectLaunchPolicyProfile(record.policy, "robinhood-launch-readiness").outcome, "ROBINHOOD_LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED");
+  assert.equal(selectLaunchPolicyProfile(record.policy, "robinhood-production-launch").outcome, "ROBINHOOD_PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED");
   assert.equal(selectLaunchPolicyProfile(record.policy, "workflow-canary").outcome, "CANARY_WORKFLOW_PASSED");
   for (const profile of record.policy.profiles) {
     assert.equal(profile.authority.launchAuthorized, false);
@@ -177,14 +188,23 @@ test("canonical policy exposes enabled production requirements without authority
 
 test("market-bearing readiness is closed while no-market stays admissible and unsupported integration stays pending", (t) => {
   const { policy } = canonicalPolicyRecord();
-  assert.equal(policy.policyVersion, "2.3.0");
+  assert.equal(policy.policyVersion, "2.4.0");
   assert.deepEqual(policy.rules.map(({ id }) => id), [
     "LAUNCH.ETHEREUM_AND_TREASURY_10_BPS",
     "LAUNCH.ETHEREUM_EXACT_FEE_TEMPLATE_BEFORE_AUTHORIZATION",
     "LAUNCH.ETHEREUM_FINALIZED_ROUTER_STAMP_BEFORE_PROMOTION",
     "LAUNCH.ETHEREUM_FINALIZED_RUNTIME_FEE_SETTLEMENT_BEFORE_PROMOTION",
     "LAUNCH.ETHEREUM_ROUTER_PROVENANCE_READINESS",
-    "LAUNCH.ETHEREUM_VERIFIED_EXECUTED_PLATFORM_FEE_BEFORE_AUTHORIZATION"
+    "LAUNCH.ETHEREUM_VERIFIED_EXECUTED_PLATFORM_FEE_BEFORE_AUTHORIZATION",
+    "LAUNCH.ROBINHOOD_FINALIZED_ROUTER_EVIDENCE_BEFORE_PROMOTION",
+    "LAUNCH.ROBINHOOD_FUNDING_AND_SETTLEMENT_READINESS",
+    "LAUNCH.ROBINHOOD_HONEST_FEE_CAPABILITY",
+    "LAUNCH.ROBINHOOD_INDEXING_AND_READINESS",
+    "LAUNCH.ROBINHOOD_NETWORK_AND_POOL_MANAGER_PROVENANCE",
+    "LAUNCH.ROBINHOOD_PROGRAMMABLE_TRUST_ROOTS",
+    "LAUNCH.ROBINHOOD_SERVER_VALIDATION_AND_SIMULATION",
+    "LAUNCH.ROBINHOOD_SOURCE_VERIFICATION_BINDING",
+    "LAUNCH.ROBINHOOD_WALLET_HANDOFF_CHAIN_BINDING"
   ]);
   assert.deepEqual(rulesForProfile(policy, "build"), []);
   assert.deepEqual(rulesForProfile(policy, "launch-readiness").map(({ id }) => id), [
@@ -393,7 +413,7 @@ test("active rules cannot become non-enforcing historical records", () => {
 });
 
 test("checker-only profiles cannot carry routing discovery or real-user funds", () => {
-  for (const profileId of ["build", "launch-readiness", "production-launch", "workflow-canary"]) {
+  for (const profileId of ["build", "launch-readiness", "production-launch", "robinhood-launch-readiness", "robinhood-production-launch", "workflow-canary"]) {
     for (const [field, invalidValue] of [
       ["checkerOnly", false],
       ["independentAudit", true],
@@ -442,7 +462,7 @@ test("fabricated records cannot mint bindings or evaluate policy", () => {
   const parsed = canonicalPolicyRecord();
   const fabricated = {
     ...parsed,
-    repository: "0xprogrammable/launch-policy",
+    repository: "programmablehq/Launch-Policy",
     numericRepositoryId: "1320171831",
     baseCommit: "0".repeat(40),
     baseTree: "0".repeat(40),
@@ -479,7 +499,7 @@ test("trusted Git reader binds fixed protected-base identity and rejects substit
   assert.equal(record.baseTree, baseTree);
   assert.equal(record.gitBlobOid, blob);
   assert.equal(record.path, "policy/launch-policy.v1.json");
-  assert.equal(record.repository, "0xprogrammable/launch-policy");
+  assert.equal(record.repository, "programmablehq/Launch-Policy");
   assert.equal(record.numericRepositoryId, "1320171831");
 
   const binding = buildLaunchPolicyBinding(record, "workflow-canary");
@@ -515,16 +535,16 @@ test("trusted Git reader accepts canonical GitHub URL casing without changing au
   runGit(repositoryRoot, ["remote", "set-url", "origin", "https://github.com/0xProgrammable/Launch-Policy.git"]);
 
   const record = readTrustedLaunchPolicyFromGit({ repositoryRoot, expectedBaseCommit: baseCommit });
-  assert.equal(record.repository, "0xprogrammable/launch-policy");
+  assert.equal(record.repository, "programmablehq/Launch-Policy");
   assert.equal(record.numericRepositoryId, "1320171831");
 });
 
-test("trusted Git reader accepts the organization-owned repository without changing frozen policy identity", (t) => {
+test("trusted Git reader accepts the organization-owned repository with the current policy identity", (t) => {
   const { baseCommit, repositoryRoot } = trustedPolicyFixture(t);
   runGit(repositoryRoot, ["remote", "set-url", "origin", "https://github.com/programmablehq/Launch-Policy.git"]);
 
   const record = readTrustedLaunchPolicyFromGit({ repositoryRoot, expectedBaseCommit: baseCommit });
-  assert.equal(record.repository, "0xprogrammable/launch-policy");
+  assert.equal(record.repository, "programmablehq/Launch-Policy");
   assert.equal(record.numericRepositoryId, "1320171831");
 });
 

@@ -63,6 +63,116 @@ function programmableExactFeeTemplateHandler(context) {
   ]);
 }
 
+function robinhoodNetworkAndPoolManagerProvenanceHandler(context) {
+  return exactEvidenceHandler(context, [
+    "caip2",
+    "chainId",
+    "network",
+    "officialDeploymentRegistry",
+    "poolManager",
+    "registryCommit"
+  ]);
+}
+
+function robinhoodProgrammableTrustRootsHandler(context) {
+  return exactEvidenceHandler(context, [
+    "chainDeploymentDescriptorRequired",
+    "exactRuntimeHashesRequired",
+    "foundationSourceCommitment",
+    "graphFactoryRequired",
+    "permitAuthorityRequired",
+    "routerRequired",
+    "sourceRepository",
+    "sourceRepositoryBranch"
+  ]);
+}
+
+function robinhoodWalletHandoffChainBindingHandler(context) {
+  return exactEvidenceHandler(context, [
+    "caip2",
+    "chainId",
+    "connectedAccountRecheckRequired",
+    "connectedChainRecheckRequired",
+    "crossChainReplayRejected",
+    "destinationRuntimeHashRecheckRequired",
+    "exactTransactionPreimageRequired",
+    "walletSignatureSeparate"
+  ]);
+}
+
+function robinhoodServerValidationAndSimulationHandler(context) {
+  return exactEvidenceHandler(context, [
+    "backendAuthority",
+    "canonicalRequestBytesRebuilt",
+    "chainSpecificForkSimulationRequired",
+    "clientVerdictsAccepted",
+    "deterministicValidationRequired",
+    "llmAuthorizationAllowed",
+    "pathBodyChainBindingRequired"
+  ]);
+}
+
+function robinhoodFundingAndSettlementReadinessHandler(context) {
+  return exactEvidenceHandler(context, [
+    "advertisedFundingModes",
+    "erc20ModesRequireSeparateProof",
+    "settlementClosureRequired",
+    "unsupportedModesAbsent"
+  ]);
+}
+
+function robinhoodFinalizedRouterEvidenceHandler(context) {
+  return exactEvidenceHandler(context, [
+    "caip2",
+    "chainId",
+    "finalityCheckpoint",
+    "finalizedRouterEvidenceRequired",
+    "promotionTargets"
+  ]);
+}
+
+function robinhoodSourceVerificationBindingHandler(context) {
+  return exactEvidenceHandler(context, [
+    "blockscoutAvailability",
+    "blockscoutExactSourceClaimAllowed",
+    "blockscoutFinalityBlocker",
+    "exactMatchClaimRequiresProviderReceipt",
+    "externalContractReferenceCaip2",
+    "externalContractReferenceCheckpointRequired",
+    "externalContractReferenceExactAddressRequired",
+    "externalContractReferenceRoleRequired",
+    "externalContractReferenceRuntimeHashRequired",
+    "externalContractReferenceServerVerificationRequired",
+    "externalContractReferenceSourceVerificationEvidenceRequired",
+    "finalityIndependent",
+    "jobStates",
+    "requiredExactMatchProvider",
+    "sourceBuildBindingRequired",
+    "sourcifyV2ExactMatchRequired",
+    "unboundExternalContractReferencesTrusted"
+  ]);
+}
+
+function robinhoodIndexingAndReadinessHandler(context) {
+  return exactEvidenceHandler(context, [
+    "chainScopedIdentityRequired",
+    "crossChainFailureIsolation",
+    "lastKnownGoodSnapshotRequired",
+    "qualityStates",
+    "routerLedgerProjectionRequired"
+  ]);
+}
+
+function robinhoodHonestFeeCapabilityHandler(context) {
+  return exactEvidenceHandler(context, [
+    "buybacksLive",
+    "feeBehaviorClaim",
+    "genericClaimingLive",
+    "launchValidityIndependentOfFeeCertification",
+    "universalFeeBehaviorClaim"
+  ]);
+}
+
 function programmableVerifiedExecutedPlatformFeeHandler({ evidence, rule }) {
   const [evidenceId] = rule.evidence;
   const value = evidence?.[evidenceId];
@@ -517,6 +627,21 @@ const RULE_HANDLERS_BY_POLICY_VERSION = Object.freeze({
     "programmable-exact-fee-template-v1": programmableExactFeeTemplateHandler,
     "programmable-router-promotion-v1": programmableRouterPromotionHandler,
     "programmable-router-readiness-v1": programmableRouterReadinessHandler
+  }),
+  "2.4.0": Object.freeze({
+    "ethereum-treasury-10-bps-v1": ethereumTreasuryTenBpsHandler,
+    "programmable-exact-fee-template-v1": programmableExactFeeTemplateHandler,
+    "programmable-router-promotion-v1": programmableRouterPromotionHandler,
+    "programmable-router-readiness-v1": programmableRouterReadinessHandler,
+    "robinhood-finalized-router-evidence-v1": robinhoodFinalizedRouterEvidenceHandler,
+    "robinhood-funding-settlement-readiness-v1": robinhoodFundingAndSettlementReadinessHandler,
+    "robinhood-honest-fee-capability-v1": robinhoodHonestFeeCapabilityHandler,
+    "robinhood-indexing-readiness-v1": robinhoodIndexingAndReadinessHandler,
+    "robinhood-network-pool-manager-provenance-v1": robinhoodNetworkAndPoolManagerProvenanceHandler,
+    "robinhood-programmable-trust-roots-v1": robinhoodProgrammableTrustRootsHandler,
+    "robinhood-server-validation-simulation-v1": robinhoodServerValidationAndSimulationHandler,
+    "robinhood-source-verification-binding-v1": robinhoodSourceVerificationBindingHandler,
+    "robinhood-wallet-handoff-chain-binding-v1": robinhoodWalletHandoffChainBindingHandler
   })
 });
 

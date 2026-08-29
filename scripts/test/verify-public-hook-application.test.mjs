@@ -393,14 +393,14 @@ test("unchanged V2 bytes bind the exact trusted policy snapshot without canary o
 
   assert.deepEqual(report.policyBinding, {
     schemaVersion: "programmable.trusted-policy-snapshot-binding.v1",
-    repository: "0xprogrammable/launch-policy",
+    repository: "programmablehq/Launch-Policy",
     numericRepositoryId: "1320171831",
     baseCommit: fixture.baseCommit,
     baseTree: git(fixture.base, ["rev-parse", `${fixture.baseCommit}^{tree}`]),
     path: "policy/launch-policy.v1.json",
     gitBlobOid: git(fixture.base, ["rev-parse", `${fixture.baseCommit}:policy/launch-policy.v1.json`]),
     policyId: "programmable-central-launch-policy",
-    policyVersion: "2.3.0",
+    policyVersion: "2.4.0",
     sha256: `sha256:${crypto.createHash("sha256").update(TRUSTED_POLICY_BYTES).digest("hex")}`
   });
   assert.equal(Object.hasOwn(report.policyBinding, "profileId"), false);

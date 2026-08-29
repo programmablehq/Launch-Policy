@@ -23,13 +23,17 @@ the retired GitHub intake and must not be rewritten, extended, or repurposed.
 `policy/launch-policy.v1.json` is the authored source for Programmable Router, fee, and promotion business obligations.
 `policy/custom-launch-admission-v3.json` separately publishes the current V3 profile, finding codes, evidence duties,
 and claim boundaries; it cannot add or override business rules. The private API remains the executable admission
-authority. Do not copy either contract into a hidden workflow or caller-controlled assertion. Keep stable IDs, update
+authority. Do not copy these contracts into a hidden workflow or caller-controlled assertion. Keep stable IDs, update
 the appropriate version when semantics change, add a focused regression, then run:
+
+`policy/custom-launch-admission-v4.json` separately publishes the planned Robinhood V4 lane. Its Robinhood profiles
+must remain server-selected and may not change the Ethereum V3 descriptor or any `LAUNCH.ETHEREUM_*` rule semantics.
 
 ```bash
 npm run policy:generate
 npm run policy:check
 npm run admission:v3 -- --check
+npm run admission:v4
 npm run authority:write
 npm run authority:check
 npm test
