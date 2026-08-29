@@ -470,7 +470,7 @@ export function buildCustomLaunchAdmissionBindingV3({ repositoryRoot }) {
   if (
     !authorizationGateRule
     || authorizationGateRule.status !== "inactive"
-    || authorizationGateRule.retiredIn !== policy.policy.policyVersion
+    || authorizationGateRule.retiredIn !== "2.3.0"
     || authorizationGateRule.enforcement?.owner !== "platform"
     || canonicalJson(authorizationGateRule.parameters?.activationPrerequisites) !== canonicalJson(descriptor.feeAuthorizationGate.activationPrerequisites)
     || authorizationGateRule.parameters?.activationState !== descriptor.candidateProfile.activationState

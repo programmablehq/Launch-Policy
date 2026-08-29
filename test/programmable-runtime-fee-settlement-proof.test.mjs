@@ -338,6 +338,8 @@ function writeFixtureRepository(t, {
   // contract without reactivating it in the current v2.3 production profile.
   policy.policyVersion = "2.1.0";
   policy.effective.startsAt = "2026-08-20T00:00:00Z";
+  policy.profiles = policy.profiles.filter(({ id }) => !id.startsWith("robinhood-"));
+  policy.rules = policy.rules.filter(({ id }) => !id.startsWith("LAUNCH.ROBINHOOD_"));
   const productionProfile = policy.profiles.find(({ id }) => id === "production-launch");
   productionProfile.enabled = false;
   productionProfile.outcome = null;

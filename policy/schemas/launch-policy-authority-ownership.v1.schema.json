@@ -376,7 +376,7 @@
           "const": "main"
         },
         "name": {
-          "const": "0xprogrammable/launch-policy"
+          "const": "programmablehq/Launch-Policy"
         },
         "numericRepositoryId": {
           "const": "1320171831"

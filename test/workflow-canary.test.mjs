@@ -23,7 +23,7 @@ import {
 import { classifyPublicIntakePullRequest } from "../scripts/verify-public-hook-application-core.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
-const BASE_REPOSITORY = "0xprogrammable/launch-policy";
+const BASE_REPOSITORY = "programmablehq/Launch-Policy";
 const BASE_REPOSITORY_ID = "1320171831";
 const HEAD_REPOSITORY = "alice/submit-launch-fork";
 const HEAD_REPOSITORY_ID = "88001";

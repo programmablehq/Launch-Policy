@@ -21,13 +21,14 @@ test("the public landing page leads with the API-first launch boundary", () => {
   assert.ok(readme.indexOf("GitHub launch intake is closed") < readme.indexOf("## Launch policy"));
 });
 
-test("the current owner is launch-policy while legacy provenance remains explicit", () => {
+test("the current programmablehq owner is explicit while legacy provenance remains preserved", () => {
   const readme = read("README.md");
-  assert.match(readme, /0xprogrammable\/launch-policy/u);
+  assert.match(readme, /programmablehq\/Launch-Policy/u);
   assert.match(readme, /formerly named `0xprogrammable\/submit-launch`/u);
   assert.match(readme, /versioned legacy protocol\s+identifiers, frozen vendor bytes, historical snapshots, and old provenance links/u);
   assert.match(readme, /submissions\/.*preserves former V2, V3\.1, and V3\.2 application records/su);
   assert.match(readme, /canary-submissions\/.*preserves former Workflow Canary records/su);
+  assert.doesNotMatch(readme, /github\.com\/0xprogrammable\/Launch-Policy/u);
   assert.doesNotMatch(readme, /Three intake transports are open|Open legacy V2/u);
 });
 

@@ -27,7 +27,7 @@ import { evaluateTrustedLaunchPolicyReview } from "../review/launch-policy-revie
 const root = path.resolve(import.meta.dirname, "..");
 const canonicalPolicyPath = "policy/launch-policy.v1.json";
 
-test("the closed ownership manifest separates business-policy authority from the V3 admission disclosure", () => {
+test("the closed ownership manifest separates business-policy authority from the V3 and V4 admission disclosures", () => {
   const report = verifyLaunchPolicyAuthorityOwnership({ repositoryRoot: root });
   const manifest = readLaunchPolicyAuthorityOwnership({ repositoryRoot: root });
   const validateManifest = new Ajv2020({ allErrors: true, strict: true }).compile(
@@ -44,7 +44,10 @@ test("the closed ownership manifest separates business-policy authority from the
     rules: manifest.semanticRuleMap.length
   });
   assert.deepEqual(manifest.fileClasses["canonical-admission-policy"], [canonicalPolicyPath]);
-  assert.deepEqual(manifest.fileClasses["current-admission-disclosure"], ["policy/custom-launch-admission-v3.json"]);
+  assert.deepEqual(manifest.fileClasses["current-admission-disclosure"], [
+    "policy/custom-launch-admission-v3.json",
+    "policy/custom-launch-admission-v4.json"
+  ]);
   assert.deepEqual(manifest.fileClasses["authority-ownership-manifest"], [AUTHORITY_OWNERSHIP_MANIFEST_PATH]);
   assert.equal(manifest.canonicalPolicy.path, canonicalPolicyPath);
   assert.equal(manifest.canonicalPolicy.schemaPath, "policy/schemas/launch-policy.v1.schema.json");
@@ -120,7 +123,7 @@ test("the closed ownership manifest separates business-policy authority from the
   assert.deepEqual(findForbiddenPolicyValueKeys(manifest), []);
 
   const policy = readJson(canonicalPolicyPath);
-  assert.equal(policy.repository.name, "0xprogrammable/launch-policy");
+  assert.equal(policy.repository.name, "programmablehq/Launch-Policy");
   assert.equal(policy.repository.numericRepositoryId, "1320171831");
   assert.equal(policy.repository.branch, "main");
   assert.equal(policy.repository.path, canonicalPolicyPath);
@@ -401,6 +404,13 @@ test("every semantic finding and handler maps bijectively to a central Rule ID",
       "scripts/launch-policy-handlers.mjs"
     ]
   };
+  for (const ruleId of [...policyIds].filter((id) => id.startsWith("LAUNCH.ROBINHOOD_"))) {
+    expectedConsumers[ruleId] = [
+      "scripts/custom-launch-admission-v4-core.mjs",
+      "scripts/launch-policy-core.mjs",
+      "scripts/launch-policy-handlers.mjs"
+    ];
+  }
   assert.deepEqual(
     Object.fromEntries(manifest.semanticRuleMap.map(({ consumers, ruleId }) => [ruleId, consumers])),
     expectedConsumers
@@ -584,7 +594,7 @@ function withRepositoryCopy(callback) {
   const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), "submit-launch-authority-"));
   const repositoryRoot = path.join(temporaryRoot, "repository");
   try {
-    childProcess.execFileSync("git", ["clone", "--quiet", "--no-hardlinks", "--no-local", "--", root, repositoryRoot], {
+    childProcess.execFileSync("git", ["clone", "--quiet", "--depth", "1", "--no-hardlinks", "--no-local", "--", root, repositoryRoot], {
       encoding: "utf8",
       maxBuffer: 32 * 1024 * 1024
     });

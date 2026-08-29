@@ -6,6 +6,12 @@ document, not this Registry and not a copied endpoint. They follow the advertise
 guide, pack-config schema, and OpenAPI before producing request bytes for `/v3/custom-launches`. V1 creation and the
 GitHub submission flow are historical compatibility only.
 
+Robinhood V4 is additive and currently `planned`. Discovery may publish its chain-scoped capabilities, schema and
+OpenAPI pointers, but an agent must not interpret those pointers as write authority. It must require the chain entry
+to be `live` before using `/v4/chains/4663/*`. The
+[V4 admission descriptor](../policy/custom-launch-admission-v4.json) binds that lane to server-selected
+`robinhood-launch-readiness` and `robinhood-production-launch` profiles; no caller-supplied profile is authoritative.
+
 Registry consumers separately start with `registry/index.json` or `registry/search-index.json` at one exact Launch
 Policy commit. They do not crawl project repositories or load every application into context. Registry discovery
 answers what preserved records exist; it is not current API ingress and it is not the source of launch requirements.
@@ -39,6 +45,10 @@ entrypoints only and is not candidate-route coverage.
 
 An API key is read only from `PROGRAMMABLE_API_KEY` or an encrypted secret store. It contains no policy, cannot sign,
 and must never appear in discovery requests, source, prompts, chat, logs, screenshots, or support reports.
+
+For V4, the route chain ID, request chain ID, CAIP-2 identity, deployment descriptor, policy profiles and exact wallet
+transaction must agree. A mismatch fails closed. The public chain entry remains `planned` or `canary` until the
+deployment, provider, finality, Router, read-model, source-verification and public-readiness gates all pass.
 
 ## Required Registry consumer behavior
 

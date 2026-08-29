@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/0xprogrammable/Launch-Policy/actions/workflows/verify.yml"><img src="https://github.com/0xprogrammable/Launch-Policy/actions/workflows/verify.yml/badge.svg?branch=main" alt="Repository verification"></a>
-  <a href="https://github.com/0xprogrammable/Launch-Policy/actions/workflows/codeql.yml"><img src="https://github.com/0xprogrammable/Launch-Policy/actions/workflows/codeql.yml/badge.svg?branch=main" alt="CodeQL analysis"></a>
-  <a href="https://github.com/0xprogrammable/Launch-Policy/releases/latest"><img src="https://img.shields.io/github/v/release/0xprogrammable/Launch-Policy?label=release" alt="Latest release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/0xprogrammable/Launch-Policy" alt="MIT License"></a>
+  <a href="https://github.com/programmablehq/Launch-Policy/actions/workflows/verify.yml"><img src="https://github.com/programmablehq/Launch-Policy/actions/workflows/verify.yml/badge.svg?branch=main" alt="Repository verification"></a>
+  <a href="https://github.com/programmablehq/Launch-Policy/actions/workflows/codeql.yml"><img src="https://github.com/programmablehq/Launch-Policy/actions/workflows/codeql.yml/badge.svg?branch=main" alt="CodeQL analysis"></a>
+  <a href="https://github.com/programmablehq/Launch-Policy/releases/latest"><img src="https://img.shields.io/github/v/release/programmablehq/Launch-Policy?label=release" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/programmablehq/Launch-Policy" alt="MIT License"></a>
 </p>
 
 > [!IMPORTANT]
@@ -60,6 +60,13 @@ pointers exposed by discovery, capabilities, and V3 OpenAPI. This descriptor doe
 add a second business-policy authority: the private Custom Launch API is the sole executable exact-source, static,
 behavior-execution, and Router-simulation evidence authority. A CLI, agent, or client cannot mint an admission receipt.
 
+The separate [Robinhood V4 admission descriptor](policy/custom-launch-admission-v4.json), its
+[schema](policy/schemas/custom-launch-admission-v4.schema.json), and generated
+[digest binding](.programmable/custom-launch-admission.v4.json) define the planned chain-4663 lane without changing
+Ethereum V3 bytes or semantics. Robinhood policy profiles are selected only by the authenticated chain-bound API
+server. A caller cannot select a profile. The descriptor remains `planned` until deployment, provider, finality,
+Router, indexing, source-verification and public-readiness gates pass.
+
 The [complete launch requirements guide](docs/COMPLETE_LAUNCH_REQUIREMENTS.md) maps stable Rule IDs to the current
 request, readiness, and promotion evidence. It explains the rules; it does not create additional requirements.
 
@@ -88,14 +95,17 @@ evidence remains `analysis-pending`. Unknown project types are not rejected mere
 Node.js 24.12 or newer is required.
 
 ```bash
-git clone --depth 1 https://github.com/0xprogrammable/submit-launch.git
-cd submit-launch
+git clone --depth 1 https://github.com/programmablehq/Launch-Policy.git
+cd Launch-Policy
 npm run policy -- validate-policy
 npm run policy -- requirements --profile build
 npm run policy -- requirements --profile launch-readiness
 npm run policy -- binding --profile launch-readiness
+npm run policy -- requirements --profile robinhood-launch-readiness
+npm run policy -- requirements --profile robinhood-production-launch
 npm run policy -- render
 npm run admission:v3 -- --check
+npm run admission:v4
 ```
 
 These commands read the fixed repository-owned policy path, emit deterministic output, and never import or execute
@@ -132,8 +142,8 @@ Pull requests that modify the historical application namespaces fail closed and 
 
 The repository was formerly named `0xprogrammable/submit-launch`. That name remains only in versioned legacy protocol
 identifiers, frozen vendor bytes, historical snapshots, and old provenance links where changing it would rewrite the
-record. Current public links use `0xprogrammable/Launch-Policy`; protected bindings retain the case-normalized machine
-identity `0xprogrammable/launch-policy`.
+record. The current public and protected repository identity is `programmablehq/Launch-Policy`, with the unchanged
+numeric repository ID retaining continuity across the rename.
 
 ## Discovery registry
 
@@ -155,9 +165,9 @@ records.
 
 ## Report a problem
 
-- [Report a non-sensitive policy, checker, schema, or registry problem](https://github.com/0xprogrammable/Launch-Policy/issues/new/choose).
-- [Discuss a policy or architecture idea](https://github.com/0xprogrammable/Launch-Policy/discussions).
-- [Report an exploitable vulnerability privately](https://github.com/0xprogrammable/Launch-Policy/security/advisories/new).
+- [Report a non-sensitive policy, checker, schema, or registry problem](https://github.com/programmablehq/Launch-Policy/issues/new/choose).
+- [Discuss a policy or architecture idea](https://github.com/programmablehq/Launch-Policy/discussions).
+- [Report an exploitable vulnerability privately](https://github.com/programmablehq/Launch-Policy/security/advisories/new).
 
 Launch Policy issues cover policy, checker, schema, Registry, and documentation defects. They do not provide project
 construction, API operation, project approval, wallet authorization, deployment, investment advice, or guaranteed

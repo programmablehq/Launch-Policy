@@ -21,12 +21,24 @@ export const AUTHORITY_OWNERSHIP_MANIFEST_PATH = "policy/launch-policy-authority
 const SCHEMA_VERSION = "programmable.launch-policy-authority-ownership.v1";
 const POLICY_PATH = "policy/launch-policy.v1.json";
 const POLICY_SCHEMA_PATH = "policy/schemas/launch-policy.v1.schema.json";
-const CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_PATH = "policy/custom-launch-admission-v3.json";
-const CUSTOM_LAUNCH_ADMISSION_SCHEMA_PATH = "policy/schemas/custom-launch-admission-v3.schema.json";
-const CUSTOM_LAUNCH_ADMISSION_BINDING_PATH = ".programmable/custom-launch-admission.v3.json";
+const CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_PATHS = Object.freeze([
+  "policy/custom-launch-admission-v3.json",
+  "policy/custom-launch-admission-v4.json"
+]);
+const CUSTOM_LAUNCH_ADMISSION_SCHEMA_PATHS = Object.freeze([
+  "policy/schemas/custom-launch-admission-v3.schema.json",
+  "policy/schemas/custom-launch-admission-v4.schema.json"
+]);
+const CUSTOM_LAUNCH_ADMISSION_BINDING_PATHS = Object.freeze([
+  ".programmable/custom-launch-admission.v3.json",
+  ".programmable/custom-launch-admission.v4.json"
+]);
 const MANIFEST_SCHEMA_PATH = "policy/schemas/launch-policy-authority-ownership.v1.schema.json";
-const REPOSITORY_NAME = "0xprogrammable/launch-policy";
-const LEGACY_REPOSITORY_NAME = "0xprogrammable/submit-launch";
+const REPOSITORY_NAME = "programmablehq/Launch-Policy";
+const LEGACY_REPOSITORY_NAMES = new Set([
+  "0xprogrammable/launch-policy",
+  "0xprogrammable/submit-launch"
+]);
 const REPOSITORY_ID = "1320171831";
 const REPOSITORY_BRANCH = "main";
 const CURRENT_RELEASE_DOCUMENT = "docs/releases/v1.11.0.md";
@@ -108,6 +120,7 @@ const CONTROL_IMPLEMENTATION_PATHS = new Set([
   "scripts/compile-canary-eligibility.mjs",
   "scripts/compile-launch-entitlement.mjs",
   "scripts/custom-launch-admission-v3.mjs",
+  "scripts/custom-launch-admission-v4.mjs",
   "scripts/generate-launch-policy-artifacts.mjs",
   "scripts/launch-policy-authority-ownership.mjs",
   "scripts/launch-policy.mjs",
@@ -359,7 +372,7 @@ function validateManifestShape(manifest, { allowLegacyRepositoryName = false, re
   assertExactKeys(manifest.repository, ["branch", "name", "numericRepositoryId"], "AUTHORITY_OWNERSHIP_MANIFEST_INVALID", "repository");
   if (
     manifest.repository.name !== REPOSITORY_NAME
-    && !(allowLegacyRepositoryName && manifest.repository.name === LEGACY_REPOSITORY_NAME)
+    && !(allowLegacyRepositoryName && LEGACY_REPOSITORY_NAMES.has(manifest.repository.name))
   ) {
     fail("AUTHORITY_OWNERSHIP_REPOSITORY_INVALID", "repository.name is invalid.");
   }
@@ -461,7 +474,7 @@ function validateFileClasses(fileClasses) {
     }
   }
   assertSameStringSet(fileClasses["canonical-admission-policy"], [POLICY_PATH], "AUTHORITY_OWNERSHIP_POLICY_INVALID", "Only the canonical policy may be classified as authored admission policy.");
-  assertSameStringSet(fileClasses["current-admission-disclosure"], [CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_PATH], "AUTHORITY_OWNERSHIP_POLICY_INVALID", "The V3 admission disclosure must remain separate from the canonical business policy.");
+  assertSameStringSet(fileClasses["current-admission-disclosure"], CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_PATHS, "AUTHORITY_OWNERSHIP_POLICY_INVALID", "The V3 and V4 admission disclosures must remain separate from the canonical business policy.");
   assertSameStringSet(fileClasses["authority-ownership-manifest"], [AUTHORITY_OWNERSHIP_MANIFEST_PATH], "AUTHORITY_OWNERSHIP_MANIFEST_INVALID", "The ownership manifest must classify only itself as the ownership manifest.");
   if (!seen.has(MANIFEST_SCHEMA_PATH)) fail("AUTHORITY_OWNERSHIP_SCHEMA_MISSING", "The ownership schema must be in the closed repository inventory.");
 }
@@ -794,14 +807,19 @@ function verifyProjectionOwnership({ manifest, classifiedFiles }) {
       );
     }
   }
-  if (projectionsByPath.get(CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_PATH)?.kind !== "public-contract") {
-    fail("AUTHORITY_OWNERSHIP_PROJECTIONS_INVALID", `${CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_PATH} must remain the public declarative V3 admission contract.`);
-  }
-  if (projectionsByPath.get(CUSTOM_LAUNCH_ADMISSION_SCHEMA_PATH)?.kind !== "public-schema") {
-    fail("AUTHORITY_OWNERSHIP_PROJECTIONS_INVALID", `${CUSTOM_LAUNCH_ADMISSION_SCHEMA_PATH} must remain the public V3 admission schema.`);
-  }
-  if (projectionsByPath.get(CUSTOM_LAUNCH_ADMISSION_BINDING_PATH)?.kind !== "generated-discovery") {
-    fail("AUTHORITY_OWNERSHIP_PROJECTIONS_INVALID", `${CUSTOM_LAUNCH_ADMISSION_BINDING_PATH} must remain the generated V3 admission digest binding.`);
+  for (const [index, descriptorPath] of CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_PATHS.entries()) {
+    const version = index + 3;
+    const schemaPath = CUSTOM_LAUNCH_ADMISSION_SCHEMA_PATHS[index];
+    const bindingPath = CUSTOM_LAUNCH_ADMISSION_BINDING_PATHS[index];
+    if (projectionsByPath.get(descriptorPath)?.kind !== "public-contract") {
+      fail("AUTHORITY_OWNERSHIP_PROJECTIONS_INVALID", `${descriptorPath} must remain the public declarative V${version} admission contract.`);
+    }
+    if (projectionsByPath.get(schemaPath)?.kind !== "public-schema") {
+      fail("AUTHORITY_OWNERSHIP_PROJECTIONS_INVALID", `${schemaPath} must remain the public V${version} admission schema.`);
+    }
+    if (projectionsByPath.get(bindingPath)?.kind !== "generated-discovery") {
+      fail("AUTHORITY_OWNERSHIP_PROJECTIONS_INVALID", `${bindingPath} must remain the generated V${version} admission digest binding.`);
+    }
   }
   for (const entrypointPath of manifest.orchestrationEntrypoints) {
     if (!classified.has(entrypointPath)) fail("AUTHORITY_OWNERSHIP_ORCHESTRATION_INVALID", `${entrypointPath} is not in the closed file inventory.`);

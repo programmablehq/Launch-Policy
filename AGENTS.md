@@ -13,6 +13,11 @@ Launch requests use the Custom Launch API; repository pull requests are maintena
   hard-block finding rules, evidence-bound codes, evidence duties, and false claim boundaries. It does not execute
   admission, authorize a launch, or own Router/fee business rules. `.programmable/custom-launch-admission.v3.json` is
   its generated digest and cross-projection contract.
+- `policy/custom-launch-admission-v4.json` is the separate Robinhood V4 declarative contract. It preserves the V3
+  contract, binds chain 4663 to server-selected `robinhood-launch-readiness` and
+  `robinhood-production-launch` profiles, and remains planned or canary until the production gates pass.
+  `.programmable/custom-launch-admission.v4.json` is its generated policy and descriptor binding. A client cannot
+  select either Robinhood policy profile.
 - The private Custom Launch API exact-source/runtime scanner, platform-owned behavior executor, and Router simulation
   are the sole executable admission-evidence authorities. Their public hard-block IDs and evidence duties must remain
   projected by the V3 descriptor, discovery, capabilities, and OpenAPI. Profile `3.3.0` remains current. Candidate

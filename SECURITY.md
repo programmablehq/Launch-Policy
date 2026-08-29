@@ -3,7 +3,7 @@
 ## Report privately
 
 Report security-sensitive findings through [GitHub private vulnerability
-reporting](https://github.com/0xprogrammable/Launch-Policy/security/advisories/new). Do not open a public issue for a legacy
+reporting](https://github.com/programmablehq/Launch-Policy/security/advisories/new). Do not open a public issue for a legacy
 validator bypass, path-confusion defect, source-binding failure, registry-integrity problem, prompt-injection path, credential
 exposure, or unpublished exploit.
 

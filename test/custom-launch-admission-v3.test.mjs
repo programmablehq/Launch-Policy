@@ -196,7 +196,7 @@ test("generated V3 binding pins the business policy, descriptor, and every publi
   const expectedDescriptorDigest = `sha256:${crypto.createHash("sha256").update(descriptorSource).digest("hex")}`;
   assert.equal(binding.descriptor.sha256, expectedDescriptorDigest);
   assert.match(binding.businessPolicy.sha256, /^sha256:[0-9a-f]{64}$/u);
-  assert.equal(binding.businessPolicy.policyVersion, "2.3.0");
+  assert.equal(binding.businessPolicy.policyVersion, "2.4.0");
   assert.deepEqual(binding.profile, descriptor.profile);
   assert.deepEqual(binding.candidateProfile, descriptor.candidateProfile);
   assert.equal(binding.projections.length, 3);

@@ -90,6 +90,12 @@ test("generated Markdown and active contract are byte-exact projections", () => 
       descriptorSha256: JSON.parse(read(".programmable/custom-launch-admission.v3.json")).descriptor.sha256,
       ok: true
     },
+    customLaunchAdmissionV4: {
+      descriptorSha256: JSON.parse(read(".programmable/custom-launch-admission.v4.json")).descriptor.sha256,
+      ok: true,
+      path: ".programmable/custom-launch-admission.v4.json",
+      policySha256: record.sha256
+    },
     policyPath: "policy/launch-policy.v1.json",
     policySha256: record.sha256,
     renderedPolicyPath: "docs/LAUNCH_POLICY.md"
@@ -105,6 +111,8 @@ test("generated-artifact verifier fails closed on stale bytes", (t) => {
     ...Object.values(ACTIVE_CONTRACT_ROLE_PATHS_V1).flat(),
     ...Object.values(ACTIVE_CONTRACT_ROLE_PATHS_V2).flat(),
     "policy/custom-launch-admission-v3.json",
+    "policy/custom-launch-admission-v4.json",
+    "policy/schemas/custom-launch-admission-v4.schema.json",
     "vendor/programmable-applicant-validator/scripts/evm-encoding-core.mjs",
     "vendor/programmable-v4-hook-builder/scripts/github-public-source-lossless-json.mjs"
   ]);
@@ -212,7 +220,7 @@ test("binding CLI binds the fixed Git policy for readiness and non-authorizing p
   const result = run(["binding", "--profile", "launch-readiness"]);
   assert.equal(result.status, 0, result.stderr);
   const binding = parseCanonicalOutput(result);
-  assert.equal(binding.repository, "0xprogrammable/launch-policy");
+  assert.equal(binding.repository, "programmablehq/Launch-Policy");
   assert.equal(binding.numericRepositoryId, "1320171831");
   assert.equal(binding.baseCommit, childProcess.execFileSync("git", ["rev-parse", "HEAD^{commit}"], { cwd: root, encoding: "utf8" }).trim());
   assert.equal(binding.path, "policy/launch-policy.v1.json");

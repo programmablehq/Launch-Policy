@@ -9,11 +9,13 @@ import { ruleHandlersForPolicyVersion } from "./launch-policy-handlers.mjs";
 
 const MAXIMUM_POLICY_BYTES = 512 * 1024;
 const POLICY_PATH = "policy/launch-policy.v1.json";
-const REPOSITORY = "0xprogrammable/launch-policy";
-const LEGACY_REPOSITORY = "0xprogrammable/submit-launch";
+const REPOSITORY = "programmablehq/Launch-Policy";
+const LEGACY_REPOSITORIES = new Set([
+  "0xprogrammable/launch-policy",
+  "0xprogrammable/submit-launch"
+]);
 const NUMERIC_REPOSITORY_ID = "1320171831";
-const REPOSITORY_REMOTE = "https://github.com/0xprogrammable/launch-policy.git";
-const CURRENT_REPOSITORY_REMOTE = "https://github.com/programmablehq/Launch-Policy.git";
+const REPOSITORY_REMOTE = "https://github.com/programmablehq/Launch-Policy.git";
 const POLICY_SCHEMA_VERSION = "programmable.launch-policy.v1";
 const BINDING_SCHEMA_VERSION = "programmable.launch-policy-binding.v1";
 const OBJECT_ID = /^[0-9a-f]{40}$/u;
@@ -72,7 +74,8 @@ export function validateLaunchPolicy(policy) {
   requirePlainObject(policy.repository, "policy.repository");
   exactKeys(policy.repository, ["branch", "name", "numericRepositoryId", "path"], "policy.repository");
   if (
-    ![REPOSITORY, LEGACY_REPOSITORY].includes(policy.repository.name)
+    (policy.repository.name !== REPOSITORY
+      && !LEGACY_REPOSITORIES.has(policy.repository.name))
     || policy.repository.numericRepositoryId !== NUMERIC_REPOSITORY_ID
     || policy.repository.branch !== "main"
     || policy.repository.path !== POLICY_PATH
@@ -302,6 +305,15 @@ function validateProfiles(profiles, policyVersion) {
     ? ["build", "production-launch", "workflow-canary"]
     : new Set(["2.0.0", "2.1.0", "2.2.0", "2.3.0"]).has(policyVersion)
       ? ["build", "launch-readiness", "production-launch", "workflow-canary"]
+      : policyVersion === "2.4.0"
+        ? [
+          "build",
+          "launch-readiness",
+          "production-launch",
+          "robinhood-launch-readiness",
+          "robinhood-production-launch",
+          "workflow-canary"
+        ]
       : null;
   if (expectedProfileIds === null) {
     fail("LAUNCH_POLICY_IDENTITY_INVALID", `Policy version ${policyVersion} is unsupported.`);
@@ -315,24 +327,31 @@ function validateProfiles(profiles, policyVersion) {
   }
   for (const profile of profiles) {
     requirePlainObject(profile, `profile ${profile?.id ?? "unknown"}`);
-    exactKeys(profile, ["authority", "enabled", "id", "outcome"], `profile ${profile.id}`);
+    const robinhood = profile.id === "robinhood-launch-readiness"
+      || profile.id === "robinhood-production-launch";
+    exactKeys(
+      profile,
+      robinhood ? ["authority", "enabled", "id", "outcome", "selection"] : ["authority", "enabled", "id", "outcome"],
+      `profile ${profile.id}`
+    );
     if (!PROFILE_ID.test(profile.id) || typeof profile.enabled !== "boolean") fail("LAUNCH_POLICY_PROFILE_INVALID", `Profile ${profile.id} is invalid.`);
     requirePlainObject(profile.authority, `profile ${profile.id}.authority`);
     exactKeys(profile.authority, ["checkerOnly", "independentAudit", "launchAuthorized", "productionDiscoveryAllowed", "publicRoutingAllowed", "realUserFundsAllowed"], `profile ${profile.id}.authority`);
     if (Object.values(profile.authority).some((value) => typeof value !== "boolean")) fail("LAUNCH_POLICY_AUTHORITY_INVALID", `Profile ${profile.id} authority flags must be boolean.`);
     if (profile.authority.launchAuthorized || profile.authority.independentAudit) fail("LAUNCH_POLICY_AUTHORITY_INVALID", `Profile ${profile.id} cannot confer launch or audit authority.`);
+    if (robinhood) validateRobinhoodProfileSelection(profile);
   }
   const build = profiles[0];
   const readiness = legacy ? null : profiles[1];
   const production = profiles[legacy ? 1 : 2];
-  const canary = profiles[legacy ? 2 : 3];
+  const canary = profiles[legacy ? 2 : policyVersion === "2.4.0" ? 5 : 3];
   if (!build.enabled || build.outcome !== "BUILT_NOT_REVIEWED") fail("LAUNCH_POLICY_PROFILE_INVALID", "Build profile outcome is invalid.");
   if (!closedAuthority(build.authority, true)) fail("LAUNCH_POLICY_AUTHORITY_INVALID", "Build authority must remain checker-only and non-production.");
   if (!legacy) {
     if (!readiness.enabled || readiness.outcome !== "LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED") fail("LAUNCH_POLICY_PROFILE_INVALID", "Launch-readiness profile outcome is invalid.");
     if (!closedAuthority(readiness.authority, true)) fail("LAUNCH_POLICY_AUTHORITY_INVALID", "Launch-readiness authority must remain checker-only and non-production.");
   }
-  if (new Set(["2.2.0", "2.3.0"]).has(policyVersion)) {
+  if (new Set(["2.2.0", "2.3.0", "2.4.0"]).has(policyVersion)) {
     if (!production.enabled || production.outcome !== "PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED") {
       fail("LAUNCH_POLICY_PROFILE_INVALID", "Production requirements must be enabled with the non-authorizing outcome.");
     }
@@ -345,6 +364,37 @@ function validateProfiles(profiles, policyVersion) {
   }
   if (!canary.enabled || canary.outcome !== "CANARY_WORKFLOW_PASSED") fail("LAUNCH_POLICY_PROFILE_INVALID", "Workflow canary outcome is invalid.");
   if (!closedAuthority(canary.authority, true)) fail("LAUNCH_POLICY_AUTHORITY_INVALID", "Workflow canary authority must remain checker-only and non-production.");
+
+  if (policyVersion === "2.4.0") {
+    const readiness = profiles[3];
+    const production = profiles[4];
+    if (!readiness.enabled || readiness.outcome !== "ROBINHOOD_LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED") {
+      fail("LAUNCH_POLICY_PROFILE_INVALID", "Robinhood launch-readiness must remain enabled and non-authorizing.");
+    }
+    if (!production.enabled || production.outcome !== "ROBINHOOD_PRODUCTION_REQUIREMENTS_CHECKED_NOT_AUTHORIZED") {
+      fail("LAUNCH_POLICY_PROFILE_INVALID", "Robinhood production requirements must remain enabled and non-authorizing.");
+    }
+    if (!closedAuthority(readiness.authority, true) || !closedAuthority(production.authority, true)) {
+      fail("LAUNCH_POLICY_AUTHORITY_INVALID", "Robinhood profiles may check policy but cannot confer launch authority.");
+    }
+  }
+}
+
+function validateRobinhoodProfileSelection(profile) {
+  requirePlainObject(profile.selection, `profile ${profile.id}.selection`);
+  exactKeys(
+    profile.selection,
+    ["authenticatedRequestRequired", "chainId", "clientSelectable", "selectedBy"],
+    `profile ${profile.id}.selection`
+  );
+  if (
+    profile.selection.authenticatedRequestRequired !== true
+    || profile.selection.chainId !== 4663
+    || profile.selection.clientSelectable !== false
+    || profile.selection.selectedBy !== "api-server-chain-binding"
+  ) {
+    fail("LAUNCH_POLICY_PROFILE_INVALID", `${profile.id} must be selected only by the authenticated chain-bound API server.`);
+  }
 }
 
 function validateRules(rules, profiles) {
@@ -519,10 +569,10 @@ function normalizeRemote(remote) {
   const trimmed = remote.trim().replace(/\/$/u, "");
   const canonicalCandidate = trimmed.toLowerCase();
   if (canonicalCandidate === "git@github.com:programmablehq/launch-policy.git") return REPOSITORY_REMOTE;
-  if (canonicalCandidate === CURRENT_REPOSITORY_REMOTE.toLowerCase()) return REPOSITORY_REMOTE;
+  if (canonicalCandidate === REPOSITORY_REMOTE.toLowerCase()) return REPOSITORY_REMOTE;
   if (canonicalCandidate === "https://github.com/programmablehq/launch-policy") return REPOSITORY_REMOTE;
   if (canonicalCandidate === "git@github.com:0xprogrammable/launch-policy.git") return REPOSITORY_REMOTE;
-  if (canonicalCandidate === REPOSITORY_REMOTE) return REPOSITORY_REMOTE;
+  if (canonicalCandidate === "https://github.com/0xprogrammable/launch-policy.git") return REPOSITORY_REMOTE;
   if (canonicalCandidate === "https://github.com/0xprogrammable/launch-policy") return REPOSITORY_REMOTE;
   if (trimmed === "git@github.com:0xprogrammable/submit-launch.git") return REPOSITORY_REMOTE;
   if (trimmed === "https://github.com/0xprogrammable/submit-launch.git") return REPOSITORY_REMOTE;

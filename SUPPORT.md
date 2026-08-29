@@ -1,10 +1,10 @@
 # Support
 
-Use the [issue chooser](https://github.com/0xprogrammable/Launch-Policy/issues/new/choose) for reproducible checker defects,
+Use the [issue chooser](https://github.com/programmablehq/Launch-Policy/issues/new/choose) for reproducible checker defects,
 review-rule gaps, legacy-validation failures, registry or schema problems, and documentation errors. Include the affected Launch Policy
 release or commit, exact command, sanitized output, and a minimal public reproduction when possible.
 
-Use [Launch Policy Discussions](https://github.com/0xprogrammable/Launch-Policy/discussions) for architecture questions and unfamiliar
+Use [Launch Policy Discussions](https://github.com/programmablehq/Launch-Policy/discussions) for architecture questions and unfamiliar
 product ideas. Novelty is not a security report and not a reason to force an idea into an existing template.
 
 For current launch and API usage, start at the public
@@ -15,7 +15,7 @@ For current launch and API usage, start at the public
 `POST https://api.programmable.market/v3/custom-launches`. V1 creation is historical read-only compatibility and
 returns non-retryable `409 CUSTOM_LAUNCH_V1_READ_ONLY`.
 
-Use [private vulnerability reporting](https://github.com/0xprogrammable/Launch-Policy/security/advisories/new) for
+Use [private vulnerability reporting](https://github.com/programmablehq/Launch-Policy/security/advisories/new) for
 security-sensitive findings. Do not post wallet material, credentials, private repositories, personal data, or
 unannounced vulnerabilities in public issues.
 
