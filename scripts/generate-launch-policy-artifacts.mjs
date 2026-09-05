@@ -26,6 +26,13 @@ import {
   verifyCustomLaunchAdmissionBindingV4
 } from "./custom-launch-admission-v4-core.mjs";
 import {
+  CUSTOM_LAUNCH_ADMISSION_BINDING_V41_PATH,
+  CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_V41_SCHEMA_PATH,
+  buildCustomLaunchAdmissionBindingV41,
+  buildCustomLaunchAdmissionSchemaV41,
+  verifyCustomLaunchAdmissionBindingV41
+} from "./custom-launch-admission-v4.1-core.mjs";
+import {
   canonicalJson,
   parseLaunchPolicyBytes,
   renderLaunchPolicyMarkdown
@@ -97,6 +104,8 @@ const GENERATED_PATHS = Object.freeze([
   APPLICANT_COMPATIBILITY_V2_PATH,
   CUSTOM_LAUNCH_ADMISSION_BINDING_V3_PATH,
   CUSTOM_LAUNCH_ADMISSION_BINDING_V4_PATH,
+  CUSTOM_LAUNCH_ADMISSION_BINDING_V41_PATH,
+  CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_V41_SCHEMA_PATH,
   RENDERED_POLICY_PATH,
   ACTIVE_CONTRACT_PATH,
   ACTIVE_CONTRACT_V2_PATH
@@ -164,6 +173,8 @@ function buildArtifactState(repositoryRoot) {
       [APPLICANT_COMPATIBILITY_V2_PATH, applicantCompatibilityV2Source],
       [CUSTOM_LAUNCH_ADMISSION_BINDING_V3_PATH, customLaunchAdmissionBindingV3Source],
       [CUSTOM_LAUNCH_ADMISSION_BINDING_V4_PATH, customLaunchAdmissionBindingV4Source],
+      [CUSTOM_LAUNCH_ADMISSION_BINDING_V41_PATH, `${canonicalJson(buildCustomLaunchAdmissionBindingV41({ repositoryRoot }))}\n`],
+      [CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_V41_SCHEMA_PATH, `${canonicalJson(buildCustomLaunchAdmissionSchemaV41({ repositoryRoot }))}\n`],
       [RENDERED_POLICY_PATH, renderLaunchPolicyMarkdown(policyRecord)],
       [ACTIVE_CONTRACT_V2_PATH, activeContractV2Source],
       [ACTIVE_CONTRACT_PATH, `${canonicalJson(activeContractV1)}\n`]
@@ -200,6 +211,7 @@ export function verifyLaunchPolicyArtifacts(options) {
     activeContractPath: ACTIVE_CONTRACT_PATH,
     customLaunchAdmission: verifyCustomLaunchAdmissionBindingV3({ repositoryRoot }),
     customLaunchAdmissionV4: verifyCustomLaunchAdmissionBindingV4({ repositoryRoot }),
+    customLaunchAdmissionV41: verifyCustomLaunchAdmissionBindingV41({ repositoryRoot }),
     policyPath: POLICY_PATH,
     policySha256: policyRecord.sha256,
     renderedPolicyPath: RENDERED_POLICY_PATH

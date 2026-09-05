@@ -6,8 +6,11 @@ Launch requests use the Custom Launch API; repository pull requests are maintena
 
 ## Authority boundaries
 
-- `policy/launch-policy.v1.json` is the only authored source of current Programmable Router, fee, and promotion business
-  obligations. Reviewers, workflows, agents, and Website consumers may bind and evaluate it; they may not add private
+- `policy/launch-policy.v1.json` owns the preserved shared Router, fee, and promotion business obligations.
+  `policy/robinhood-custom-launch-economics-v1.json` is the sole authored successor fee source for fresh Robinhood
+  chain 4663 profile 4.1 launches. It inherits the existing Robinhood obligations except its explicitly superseded
+  fee-certification rule. Existing profiles, launches, and other chains keep their exact policy bytes. Reviewers,
+  workflows, agents, and Website consumers may bind and evaluate these scoped sources; they may not add private
   business requirements.
 - `policy/custom-launch-admission-v3.json` is the separate public declarative contract for the current V3 profile,
   hard-block finding rules, evidence-bound codes, evidence duties, and false claim boundaries. It does not execute
@@ -18,6 +21,10 @@ Launch requests use the Custom Launch API; repository pull requests are maintena
   `robinhood-production-launch` profiles, and remains planned or canary until the production gates pass.
   `.programmable/custom-launch-admission.v4.json` is its generated policy and descriptor binding. A client cannot
   select either Robinhood policy profile.
+- `policy/custom-launch-admission-v4.1.json` binds the candidate 4.1 profile to the scoped Robinhood economics
+  source. Its schema and `.programmable/custom-launch-admission.v4.1.json` are generated exact projections.
+  Publication alone cannot activate it: the protected backend, client, source, provider and per-launch fee proofs
+  must match. A missing proof is not evidence that a novel architecture is unsafe.
 - The private Custom Launch API exact-source/runtime scanner, platform-owned behavior executor, and Router simulation
   are the sole executable admission-evidence authorities. Their public hard-block IDs and evidence duties must remain
   projected by the V3 descriptor, discovery, capabilities, and OpenAPI. Profile `3.3.0` remains current. Candidate

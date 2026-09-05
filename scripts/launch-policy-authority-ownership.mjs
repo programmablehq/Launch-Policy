@@ -20,18 +20,22 @@ export const AUTHORITY_OWNERSHIP_MANIFEST_PATH = "policy/launch-policy-authority
 
 const SCHEMA_VERSION = "programmable.launch-policy-authority-ownership.v1";
 const POLICY_PATH = "policy/launch-policy.v1.json";
+const ROBINHOOD_ECONOMICS_POLICY_PATH = "policy/robinhood-custom-launch-economics-v1.json";
 const POLICY_SCHEMA_PATH = "policy/schemas/launch-policy.v1.schema.json";
 const CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_PATHS = Object.freeze([
   "policy/custom-launch-admission-v3.json",
-  "policy/custom-launch-admission-v4.json"
+  "policy/custom-launch-admission-v4.json",
+  "policy/custom-launch-admission-v4.1.json"
 ]);
 const CUSTOM_LAUNCH_ADMISSION_SCHEMA_PATHS = Object.freeze([
   "policy/schemas/custom-launch-admission-v3.schema.json",
-  "policy/schemas/custom-launch-admission-v4.schema.json"
+  "policy/schemas/custom-launch-admission-v4.schema.json",
+  "policy/schemas/custom-launch-admission-v4.1.schema.json"
 ]);
 const CUSTOM_LAUNCH_ADMISSION_BINDING_PATHS = Object.freeze([
   ".programmable/custom-launch-admission.v3.json",
-  ".programmable/custom-launch-admission.v4.json"
+  ".programmable/custom-launch-admission.v4.json",
+  ".programmable/custom-launch-admission.v4.1.json"
 ]);
 const MANIFEST_SCHEMA_PATH = "policy/schemas/launch-policy-authority-ownership.v1.schema.json";
 const REPOSITORY_NAME = "programmablehq/Launch-Policy";
@@ -121,6 +125,7 @@ const CONTROL_IMPLEMENTATION_PATHS = new Set([
   "scripts/compile-launch-entitlement.mjs",
   "scripts/custom-launch-admission-v3.mjs",
   "scripts/custom-launch-admission-v4.mjs",
+  "scripts/custom-launch-admission-v4.1-core.mjs",
   "scripts/generate-launch-policy-artifacts.mjs",
   "scripts/launch-policy-authority-ownership.mjs",
   "scripts/launch-policy.mjs",
@@ -473,8 +478,8 @@ function validateFileClasses(fileClasses) {
       seen.add(relativePath);
     }
   }
-  assertSameStringSet(fileClasses["canonical-admission-policy"], [POLICY_PATH], "AUTHORITY_OWNERSHIP_POLICY_INVALID", "Only the canonical policy may be classified as authored admission policy.");
-  assertSameStringSet(fileClasses["current-admission-disclosure"], CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_PATHS, "AUTHORITY_OWNERSHIP_POLICY_INVALID", "The V3 and V4 admission disclosures must remain separate from the canonical business policy.");
+  assertSameStringSet(fileClasses["canonical-admission-policy"], [POLICY_PATH, ROBINHOOD_ECONOMICS_POLICY_PATH], "AUTHORITY_OWNERSHIP_POLICY_INVALID", "Only the canonical policy and scoped Robinhood 4.1 economics policy may author business requirements.");
+  assertSameStringSet(fileClasses["current-admission-disclosure"], CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_PATHS, "AUTHORITY_OWNERSHIP_POLICY_INVALID", "The versioned admission disclosures must remain separate from the canonical business policy.");
   assertSameStringSet(fileClasses["authority-ownership-manifest"], [AUTHORITY_OWNERSHIP_MANIFEST_PATH], "AUTHORITY_OWNERSHIP_MANIFEST_INVALID", "The ownership manifest must classify only itself as the ownership manifest.");
   if (!seen.has(MANIFEST_SCHEMA_PATH)) fail("AUTHORITY_OWNERSHIP_SCHEMA_MISSING", "The ownership schema must be in the closed repository inventory.");
 }
@@ -808,7 +813,7 @@ function verifyProjectionOwnership({ manifest, classifiedFiles }) {
     }
   }
   for (const [index, descriptorPath] of CUSTOM_LAUNCH_ADMISSION_DESCRIPTOR_PATHS.entries()) {
-    const version = index + 3;
+    const version = ["3", "4", "4.1"][index];
     const schemaPath = CUSTOM_LAUNCH_ADMISSION_SCHEMA_PATHS[index];
     const bindingPath = CUSTOM_LAUNCH_ADMISSION_BINDING_PATHS[index];
     if (projectionsByPath.get(descriptorPath)?.kind !== "public-contract") {

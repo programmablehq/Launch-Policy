@@ -96,6 +96,14 @@ test("generated Markdown and active contract are byte-exact projections", () => 
       path: ".programmable/custom-launch-admission.v4.json",
       policySha256: record.sha256
     },
+    customLaunchAdmissionV41: {
+      descriptorSha256: digest("policy/custom-launch-admission-v4.1.json"),
+      policySha256: digest("policy/robinhood-custom-launch-economics-v1.json"),
+      schemaSha256: digest("policy/schemas/custom-launch-admission-v4.1.schema.json"),
+      bindingSha256: digest(".programmable/custom-launch-admission.v4.1.json"),
+      ok: true,
+      path: ".programmable/custom-launch-admission.v4.1.json"
+    },
     policyPath: "policy/launch-policy.v1.json",
     policySha256: record.sha256,
     renderedPolicyPath: "docs/LAUNCH_POLICY.md"
@@ -112,6 +120,9 @@ test("generated-artifact verifier fails closed on stale bytes", (t) => {
     ...Object.values(ACTIVE_CONTRACT_ROLE_PATHS_V2).flat(),
     "policy/custom-launch-admission-v3.json",
     "policy/custom-launch-admission-v4.json",
+    "policy/custom-launch-admission-v4.1.json",
+    "policy/robinhood-custom-launch-economics-v1.json",
+    "policy/schemas/custom-launch-admission-v4.1.schema.json",
     "policy/schemas/custom-launch-admission-v4.schema.json",
     "vendor/programmable-applicant-validator/scripts/evm-encoding-core.mjs",
     "vendor/programmable-v4-hook-builder/scripts/github-public-source-lossless-json.mjs"

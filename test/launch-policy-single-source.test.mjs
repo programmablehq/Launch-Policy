@@ -43,9 +43,10 @@ test("the closed ownership manifest separates business-policy authority from the
     ok: true,
     rules: manifest.semanticRuleMap.length
   });
-  assert.deepEqual(manifest.fileClasses["canonical-admission-policy"], [canonicalPolicyPath]);
+  assert.deepEqual(manifest.fileClasses["canonical-admission-policy"], [canonicalPolicyPath, "policy/robinhood-custom-launch-economics-v1.json"]);
   assert.deepEqual(manifest.fileClasses["current-admission-disclosure"], [
     "policy/custom-launch-admission-v3.json",
+    "policy/custom-launch-admission-v4.1.json",
     "policy/custom-launch-admission-v4.json"
   ]);
   assert.deepEqual(manifest.fileClasses["authority-ownership-manifest"], [AUTHORITY_OWNERSHIP_MANIFEST_PATH]);
@@ -529,7 +530,9 @@ test("public docs separate the current API flow from historical GitHub eligibili
   assert.doesNotMatch(agents + architecture + lifecycle, /complete current launch contract|current full application package|new or existing compatibility draft|New V3\.2 revisions|may enter only as an unreviewed draft|must use Application V3\.2/u);
   assert.match(beta, /GitHub launch intake is closed/u);
   assert.match(beta, /No contract in that list opens GitHub intake/u);
-  assert.match(agents, /only authored source of current Programmable Router, fee, and promotion business\s+obligations/u);
+  assert.match(agents, /owns the preserved shared Router, fee, and promotion business obligations/u);
+  assert.match(agents, /robinhood-custom-launch-economics-v1\.json` is the sole authored successor fee source for fresh Robinhood\s+chain 4663 profile 4\.1 launches/u);
+  assert.match(agents, /Existing profiles, launches, and other chains keep their exact policy bytes/u);
   assert.match(agents, /separate public declarative contract for the current V3 profile/u);
   assert.match(agents, /private Custom Launch API exact-source\/runtime scanner, platform-owned behavior executor, and Router simulation\s+are the sole executable admission-evidence authorities/u);
   assert.match(readme, /request-bound policy obligation for the 10 bps Programmable share/u);
