@@ -64,7 +64,7 @@ export function validateRobinhoodEconomicsPolicyV1(policy) {
   equal(policy.firstBuy.requiredForEveryFreshLaunch, true, "required initial buy");
   equal(policy.firstBuy.requiredFundingMode, "wallet-transaction-value", "funded first buy");
   equal(policy.firstBuy.minimumUsd, "1.00", "minimum initial buy USD");
-  equal(policy.firstBuy.nativeAmountField, "fundingPlan.initialBuyWei", "initial buy allocation");
+  equal(policy.firstBuy.nativeAmountField, "fundingPlan.nativeAllocations.initialBuyWei", "initial buy allocation");
   equal(policy.firstBuy.nativeAllocationCount, 1, "no double-counted initial buy");
   equal(policy.firstBuy.atomicWithLaunch, true, "atomic first buy");
   equal(policy.firstBuy.successfulProtectedSimulationRequired, true, "executed first-buy simulation");
@@ -73,7 +73,10 @@ export function validateRobinhoodEconomicsPolicyV1(policy) {
   equal(policy.firstBuy.boundMinimumTokenOutputRequired, true, "bound minimum output");
   equal(policy.firstBuy.minimumTokenOutputMustBePositive, true, "positive minimum output");
   equal(policy.firstBuy.clientPriceAssertionsAccepted, false, "server price authority");
-  equal(policy.firstBuy.freshQuoteRequiredBeforePermitSigning, true, "fresh pre-sign quote");
+  equal(policy.firstBuy.sameQuoteFreshnessRequiredBeforePermitSigning, true, "fresh pre-sign quote");
+  equal(policy.firstBuy.quoteLinkedToLaunchIntentThroughAdmissionReceipt, true, "server quote receipt linkage");
+  equal(policy.firstBuy.expiredQuoteAbortsAuthorization, true, "expired quote abort");
+  equal(policy.firstBuy.silentQuoteReplacementAllowed, false, "no silent quote replacement");
   equal(policy.firstBuy.executionTimeUsdValueGuaranteed, false, "quote-time boundary");
   equal(policy.firstBuy.externalChartOrIndexingGuaranteed, false, "external-index boundary");
   const reference = policy.firstBuy.priceReference;
