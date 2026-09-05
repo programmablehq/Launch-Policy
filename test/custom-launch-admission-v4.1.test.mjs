@@ -75,12 +75,39 @@ test("fee scope is four quadrants, alternate routers and separate backed claims"
   assert.equal(policy.value.platformFee.feeBps/policy.value.platformFee.denominator*2_000_000,4000);
 });
 
+test("first buy requires atomic funded execution and a fresh server-owned USD reference", () => {
+  const firstBuy=policy.value.firstBuy;
+  assert.equal(firstBuy.requiredForEveryFreshLaunch,true);
+  assert.equal(firstBuy.minimumUsd,"1.00");
+  assert.equal(firstBuy.nativeAllocationCount,1);
+  assert.equal(firstBuy.recipient,"bound-launch-controller");
+  assert.equal(firstBuy.executionTimeUsdValueGuaranteed,false);
+  assert.equal(firstBuy.externalChartOrIndexingGuaranteed,false);
+  for(const mutate of [
+    x=>x.firstBuy.requiredForEveryFreshLaunch=false,
+    x=>x.firstBuy.minimumUsd="0.01",
+    x=>x.firstBuy.atomicWithLaunch=false,
+    x=>x.firstBuy.actualTokenOutputMustBePositive=false,
+    x=>x.firstBuy.boundMinimumTokenOutputRequired=false,
+    x=>x.firstBuy.clientPriceAssertionsAccepted=true,
+    x=>x.firstBuy.freshQuoteRequiredBeforePermitSigning=false,
+    x=>x.firstBuy.priceReference.sourceChainId="4663",
+    x=>x.firstBuy.priceReference.decimals=18,
+    x=>x.firstBuy.priceReference.independentProvidersRequired=1,
+    x=>x.firstBuy.priceReference.sameRoundAndAnswerRequired=false,
+    x=>x.firstBuy.priceReference.maximumSourceBlockAgeSeconds=121,
+    x=>x.firstBuy.priceReference.maximumRoundAgeSeconds=7201,
+    x=>x.firstBuy.priceReference.maximumQuoteAgeSeconds=61,
+    x=>x.firstBuy.priceReference.providerFailureOrDisagreementBlocksAuthorization=false,
+  ]){const x=structuredClone(policy.value);mutate(x);assert.equal(validatePolicySchema(x),false);assert.throws(()=>validateRobinhoodEconomicsPolicyV1(x));}
+});
+
 test("duplicate JSON and inherited source drift fail closed before producing a binding", t => {
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(),"rh41-policy-"));
   t.after(()=>fs.rmSync(temporary,{recursive:true,force:true}));
   for(const p of [policyPath,descriptorPath,"policy/launch-policy.v1.json"]){const target=path.join(temporary,p);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,read(p));}
   const target=path.join(temporary,policyPath);
-  fs.writeFileSync(target,policy.source.replace('"policyVersion":"1.0.0"','"policyVersion":"1.0.0","policyVersion":"1.0.0"'));
+  fs.writeFileSync(target,policy.source.replace('"policyVersion":"1.1.0"','"policyVersion":"1.1.0","policyVersion":"1.1.0"'));
   assert.throws(()=>readCustomLaunchAdmissionV41Sources({repositoryRoot:temporary}));
   fs.writeFileSync(target,policy.source);
   const inherited=JSON.parse(read("policy/launch-policy.v1.json"));inherited.policyVersion="2.4.1";

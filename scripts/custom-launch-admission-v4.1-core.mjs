@@ -31,9 +31,9 @@ export function readCustomLaunchAdmissionV41Sources({ repositoryRoot }) {
 }
 
 export function validateRobinhoodEconomicsPolicyV1(policy) {
-  exactKeys(policy, ["accounting", "activation", "authority", "claims", "conformance", "custody", "flexibility", "fundingPlan", "inheritedPolicy", "platformFee", "policyId", "policyVersion", "repository", "schemaVersion", "scope"], "economics policy");
+  exactKeys(policy, ["accounting", "activation", "authority", "claims", "conformance", "custody", "flexibility", "firstBuy", "fundingPlan", "inheritedPolicy", "platformFee", "policyId", "policyVersion", "repository", "schemaVersion", "scope"], "economics policy");
   equal(policy.schemaVersion, "programmable.robinhood-custom-launch-economics.v1", "economics schema");
-  equal(policy.policyVersion, "1.0.0", "economics version");
+  equal(policy.policyVersion, "1.1.0", "economics version");
   equal(policy.repository.path, ROBINHOOD_ECONOMICS_POLICY_V1_PATH, "economics path");
   equal(policy.scope.chainId, "4663", "economics chain");
   equal(policy.scope.caip2, "eip155:4663", "economics CAIP-2");
@@ -61,19 +61,54 @@ export function validateRobinhoodEconomicsPolicyV1(policy) {
   equal(policy.fundingPlan.schemaVersion, "programmable.robinhood-funding-plan.v1", "funding plan schema");
   equal(policy.fundingPlan.required, true, "required funding plan");
   equal(policy.fundingPlan.buildOnlyCannotCreate, true, "build-only launch boundary");
+  equal(policy.firstBuy.requiredForEveryFreshLaunch, true, "required initial buy");
+  equal(policy.firstBuy.requiredFundingMode, "wallet-transaction-value", "funded first buy");
+  equal(policy.firstBuy.minimumUsd, "1.00", "minimum initial buy USD");
+  equal(policy.firstBuy.nativeAmountField, "fundingPlan.initialBuyWei", "initial buy allocation");
+  equal(policy.firstBuy.nativeAllocationCount, 1, "no double-counted initial buy");
+  equal(policy.firstBuy.atomicWithLaunch, true, "atomic first buy");
+  equal(policy.firstBuy.successfulProtectedSimulationRequired, true, "executed first-buy simulation");
+  equal(policy.firstBuy.actualTokenOutputMustBePositive, true, "real token output");
+  equal(policy.firstBuy.recipient, "bound-launch-controller", "first-buy recipient");
+  equal(policy.firstBuy.boundMinimumTokenOutputRequired, true, "bound minimum output");
+  equal(policy.firstBuy.minimumTokenOutputMustBePositive, true, "positive minimum output");
+  equal(policy.firstBuy.clientPriceAssertionsAccepted, false, "server price authority");
+  equal(policy.firstBuy.freshQuoteRequiredBeforePermitSigning, true, "fresh pre-sign quote");
+  equal(policy.firstBuy.executionTimeUsdValueGuaranteed, false, "quote-time boundary");
+  equal(policy.firstBuy.externalChartOrIndexingGuaranteed, false, "external-index boundary");
+  const reference = policy.firstBuy.priceReference;
+  equal(reference.sourceChainId, "1", "reference source chain");
+  equal(reference.executionChainId, "4663", "first-buy execution chain");
+  equal(reference.proxy, "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419", "ETH-USD proxy");
+  equal(reference.decimals, 8, "reference decimals");
+  equal(reference.independentProvidersRequired, 2, "reference quorum");
+  equal(reference.sameSourceBlockNumberAndHashRequired, true, "same reference checkpoint");
+  equal(reference.sameRoundAndAnswerRequired, true, "same reference round");
+  equal(reference.positiveAnswerRequired, true, "positive reference answer");
+  equal(reference.completedRoundRequired, true, "complete reference round");
+  equal(reference.futureTimestampsRejected, true, "reference timestamps");
+  equal(reference.maximumSourceBlockAgeSeconds, 120, "source-block freshness");
+  equal(reference.maximumRoundAgeSeconds, 7200, "reference-round freshness");
+  equal(reference.maximumQuoteAgeSeconds, 60, "pre-sign quote freshness");
+  equal(reference.minimumNativeWeiFormula, "ceil(100000000000000000000000000 / answer)", "integer USD conversion");
+  equal(reference.providerFailureOrDisagreementBlocksAuthorization, true, "reference fail-closed boundary");
   for (const [claim, value] of Object.entries(policy.claims)) equal(value, false, `claim ${claim}`);
   return true;
 }
 
 export function validateCustomLaunchAdmissionDescriptorV41(descriptor) {
-  exactKeys(descriptor.economics, ["policyPath", "policyVersion", "exactFeePathRequiredForFreshLaunch", "clientFeeAssertionsAccepted", "unknownSettlementDisposition", "lpPrincipalSafetyIsSeparate"], "economics binding");
+  exactKeys(descriptor.economics, ["policyPath", "policyVersion", "exactFeePathRequiredForFreshLaunch", "clientFeeAssertionsAccepted", "unknownSettlementDisposition", "lpPrincipalSafetyIsSeparate", "exactFirstBuyProofRequiredForFreshLaunch", "firstBuyPolicyPointer"], "economics binding");
   equal(descriptor.schemaVersion, "programmable.custom-launch-admission-descriptor.v4.1", "descriptor schema");
   equal(descriptor.authority.businessPolicyPath, ROBINHOOD_ECONOMICS_POLICY_V1_PATH, "business policy");
   equal(descriptor.economics.policyPath, ROBINHOOD_ECONOMICS_POLICY_V1_PATH, "economics source");
   equal(descriptor.economics.exactFeePathRequiredForFreshLaunch, true, "fee proof duty");
+  equal(descriptor.descriptorVersion, "1.1.0", "descriptor version");
+  equal(descriptor.economics.exactFirstBuyProofRequiredForFreshLaunch, true, "first-buy proof duty");
+  equal(descriptor.economics.firstBuyPolicyPointer, "#/firstBuy", "first-buy policy source");
   equal(descriptor.economics.clientFeeAssertionsAccepted, false, "fee evidence authority");
   equal(descriptor.economics.unknownSettlementDisposition, "needs-evidence", "settlement evidence");
   equal(descriptor.economics.lpPrincipalSafetyIsSeparate, true, "principal boundary");
+  equal(canonicalJson(descriptor.funding.advertisedModes), canonicalJson(["wallet-transaction-value"]), "fresh-launch funding mode");
   equal(descriptor.funding.plan.schemaVersion, "programmable.robinhood-funding-plan.v1", "funding plan schema");
   equal(descriptor.funding.plan.required, true, "funding plan required");
   equal(descriptor.funding.plan.boundToLaunchIntent, true, "funding plan binding");
@@ -88,7 +123,9 @@ export function validateCustomLaunchAdmissionDescriptorV41(descriptor) {
   delete legacy.economics;
   delete legacy.activation;
   delete legacy.funding.plan;
+  legacy.funding.advertisedModes = ["none", "wallet-transaction-value"];
   legacy.schemaVersion = "programmable.custom-launch-admission-descriptor.v4";
+  legacy.descriptorVersion = "1.0.0";
   legacy.authority.businessPolicyPath = LEGACY_POLICY_PATH;
   legacy.profile.profileVersion = "4.0.0";
   legacy.profile.profileRevision = 1;
