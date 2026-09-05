@@ -1,4 +1,4 @@
-# Robinhood custom-launch economics 1.0 and admission 4.1
+# Robinhood custom-launch economics 1.1 and admission 4.1
 
 These are candidate source contracts for new chain 4663 launches. Publishing them does not activate a runtime, deploy a contract, establish an audit or demonstrate collected revenue. The exact protected API, immutable client, provider tuple, per-launch source and executable fee evidence must agree before fresh writes select profile 4.1.0/revision 2.
 
@@ -35,6 +35,18 @@ The kernel accrues native ERC-6909 claims backed by PoolManager into separate va
 Profile 4.1 requires the distinct `programmable.robinhood-funding-plan.v1` client contract, bound into launch intent and durable state. It captures declared capital source and pricing mechanism separately, four allocations of exact native transaction value, a launch-value ceiling and a separate gas budget. Initial buys are counted once. Build-only plans cannot create a launch. Current native balance and network gas estimate must be checked against the exact transaction before sending.
 
 A buyer-funded launch still needs gas, token inventory, real reserve and redemption design. A creator-funded launch needs the actual quoted native capital. A declaration, available token supply, virtual reserve or accepted budget is not proof of actual native funds, solvent redemptions or operating liquidity. Financing purpose never waives the platform fee.
+
+## Required first buy
+
+Fresh 4.1 launches therefore require `wallet-transaction-value`; the historical `none` parser mode does not satisfy the first-buy requirement. Even a buyer-funded start needs native ETH for this purchase and gas.
+
+Every fresh launch includes a real initial buy of at least 1 USD in gross native ETH at the server's reference quote, including applicable platform and creator hook fees. The transaction allocates `fundingPlan.nativeAllocations.initialBuyWei` exactly once and executes the buy atomically with the launch against the exact official PoolKey. Protected simulation must prove positive actual token output to the bound launch controller and a positive, bound minimum output. The platform fee also applies to this trade. An empty pool, virtual reserve, transfer or asserted price cannot replace an executed purchase.
+
+The private API quotes ETH/USD from the Chainlink proxy `0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419` on source chain 1 using the two existing code-pinned Ethereum providers. This is a price reference for execution on Robinhood chain 4663; no Ethereum launch behavior changes. Both providers must agree on block number/hash and the complete round/answer. The answer must be positive with exactly 8 decimals, a completed round and no future timestamps. The source block may be at most 120 seconds old, the round at most 7,200 seconds old and the quote at most 60 seconds old before permit signing. Missing, stale or inconsistent reference evidence blocks authorization.
+
+The integer minimum is `ceil(10^26 / answer)` wei for an 8-decimal USD answer. The server issues the quote after the request commitment exists and links it to that launch intent through the admission receipt. Before signing, the server checks the freshness of that same quote; an expired quote aborts authorization and cannot be silently replaced. The caller does not commit a foreign-exchange quote into its launch-intent hash. This establishes the 1 USD threshold at the accepted reference quote; price movement means it cannot guarantee a dollar value at eventual execution. A first trade, onchain finality, platform indexing and appearance in external charts remain separate facts.
+
+This revision updates the preactivation 4.1 candidate's source digests. The earlier candidate remains reproducible from its Git commit, and already activated 4.0 artifacts remain unchanged. Publication still does not activate 4.1.
 
 ## Flexibility and bounded evidence
 
