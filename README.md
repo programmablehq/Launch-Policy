@@ -1,174 +1,72 @@
-<p align="center">
-  <img src="assets/repository-cover.jpg" alt="Programmable islands connected by streams, representing composable projects" width="100%">
-</p>
+![Programmable](https://raw.githubusercontent.com/programmablehq/PROGRAMMABLE/903b3741a6cd2981788cb09c039f0c47994c5d62/public/brand/programmable-cover.png)
 
-<h1 align="center">Programmable Launch Policy</h1>
+# Programmable Launch Policy
 
-<p align="center">
-  Versioned requirements, schemas, offline checks, and historical provenance for Programmable launches.
-</p>
+Versioned requirements, schemas and deterministic checks for Programmable Custom Launches. This repository owns the public policy sources and preserves the historical records of the former GitHub application flow. Launch requests use the Custom Launch API; pull requests here are for repository maintenance.
 
-<p align="center">
-  <a href="https://github.com/programmablehq/Launch-Policy/actions/workflows/verify.yml"><img src="https://github.com/programmablehq/Launch-Policy/actions/workflows/verify.yml/badge.svg?branch=main" alt="Repository verification"></a>
-  <a href="https://github.com/programmablehq/Launch-Policy/actions/workflows/codeql.yml"><img src="https://github.com/programmablehq/Launch-Policy/actions/workflows/codeql.yml/badge.svg?branch=main" alt="CodeQL analysis"></a>
-  <a href="https://github.com/programmablehq/Launch-Policy/releases/latest"><img src="https://img.shields.io/github/v/release/programmablehq/Launch-Policy?label=release" alt="Latest release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/programmablehq/Launch-Policy" alt="MIT License"></a>
-</p>
+## Launch a project
 
-> [!IMPORTANT]
-> **GitHub launch intake is closed.** Do not open a pull request to submit a launch, application, template, or workflow
-> canary. Start at [`/.well-known/programmable.json`](https://programmable.market/.well-known/programmable.json),
-> follow its live V3 capabilities, CLI, guide, and OpenAPI links, then create through
-> `POST https://api.programmable.market/v3/custom-launches` with a wallet-bound API key.
+Start with the [Custom Launch quickstart](https://programmable.market/docs/developers/custom-launch-quickstart), then read [live discovery](https://programmable.market/.well-known/programmable.json) for the selected chain and contract layout.
 
-This repository is the public owner of Programmable launch requirements. It keeps the canonical policy, schemas,
-deterministic offline checks, generated policy projections, discovery records, and the immutable history of the former
-GitHub application flow. It does not accept or launch projects.
+| Project | API |
+| --- | --- |
+| Robinhood Chain, separate token and hook contracts | V4 profile and immutable client advertised by discovery |
+| Robinhood Chain, one contract implementing token and hook roles | [MultiRole V2](https://api.programmable.market/v4/chains/4663/multi-role-custom-launches/guide.md) |
+| Ethereum Mainnet | [V3 integration](https://programmable.market/developer-reference/custom-launch#quickstart) |
 
-## API-first launch path
+Create a scoped, wallet-bound key in the [API-key manager](https://programmable.market/developers/api-keys). Package and validate the exact project, submit its canonical bytes, and follow the returned status. The API prepares an authorized transaction for the controller wallet to review and sign. A policy check, API key or local build does not sign or broadcast a transaction.
 
-Agents and developers should use these public surfaces:
+Keep unchanged request bytes and their idempotency key when recovering from a timeout. Use the selected API's error code and remediation instead of switching to another chain or historical profile. GitHub launch intake is closed; opening an application pull request does not submit a launch.
 
-- [Resolve current discovery](https://programmable.market/.well-known/programmable.json)
-- [Read live V3 capabilities](https://api.programmable.market/v3/capabilities)
-- [Create and manage API keys](https://programmable.market/developers/api-keys)
-- Install the exact checksum-bound CLI release advertised by discovery
-- [Read the current Custom Launch guide](https://programmable.market/docs/developers/custom-launch)
-- [Read the V3 OpenAPI document](https://programmable.market/openapi/custom-launch-v3.json)
-- Submit the CLI-produced request bytes to `POST https://api.programmable.market/v3/custom-launches`
+## Policy sources
 
-Use the order discovery → capabilities → advertised CLI → `pack` → `validate --remote` → `submit` → status/wallet
-handoff. The API prepares an exact launch transaction; the controller wallet reviews, signs, and broadcasts separately.
-Finality, indexing, source verification, trading evidence, fee-behavior evidence, and later promotion remain separate
-states. An API response, local checker pass, or policy match does not authorize a wallet or prove an onchain launch.
+| Source | Responsibility |
+| --- | --- |
+| [Launch policy v1](policy/launch-policy.v1.json) | Preserved Router, fee and promotion business obligations |
+| [Robinhood economics v1](policy/robinhood-custom-launch-economics-v1.json) | Scoped economics for fresh Robinhood profile 4.1 launches |
+| [V3 admission descriptor](policy/custom-launch-admission-v3.json) | Ethereum admission fields, finding codes and evidence duties |
+| [V4 admission descriptor](policy/custom-launch-admission-v4.json) | Historical Robinhood V4.0 admission contract |
+| [V4.1 admission descriptor](policy/custom-launch-admission-v4.1.json) | Robinhood successor profile bound to its economics source |
+| [Authority ownership](policy/launch-policy-authority-ownership.v1.json) | File, rule and entrypoint ownership inventory |
 
-V1 creation is permanently read-only compatibility and returns non-retryable `409 CUSTOM_LAUNCH_V1_READ_ONLY`. V1 and
-V2 resources remain readable or byte-identical retryable only under their published compatibility contracts. Neither
-legacy API versions nor the retired GitHub flow are current creation instructions.
+The [generated launch-policy guide](docs/LAUNCH_POLICY.md) projects the canonical policy. [Complete launch requirements](docs/COMPLETE_LAUNCH_REQUIREMENTS.md) maps its rule IDs to request and release evidence. Generated bindings in `.programmable/` connect descriptors to their exact digests; they do not create another policy authority.
 
-## Launch policy
+Robinhood Native20 requires the full **20 bps (0.20%)** Programmable fee on the covered native ETH buy and sell paths, separately from project creator fees and pool fees. Ethereum keeps the request-bound policy obligation for the 10 bps Programmable share. The public V3 profile keeps `feeBehaviorClaim: false`; the selected profile determines its exact enforcement boundary. A policy requirement does not retroactively change an older deployment or prove a fee was earned. [Product fees and revenue](https://programmable.market/docs/economics) explains the user-facing rates, recipient accounting and allocation policy.
 
-The canonical business-policy source for Programmable Router, fee, and promotion obligations is
-[`policy/launch-policy.v1.json`](policy/launch-policy.v1.json). Its
-[`JSON Schema`](policy/schemas/launch-policy.v1.schema.json) closes the authored format, and
-[`docs/LAUNCH_POLICY.md`](docs/LAUNCH_POLICY.md) is a generated, digest-bound human projection.
+## Evidence and compatibility
 
-The separate public [V3 admission descriptor](policy/custom-launch-admission-v3.json) declares the current profile,
-hard-block finding rules, evidence-bound codes, executable-evidence duties, and false claim boundaries. Its generated
-[digest and cross-projection contract](.programmable/custom-launch-admission.v3.json) binds those values to the JSON
-pointers exposed by discovery, capabilities, and V3 OpenAPI. This descriptor does not implement admission and does not
-add a second business-policy authority: the private Custom Launch API is the sole executable exact-source, static,
-behavior-execution, and Router-simulation evidence authority. A CLI, agent, or client cannot mint an admission receipt.
+The protected Custom Launch API is the executable authority for source, build, economic evidence and transaction simulation required by its selected profile. Caller attestations identify submitted evidence but cannot mint an admission receipt. Novel architecture alone is not a defect; missing or contradictory evidence is handled under the profile's published rules.
 
-The separate [Robinhood V4 admission descriptor](policy/custom-launch-admission-v4.json), its
-[schema](policy/schemas/custom-launch-admission-v4.schema.json), and generated
-[digest binding](.programmable/custom-launch-admission.v4.json) define the planned chain-4663 lane without changing
-Ethereum V3 bytes or semantics. Robinhood policy profiles are selected only by the authenticated chain-bound API
-server. A caller cannot select a profile. The descriptor remains `planned` until deployment, provider, finality,
-Router, indexing, source-verification and public-readiness gates pass.
+Preparation, wallet signing, deployment, finality, source verification, indexing and trading support are separate results. A canonical Router stamp establishes origin for its exact launch, not an audit, safe behavior, current liquidity or adoption by a third-party terminal.
 
-The [complete launch requirements guide](docs/COMPLETE_LAUNCH_REQUIREMENTS.md) maps stable Rule IDs to the current
-request, readiness, and promotion evidence. It explains the rules; it does not create additional requirements.
+Read active creation capabilities from the live API. Versioned documents and historical descriptors preserve their original status and bytes. The V4.0 descriptor's recorded status does not override a separately released V4.1 or MultiRole context. Ethereum V1 and V2 preserve historical reads and reject fresh creation with their documented read-only errors.
 
-For a selected Programmable Ethereum market, the current policy covers:
+## Inspect and validate
 
-- the request-bound policy obligation for the 10 bps Programmable share;
-- an inactive `3.4.0` exact-fee execution contract whose activation is separately gated on server runtime proof and
-  an autonomous exact-route settlement-dataflow closure receipt;
-- an exact plan for the manifest-resolved canonical Router;
-- finalized matching Router stamp evidence before public promotion; and
-- the evidence boundary required before any later fee-behavior claim.
+Node.js 24.12 or newer is required:
 
-The 10 bps tuple is a business and request-binding obligation, not a blanket statement that every deployed runtime has
-already paid it. Profile `3.3.0` remains current; the public V3 profile keeps `feeBehaviorClaim: false`. Candidate `3.4.0` is explicitly
-inactive: it accepts no fresh writes until the frozen fee-vault release, server action and observation ABIs, configured
-signed runner identity, production runtime readback, and separate trusted closure receipt match exactly. Runner
-no-bypass evidence covers only canonical vault entrypoints, so candidate-route coverage must come from the closure
-authority. Its future gate covers only the four fee vectors; all other custom behavior remains unclaimed unless
-separately executed.
-
-Verified no-market and external-route states are not applicable to Router-specific rules. Incomplete or contradictory
-evidence remains `analysis-pending`. Unknown project types are not rejected merely because they are unfamiliar.
-
-## Inspect and validate the policy
-
-Node.js 24.12 or newer is required.
-
-```bash
+```sh
 git clone --depth 1 https://github.com/programmablehq/Launch-Policy.git
 cd Launch-Policy
 npm run policy -- validate-policy
-npm run policy -- requirements --profile build
 npm run policy -- requirements --profile launch-readiness
-npm run policy -- binding --profile launch-readiness
 npm run policy -- requirements --profile robinhood-launch-readiness
-npm run policy -- requirements --profile robinhood-production-launch
-npm run policy -- render
-npm run admission:v3 -- --check
-npm run admission:v4
-```
-
-These commands read the fixed repository-owned policy path, emit deterministic output, and never import or execute
-project code. `launch-readiness` is checker-only and returns
-`LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED`; it does not sign, deploy, broadcast, promote, or authorize funds.
-
-Run the complete repository gate with:
-
-```bash
+npm run policy -- binding --profile robinhood-production-launch
 npm test
 ```
 
-## Open Review Standard
+The checker reads fixed repository-owned policy files and emits deterministic results. It does not execute a candidate project, authorize a wallet or provide launch permission. The `launch-readiness` mode is checker-only and returns `LAUNCH_READINESS_CHECKED_NOT_AUTHORIZED`. See the [Policy-Bound Review Standard](docs/OPEN_REVIEW_STANDARD.md) for evidence interpretation.
 
-The policy-bound reviewer consumes the same canonical policy as every other consumer. Analyzer input can name a Rule
-ID, state, evidence references, and analyzer identity. Requirement text, enforcement, and outcome come from the exact
-trusted policy. Unknown Rule IDs are advisory, and missing evidence remains pending.
+## Historical GitHub records and discovery
 
-The public checker does not fetch private repositories, execute project code, reproduce an audit, sign a platform
-decision, deploy contracts, route traffic, handle funds, or issue launch permission. Read the
-[Policy-Bound Review Standard](docs/OPEN_REVIEW_STANDARD.md).
+The [submissions/](submissions/) directory preserves former V2, V3.1, and V3.2 application records. The [canary-submissions/](canary-submissions/) directory preserves former Workflow Canary records. [Registry history](registry/history/) retains its append-only records. Historical namespaces and frozen vendor bytes are not current launch entry points.
 
-## Historical GitHub records
+Integrations can read [registry/index.json](registry/index.json) or [registry/search-index.json](registry/search-index.json) at an exact commit and verify each record digest. Read the [discovery contract](docs/DISCOVERY_CONTRACT.md) before consuming them. The repository was formerly named `0xprogrammable/submit-launch`. That name remains in versioned legacy protocol identifiers, frozen vendor bytes, historical snapshots, and old provenance links. The legacy validators remain available for reproducing historical records. Pull requests that modify the historical application namespaces fail closed.
 
-The former application namespaces remain public and immutable for provenance:
+## Contribute and report issues
 
-- [`submissions/`](submissions) preserves former V2, V3.1, and V3.2 application records.
-- [`canary-submissions/`](canary-submissions) preserves former Workflow Canary records.
-- [Legacy GitHub intake documentation](docs/builder/PUBLIC_GITHUB_PR_BETA.md) records the retired transport contract.
-- [`registry/history/`](registry/history) is append-only release history.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for policy, schema, checker, workflow and documentation changes. Regenerate the authority inventory and run the complete repository gate for reviewed changes. Keep historical application records separate from maintenance work.
 
-The legacy validators remain available for reproducing historical records, but no GitHub application path is active.
-Pull requests that modify the historical application namespaces fail closed and point to the API.
+Use [issues](https://github.com/programmablehq/Launch-Policy/issues/new/choose) for reproducible defects and [private security reporting](https://github.com/programmablehq/Launch-Policy/security/advisories/new) for vulnerabilities. Never publish credentials, signing material or private project data.
 
-The repository was formerly named `0xprogrammable/submit-launch`. That name remains only in versioned legacy protocol
-identifiers, frozen vendor bytes, historical snapshots, and old provenance links where changing it would rewrite the
-record. The current public and protected repository identity is `programmablehq/Launch-Policy`, with the unchanged
-numeric repository ID retaining continuity across the rename.
-
-## Discovery registry
-
-Agents and integrations may read [`registry/index.json`](registry/index.json) or
-[`registry/search-index.json`](registry/search-index.json) at one exact commit, then verify each selected record digest.
-Registry evidence does not prove safety, acceptance, deployment, liquidity, provider support, or current availability.
-
-Maintainer-authored promotions remain separate from launch submission. A future market may be promoted only after the
-required finalized Router, component, policy, and source bindings exist. A valid promotion record does not guarantee
-third-party terminal adoption.
-
-Read the [discovery contract](docs/DISCOVERY_CONTRACT.md) before integrating.
-
-## Repository maintenance
-
-Pull requests are accepted only for policy, schema, checker, documentation, workflow, or registry maintenance. Read
-[`CONTRIBUTING.md`](CONTRIBUTING.md) before proposing a change. Never mix policy maintenance with historical submission
-records.
-
-## Report a problem
-
-- [Report a non-sensitive policy, checker, schema, or registry problem](https://github.com/programmablehq/Launch-Policy/issues/new/choose).
-- [Discuss a policy or architecture idea](https://github.com/programmablehq/Launch-Policy/discussions).
-- [Report an exploitable vulnerability privately](https://github.com/programmablehq/Launch-Policy/security/advisories/new).
-
-Launch Policy issues cover policy, checker, schema, Registry, and documentation defects. They do not provide project
-construction, API operation, project approval, wallet authorization, deployment, investment advice, or guaranteed
-implementation support.
+[Platform](https://programmable.market) · [Docs](https://programmable.market/docs) · [Discord](https://discord.com/invite/programmable) · [X](https://x.com/ProgrammableHQ) · [Dune](https://dune.com/programmablehq/analytics)
