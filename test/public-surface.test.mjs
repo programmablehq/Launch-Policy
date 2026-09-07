@@ -8,17 +8,18 @@ const read = (relative) => fs.readFileSync(path.join(root, relative), "utf8");
 
 test("the public landing page leads with the API-first launch boundary", () => {
   const readme = read("README.md");
-  assert.match(readme, /<h1 align="center">Programmable Launch Policy<\/h1>/u);
-  assert.match(readme, /\*\*GitHub launch intake is closed\.\*\*/u);
-  assert.match(readme, /https:\/\/programmable\.market\/developers\/api-keys/u);
-  assert.match(readme, /https:\/\/programmable\.market\/\.well-known\/programmable\.json/u);
-  assert.match(readme, /https:\/\/api\.programmable\.market\/v3\/capabilities/u);
-  assert.match(readme, /https:\/\/programmable\.market\/docs\/developers\/custom-launch/u);
-  assert.match(readme, /https:\/\/programmable\.market\/openapi\/custom-launch-v3\.json/u);
-  assert.match(readme, /POST https:\/\/api\.programmable\.market\/v3\/custom-launches/u);
-  assert.match(readme, /409 CUSTOM_LAUNCH_V1_READ_ONLY/u);
-  assert.match(readme, /does not accept or launch projects/u);
-  assert.ok(readme.indexOf("GitHub launch intake is closed") < readme.indexOf("## Launch policy"));
+  assert.match(readme, /^# Programmable Launch Policy$/mu);
+  assert.match(readme, /GitHub launch intake is closed/u);
+  for (const url of [
+    "https://programmable.market/developers/api-keys",
+    "https://programmable.market/.well-known/programmable.json",
+    "https://programmable.market/docs/developers/custom-launch-quickstart",
+    "https://api.programmable.market/v4/chains/4663/multi-role-custom-launches/guide.md",
+  ]) assert.ok(readme.includes(url));
+  assert.match(readme, /Robinhood Chain[\s\S]*Ethereum Mainnet/u);
+  assert.match(readme, /controller wallet[\s\S]*review and sign/u);
+  assert.ok(readme.indexOf("## Launch a project") < readme.indexOf("## Policy sources"));
+
 });
 
 test("the current programmablehq owner is explicit while legacy provenance remains preserved", () => {
